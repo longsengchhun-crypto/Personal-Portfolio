@@ -50,18 +50,18 @@ SKILLS = {
 SOFTWARE = ["Photoshop", "Illustrator", "After Effects", "Premiere Pro", "DaVinci Resolve", "Blender", "CapCut", "CorelDRAW"]
 
 EDITING_TOOLS = [
-    {"name": "After Effects", "image": "Editing Tools/clean/adobe-after-effects-icon-free-png-webp-clean.png"},
-    {"name": "Audition", "image": "Editing Tools/clean/adobe-audition-logo-with-transparent-background-free-png-webp-clean.png"},
-    {"name": "Illustrator", "image": "Editing Tools/clean/adobe-illustrator-icon-free-png-webp-clean.png"},
-    {"name": "InDesign", "image": "Editing Tools/clean/adobe-indesign-icon-free-png-webp-clean.png"},
-    {"name": "Lightroom", "image": "Editing Tools/clean/adobe-lightroom-logo-with-transparent-background-free-png-webp-clean.png"},
-    {"name": "Photoshop", "image": "Editing Tools/clean/adobe-photoshop-logo-transparent-background-free-png-webp-clean.png"},
-    {"name": "Blender", "image": "Editing Tools/clean/Blender_logo_no_text.svg-webp-clean.png"},
-    {"name": "CapCut", "image": "Editing Tools/clean/capcut-transparent-icon-free-png-webp-clean.png"},
-    {"name": "CorelDRAW", "image": "Editing Tools/clean/coreldraw-transparent-logo-free-png-png-clean.png"},
-    {"name": "DaVinci Resolve", "image": "Editing Tools/clean/davinci-resolve-logo-davinci-resolve-icon-transparent-background-free-png-webp-clean.png"},
-    {"name": "Creative Tool", "image": "Editing Tools/clean/images-jpg-clean.png"},
-    {"name": "Creative Tool", "image": "Editing Tools/clean/images-png-clean.png"},
+    {"name": "After Effects", "image": "site-assets/tools/after-effects.png"},
+    {"name": "Audition", "image": "site-assets/tools/audition.png"},
+    {"name": "Illustrator", "image": "site-assets/tools/illustrator.png"},
+    {"name": "InDesign", "image": "site-assets/tools/indesign.png"},
+    {"name": "Lightroom", "image": "site-assets/tools/lightroom.png"},
+    {"name": "Photoshop", "image": "site-assets/tools/photoshop.png"},
+    {"name": "Blender", "image": "site-assets/tools/blender.png"},
+    {"name": "CapCut", "image": "site-assets/tools/capcut.png"},
+    {"name": "CorelDRAW", "image": "site-assets/tools/coreldraw.png"},
+    {"name": "DaVinci Resolve", "image": "site-assets/tools/davinci-resolve.png"},
+    {"name": "Creative Tool", "image": "site-assets/tools/creative-tool-1.png"},
+    {"name": "Creative Tool", "image": "site-assets/tools/creative-tool-2.png"},
 ]
 
 PORTFOLIO_CATEGORIES = [
