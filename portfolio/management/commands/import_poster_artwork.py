@@ -174,7 +174,7 @@ FEATURED_POSTERS = {
     "Blueberry Smoothie Beverage Poster",
     "ASUS Phone Product Poster",
     "PS5 Gaming Poster",
-    "Preah Vihear Heritage Poster",
+    "Green Tea Campaign Poster",
     "Matcha Beverage Poster",
 }
 
@@ -193,7 +193,8 @@ class Command(BaseCommand):
         Project.objects.filter(category=category).update(is_featured=False)
 
         imported = 0
-        for order, item in enumerate(POSTER_SELECTION, start=1):
+        curated_items = [item for item in POSTER_SELECTION if item["title"] in FEATURED_POSTERS]
+        for order, item in enumerate(curated_items, start=1):
             source = image_dir / item["file"]
             if not source.exists():
                 self.stdout.write(self.style.WARNING(f"Missing image: {item['file']}"))

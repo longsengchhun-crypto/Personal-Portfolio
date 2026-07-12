@@ -5,3 +5,14 @@ staticfiles/
 runserver*.log
 __pycache__/
 *.pyc
+static/images/*
+!static/images/Asus Phone copy.jpg
+!static/images/Blue Berry Smootie 3.jpg
+!static/images/GREEN MOOD Cosmetics.jpg
+!static/images/GREEN TEAA POSTER copy.jpg
+!static/images/PS 5 copy.jpg
+!static/images/TUF Gaming Laptop copy.jpg
+!static/images/Travel With Us Poster copy.jpg
+!static/images/matcha new poster copy.jpg
+static/Video editing and 3D Modeling/*
+static/Web Cover/Facebook-Cover.jpg
