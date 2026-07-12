@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Services | LONG SENGCHHUN{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><p class="eyebrow">Services</p><h1>Creative services for visuals, content, film, and 3D.</h1></div></section>
+<section class="section pt-0"><div class="container service-grid large">{% for title, description in services %}<article class="service-item reveal"><span>{{ forloop.counter|stringformat:"02d" }}</span><h2>{{ title }}</h2><p>{{ description }}</p></article>{% endfor %}</div></section>
+<section class="section cta-section"><div class="container"><p class="eyebrow">Have a project in mind?</p><h2>{{ khmer_cta }}</h2><div class="button-row"><a class="btn btn-accent" href="{% url 'portfolio:contact' %}">Start a Project</a><a class="btn btn-outline-light" href="{% url 'portfolio:portfolio_list' %}">View My Work</a></div></div></section>
+{% endblock %}

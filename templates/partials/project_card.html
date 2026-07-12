@@ -1,0 +1,23 @@
+<article class="project-card reveal {% if project.category.slug == 'poster-design' %}poster-card{% endif %}">
+  <a href="{{ project.get_absolute_url }}" class="project-media" aria-label="View {{ project.title }}">
+    {% if project.video_file %}
+      <video muted loop playsinline preload="metadata" poster="{% if project.cover_image %}{{ project.cover_image.url }}{% endif %}">
+        <source src="{{ project.video_file.url }}" type="video/mp4">
+      </video>
+    {% elif project.cover_image %}
+      <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="lazy">
+    {% else %}
+      <div class="project-placeholder"><span>{{ project.category.name }}</span></div>
+    {% endif %}
+    {% if project.is_featured %}<span class="featured-pill">Featured</span>{% endif %}
+    {% if project.video_file %}<span class="video-pill"><i class="bi bi-play-fill"></i> 1080p Preview</span>{% endif %}
+    {% if project.project_type %}<span class="poster-type">{{ project.project_type }}</span>{% endif %}
+  </a>
+  <div class="project-card-body">
+    <div class="project-meta"><span>{{ project.category.name }}</span><span>{{ project.year }}</span></div>
+    <h3><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
+    <p>{{ project.short_description }}</p>
+    {% if project.project_type %}<span class="text-badge">{{ project.project_type }}</span>{% endif %}
+    <a class="text-link" href="{{ project.get_absolute_url }}">View Project</a>
+  </div>
+</article>

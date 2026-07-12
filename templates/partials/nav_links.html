@@ -1,0 +1,5 @@
+<li class="nav-item"><a class="nav-link {% if page_name == 'home' %}active{% endif %}" href="{% url 'portfolio:home' %}"><span>Home</span><small>{{ khmer.home }}</small></a></li>
+<li class="nav-item"><a class="nav-link {% if page_name == 'work' %}active{% endif %}" href="{% url 'portfolio:portfolio_list' %}"><span>Work</span><small>{{ khmer.work }}</small></a></li>
+<li class="nav-item"><a class="nav-link {% if page_name == 'services' %}active{% endif %}" href="{% url 'portfolio:services' %}"><span>Services</span><small>{{ khmer.services }}</small></a></li>
+<li class="nav-item"><a class="nav-link {% if page_name == 'about' %}active{% endif %}" href="{% url 'portfolio:about' %}"><span>About</span><small>{{ khmer.about }}</small></a></li>
+<li class="nav-item"><a class="nav-link {% if page_name == 'contact' %}active{% endif %}" href="{% url 'portfolio:contact' %}"><span>Contact</span><small>{{ khmer.contact }}</small></a></li>

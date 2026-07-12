@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Work | LONG SENGCHHUN{% endblock %}
+{% block content %}
+<section class="page-hero compact"><div class="container"><p class="eyebrow">Portfolio</p><h1>Published work and selected studies.</h1></div></section>
+<section class="section pt-0">
+  <div class="container">
+    <form class="filter-bar" method="get">
+      <input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Search by title">
+      <select class="form-select" name="category" aria-label="Filter by category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select>
+      <select class="form-select" name="year" aria-label="Filter by year"><option value="">All years</option>{% for year in years %}<option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>{% endfor %}</select>
+      <button class="btn btn-accent" type="submit">Filter</button><a class="btn btn-outline-light" href="{% url 'portfolio:portfolio_list' %}">Reset</a>
+    </form>
+    <div class="project-grid masonry-grid">{% for project in page_obj %}{% include "partials/project_card.html" %}{% empty %}<div class="empty-state"><p>No published projects match this filter yet.</p></div>{% endfor %}</div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination-row" aria-label="Portfolio pagination">
+        {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?page={{ page_obj.previous_page_number }}&category={{ selected_category }}&year={{ selected_year }}&search={{ search }}">Previous</a>{% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-outline-light" href="?page={{ page_obj.next_page_number }}&category={{ selected_category }}&year={{ selected_year }}&search={{ search }}">Load More</a>{% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

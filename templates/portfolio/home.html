@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="hero-section">
+  <div class="container hero-grid">
+    <div class="hero-copy reveal">
+      <p class="eyebrow">{{ owner.name }}</p>
+      <h1>{{ site_settings.professional_title|default:owner.title }}</h1>
+      <p class="role-line">{{ owner.roles }}</p>
+      <p class="hero-description">{{ site_settings.hero_intro|default:"Creating cinematic visuals, thoughtful designs, and digital experiences that bring ideas to life." }}</p>
+      <p class="khmer-line">{{ site_settings.khmer_intro|default:khmer.hero }}</p>
+      <div class="button-row">
+        <a class="btn btn-accent" href="{% url 'portfolio:portfolio_list' %}">Explore My Work</a>
+        <a class="btn btn-outline-light" href="{% url 'portfolio:contact' %}">Start a Project</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="profile-stage" aria-label="LONG SENGCHHUN profile portrait">
+        <div class="profile-frame">
+          <img class="profile-portrait" src="{% static 'Main Profile/profile-cutout-fade.png' %}" alt="LONG SENGCHHUN profile portrait">
+          <div class="profile-frame-copy">
+            <span>Phnom Penh, Cambodia</span>
+            <strong>{{ owner.roles }}</strong>
+          </div>
+        </div>
+        <div class="profile-glass-note">
+          <span>Available for freelance projects</span>
+          <strong>Design, video, photography, and 3D</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tool-marquee" aria-label="Creative software tools">
+  <div class="tool-track">
+    {% for tool in editing_tools %}
+      <span class="tool-logo" title="{{ tool.name }}"><img src="{% static tool.image %}" alt="{{ tool.name }} logo"></span>
+    {% endfor %}
+    {% for tool in editing_tools %}
+      <span class="tool-logo" aria-hidden="true"><img src="{% static tool.image %}" alt=""></span>
+    {% endfor %}
+    {% for tool in editing_tools %}
+      <span class="tool-logo" aria-hidden="true"><img src="{% static tool.image %}" alt=""></span>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading"><div><p class="eyebrow">Featured Work</p><h2>Selected projects from the portfolio.</h2></div></div>
+    <div class="project-grid editorial-grid">
+      {% for project in featured_projects %}{% include "partials/project_card.html" %}{% empty %}<div class="empty-state"><p>No featured projects yet. Add and feature published projects in Django Admin.</p></div>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section discipline-band">
+  <div class="container">
+    <div class="discipline-grid">
+      {% for name, slug in disciplines %}
+        <a href="{% url 'portfolio:portfolio_list' %}?category={{ slug }}" class="discipline-link reveal"><span>{{ forloop.counter|stringformat:"02d" }}</span><strong>{{ name }}</strong></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container split-section">
+    <div class="reveal"><p class="eyebrow">About</p><h2>Creative work across design, motion, film, and 3D.</h2></div>
+    <div class="prose reveal">
+      <p>I am a multidisciplinary creative based in Cambodia, working across graphic design, photography, filmmaking, video editing, and 3D visualization.</p>
+      <p>Based in Phnom Penh, Cambodia. Available for freelance collaborations and for working with local and international clients when opportunities are available.</p>
+      <a class="text-link" href="{% url 'portfolio:about' %}">Learn more</a>
+    </div>
+  </div>
+</section>
+
+<section class="software-strip" aria-label="Software"><div class="container software-list">{% for item in software %}<span>{{ item }}</span>{% endfor %}</div></section>
+
+{% if featured_video_project %}
+<section class="section video-feature-section">
+  <div class="container video-feature-grid">
+    <div class="video-feature-copy reveal">
+      <p class="eyebrow">Video and 3D Modeling</p>
+      <h2>{{ featured_video_project.title }}</h2>
+      <p>{{ featured_video_project.short_description }}</p>
+      <a class="btn btn-accent" href="{{ featured_video_project.get_absolute_url }}">View Showcase</a>
+    </div>
+    <a class="video-feature-player reveal" href="{{ featured_video_project.get_absolute_url }}" aria-label="View {{ featured_video_project.title }}">
+      <video muted loop playsinline autoplay preload="metadata" poster="{% if featured_video_project.cover_image %}{{ featured_video_project.cover_image.url }}{% endif %}">
+        <source src="{{ featured_video_project.video_file.url }}" type="video/mp4">
+      </video>
+      <span class="video-feature-badge"><i class="bi bi-play-fill"></i> 1080p video preview</span>
+    </a>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading"><div><p class="eyebrow">Services</p><h2>Creative support from concept to delivery.</h2></div><a class="text-link" href="{% url 'portfolio:services' %}">View all services</a></div>
+    <div class="service-grid">
+      {% for title, description in services %}<article class="service-item reveal"><span>{{ forloop.counter|stringformat:"02d" }}</span><h3>{{ title }}</h3><p>{{ description }}</p></article>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section showreel-section">
+  <div class="container showreel-panel reveal">
+    <div><p class="eyebrow">Showreel</p><h2>{{ site_settings.showreel_title|default:"Showreel coming soon" }}</h2><p>Configure a YouTube, Vimeo, or compressed video URL in Django Admin. The player loads only after a visitor chooses to watch.</p></div>
+    <button class="play-button" type="button" data-bs-toggle="modal" data-bs-target="#showreelModal" aria-label="Open showreel"><i class="bi bi-play-fill"></i></button>
+  </div>
+</section>
+
+<div class="modal fade" id="showreelModal" tabindex="-1" aria-label="Showreel modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content video-modal">
+      <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      {% if site_settings.youtube_url %}<iframe data-src="{{ site_settings.youtube_url }}" title="Showreel" allowfullscreen></iframe>
+      {% elif site_settings.vimeo_url %}<iframe data-src="{{ site_settings.vimeo_url }}" title="Showreel" allowfullscreen></iframe>
+      {% elif site_settings.local_video_url %}<video controls data-src="{{ site_settings.local_video_url }}"></video>
+      {% else %}<p class="empty-state">Add a showreel link in Django Admin.</p>{% endif %}
+    </div>
+  </div>
+</div>
+
+<section class="section cta-section">
+  <div class="container"><p class="eyebrow">Start a Conversation</p><h2>Let's create something worth remembering.</h2><p class="khmer-line">{{ khmer.footer_cta }}</p><div class="button-row"><a class="btn btn-accent" href="{% url 'portfolio:contact' %}">Discuss a Project</a><a class="btn btn-outline-light" href="{{ owner.telegram_url }}" target="_blank" rel="noreferrer">Telegram Me</a><a class="btn btn-outline-light" href="mailto:{{ site_settings.email|default:owner.email }}">Email Me</a></div></div>
+</section>
+{% endblock %}

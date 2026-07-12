@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Inquiry | LONG SENGCHHUN{% endblock %}
+{% block content %}
+<section class="dashboard-console">
+  <div class="container">
+    <header class="console-head compact-console-head">
+      <div>
+        <p class="eyebrow">Project Message</p>
+        <h1>{{ inquiry.full_name }}</h1>
+      </div>
+      <div class="console-actions">
+        <a class="btn btn-outline-light" href="{% url 'portfolio:dashboard' %}"><i class="bi bi-arrow-left"></i>Dashboard</a>
+        <a class="btn btn-outline-light" href="mailto:{{ inquiry.email }}"><i class="bi bi-envelope"></i>Reply</a>
+      </div>
+    </header>
+
+    <div class="inquiry-detail-layout">
+      <article class="console-panel inquiry-detail-card">
+        <div class="console-panel-head">
+          <div><span class="status-dot message-dot"></span><h2>Message</h2></div>
+          <small>{{ inquiry.created_at|date:"M d, Y H:i" }}</small>
+        </div>
+        <div class="inquiry-detail-body">
+          <dl class="detail-matrix">
+            <div><dt>Service</dt><dd>{{ inquiry.service_needed }}</dd></div>
+            <div><dt>Budget</dt><dd>{{ inquiry.estimated_budget|default:"Not decided" }}</dd></div>
+            <div><dt>Timeline</dt><dd>{{ inquiry.preferred_timeline|default:"Flexible" }}</dd></div>
+            <div><dt>Email</dt><dd>{{ inquiry.email }}</dd></div>
+            <div><dt>Phone / Telegram</dt><dd>{{ inquiry.phone_or_telegram|default:"-" }}</dd></div>
+            <div><dt>Company</dt><dd>{{ inquiry.company|default:"-" }}</dd></div>
+          </dl>
+          <div class="message-copy">
+            <h2>Project Description</h2>
+            <p>{{ inquiry.project_description|linebreaksbr }}</p>
+          </div>
+          {% if inquiry.attachment %}
+            <a class="btn btn-outline-light" href="{{ inquiry.attachment.url }}" target="_blank" rel="noreferrer">Open Attachment</a>
+          {% endif %}
+        </div>
+      </article>
+
+      <aside class="console-panel inquiry-action-panel">
+        <div class="console-panel-head">
+          <div><span class="status-dot"></span><h2>Decision</h2></div>
+        </div>
+        <div class="client-contact-card">
+          <span>Client Contact</span>
+          <a href="mailto:{{ inquiry.email }}"><i class="bi bi-envelope"></i>{{ inquiry.email }}</a>
+          {% if inquiry.phone_or_telegram %}<a href="tel:{{ inquiry.phone_or_telegram }}"><i class="bi bi-telephone"></i>{{ inquiry.phone_or_telegram }}</a>{% endif %}
+        </div>
+        <form method="post" class="dashboard-decision-form">
+          {% csrf_token %}
+          <label for="status">Status</label>
+          <select id="status" name="status" class="form-select">
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if inquiry.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <label for="admin_notes">Private Notes</label>
+          <textarea id="admin_notes" name="admin_notes" class="form-control" rows="8" placeholder="Write your next action, quote note, or client decision.">{{ inquiry.admin_notes }}</textarea>
+          <label class="review-toggle"><input type="checkbox" name="is_reviewed" {% if inquiry.is_reviewed %}checked{% endif %}> Mark as reviewed</label>
+          <div class="decision-actions">
+            <button class="btn btn-accent" type="submit" name="action" value="accept"><i class="bi bi-check2-circle"></i>Accept & Notify</button>
+            <button class="btn btn-outline-danger" type="submit" name="action" value="reject"><i class="bi bi-x-circle"></i>Reject & Notify</button>
+            <button class="btn btn-outline-light" type="submit" name="action" value="save">Save Only</button>
+          </div>
+        </form>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

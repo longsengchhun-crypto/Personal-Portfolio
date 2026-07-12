@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | LONG SENGCHHUN{% endblock %}
+{% block content %}
+<section class="dashboard-console">
+  <div class="container">
+    <header class="console-head">
+      <div>
+        <p class="eyebrow">Private Studio Console</p>
+        <h1>Visitor signal, client messages, and project decisions.</h1>
+      </div>
+      <div class="console-actions">
+        <a class="btn btn-outline-light" href="{% url 'admin:index' %}"><i class="bi bi-sliders"></i>Django Admin</a>
+        <a class="btn btn-outline-light" href="{% url 'portfolio:dashboard_logout' %}"><i class="bi bi-box-arrow-right"></i>Log Out</a>
+      </div>
+    </header>
+
+    <div class="signal-strip" aria-label="Dashboard metrics">
+      <article><span>Total visits</span><strong>{{ total_visits }}</strong></article>
+      <article><span>Today</span><strong>{{ today_visits }}</strong></article>
+      <article><span>Visitors</span><strong>{{ unique_visitors }}</strong></article>
+      <article><span>New messages</span><strong>{{ new_inquiries }}</strong></article>
+      <article><span>Accepted</span><strong>{{ accepted_projects }}</strong></article>
+    </div>
+
+    <div class="console-layout">
+      <section class="console-panel visitor-stream">
+        <div class="console-panel-head">
+          <div><span class="status-dot"></span><h2>Live Visitor Stream</h2></div>
+          <small>{{ total_visits }} tracked records</small>
+        </div>
+        <div class="visitor-list">
+          {% for visit in latest_visits %}
+            <article class="visitor-row">
+              <time>{{ visit.created_at|date:"M d, H:i" }}</time>
+              <div>
+                <strong>{{ visit.path }}</strong>
+                <span>{{ visit.device_type|default:"Unknown device" }}{% if visit.device_model %} / {{ visit.device_model }}{% endif %}</span>
+              </div>
+              <div>
+                <strong>{{ visit.browser|default:"Browser unknown" }}</strong>
+                <span>{{ visit.os|default:"OS unknown" }}{% if visit.screen_width %} / {{ visit.screen_width }}x{{ visit.screen_height }}{% endif %}</span>
+              </div>
+            </article>
+          {% empty %}
+            <p class="empty-state">No visits tracked yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="console-side">
+        <section class="console-panel">
+          <div class="console-panel-head"><div><span class="status-dot muted-dot"></span><h2>Device Mix</h2></div></div>
+          <ul class="signal-list">
+            {% for row in device_breakdown %}
+              <li><span>{{ row.device_type|default:"Unknown" }}</span><strong>{{ row.total }}</strong></li>
+            {% empty %}
+              <li><span>No device data yet</span><strong>0</strong></li>
+            {% endfor %}
+          </ul>
+        </section>
+        <section class="console-panel">
+          <div class="console-panel-head"><div><span class="status-dot warm-dot"></span><h2>Top Pages</h2></div></div>
+          <ul class="signal-list page-list">
+            {% for row in top_pages %}
+              <li><span>{{ row.path }}</span><strong>{{ row.total }}</strong></li>
+            {% empty %}
+              <li><span>No page data yet</span><strong>0</strong></li>
+            {% endfor %}
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <section class="console-panel message-board">
+      <div class="console-panel-head">
+        <div><span class="status-dot message-dot"></span><h2>Project Messages</h2></div>
+        <small>Open a message to accept, decline, reply, or add notes.</small>
+      </div>
+      <div class="request-table-wrap">
+        <table class="request-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Client</th>
+              <th>Request</th>
+              <th>Contact</th>
+              <th>Submitted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+        {% for inquiry in latest_inquiries %}
+            <tr>
+              <td><span class="status-badge status-{{ inquiry.status }}">{{ inquiry.get_status_display }}</span></td>
+              <td>
+                <strong>{{ inquiry.full_name }}</strong>
+                {% if inquiry.company %}<small>{{ inquiry.company }}</small>{% endif %}
+              </td>
+              <td>
+                <strong>{{ inquiry.service_needed }}</strong>
+                <small>{{ inquiry.project_description|truncatewords:18 }}</small>
+              </td>
+              <td>
+                <a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a>
+                {% if inquiry.phone_or_telegram %}<small>{{ inquiry.phone_or_telegram }}</small>{% endif %}
+              </td>
+              <td><time>{{ inquiry.created_at|date:"M d, H:i" }}</time></td>
+              <td>
+                <div class="request-actions">
+                  <a class="btn btn-accent" href="{% url 'portfolio:dashboard_inquiry_detail' inquiry.id %}">Open</a>
+                  <form method="post" action="{% url 'portfolio:dashboard_inquiry_detail' inquiry.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept">
+                    <input type="hidden" name="next" value="dashboard">
+                    <button class="btn btn-outline-light" type="submit">Accept</button>
+                  </form>
+                  <form method="post" action="{% url 'portfolio:dashboard_inquiry_detail' inquiry.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reject">
+                    <input type="hidden" name="next" value="dashboard">
+                    <button class="btn btn-outline-danger" type="submit">Reject</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6"><p class="empty-state">No project inquiries yet.</p></td></tr>
+        {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Contact | LONG SENGCHHUN{% endblock %}
+{% block content %}
+{% if success_submitted %}
+<div class="success-celebration" role="dialog" aria-modal="true" aria-labelledby="contactSuccessTitle" data-success-celebration>
+  <div class="success-card">
+    <button class="success-close" type="button" aria-label="Close success message" data-success-close><i class="bi bi-x-lg"></i></button>
+    <div class="success-check" aria-hidden="true"></div>
+    <p class="eyebrow">Sent Successfully</p>
+    <h2 id="contactSuccessTitle">សូមអរគុណ។</h2>
+    <p>សំណើរបស់លោកអ្នកត្រូវបានផ្ញើដោយជោគជ័យ</p>
+    <button class="btn btn-accent success-play" type="button" data-play-success hidden><i class="bi bi-volume-up-fill"></i>Play Khmer Voice</button>
+    <audio id="contactSuccessAudio" preload="auto" src="{% static 'audio/contact-success-khmer.m4a' %}"></audio>
+  </div>
+</div>
+{% endif %}
+<section class="page-hero compact">
+  <div class="container">
+    <p class="eyebrow">Contact</p>
+    <h1>Tell me about the project you want to build.</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container contact-grid">
+    <aside class="contact-panel">
+      <h2>Project inquiries</h2>
+      <a href="mailto:{{ site_settings.email|default:owner.email }}"><i class="bi bi-envelope"></i>{{ site_settings.email|default:owner.email }}</a>
+      <a href="tel:{{ site_settings.phone|default:owner.phone }}"><i class="bi bi-telephone"></i>{{ site_settings.phone|default:owner.phone }}</a>
+      <a href="{{ owner.telegram_url }}" target="_blank" rel="noreferrer"><i class="bi bi-telegram"></i>Telegram {{ owner.telegram }}</a>
+      <span><i class="bi bi-geo-alt"></i>{{ site_settings.location|default:owner.location }}</span>
+      <p>{{ budget_note }}</p>
+    </aside>
+    <form class="inquiry-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {{ form.honeypot }}
+      <div class="form-grid">
+        {% for field in form %}
+          {% if field.name != "honeypot" and field.name != "consent" %}
+            <div class="form-field {% if field.name == 'project_description' or field.name == 'attachment' %}wide{% endif %}">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}<div class="field-error">{{ field.errors|striptags }}</div>{% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="form-check consent-row">
+        {{ form.consent }}
+        <label class="form-check-label" for="{{ form.consent.id_for_label }}">{{ form.consent.label }}</label>
+        {% if form.consent.errors %}<div class="field-error">{{ form.consent.errors|striptags }}</div>{% endif %}
+      </div>
+      <div class="button-row">
+        <button class="btn btn-accent" type="submit">Send Inquiry</button>
+        <a class="btn btn-outline-light" href="{{ owner.telegram_url }}" target="_blank" rel="noreferrer">Message on Telegram</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

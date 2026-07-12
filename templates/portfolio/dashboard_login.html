@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Login | LONG SENGCHHUN{% endblock %}
+{% block content %}
+<section class="page-hero compact dashboard-auth">
+  <div class="container narrow">
+    <p class="eyebrow">Private Dashboard</p>
+    <h1>Admin access only.</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container narrow">
+    <form class="inquiry-form login-form" method="post">
+      {% csrf_token %}
+      {% if form.errors %}<div class="alert alert-danger">Username or password is not correct.</div>{% endif %}
+      <div class="form-field">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+      </div>
+      <div class="form-field">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+      </div>
+      <button class="btn btn-accent" type="submit">Open Dashboard</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
