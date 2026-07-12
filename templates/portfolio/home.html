@@ -88,7 +88,12 @@
       <a class="btn btn-accent" href="{{ featured_video_project.get_absolute_url }}">View Showcase</a>
     </div>
     <a class="video-feature-player reveal" href="{{ featured_video_project.get_absolute_url }}" aria-label="View {{ featured_video_project.title }}">
-      <video muted loop playsinline autoplay preload="metadata" poster="{% if featured_video_project.cover_image %}{{ featured_video_project.cover_image.url }}{% endif %}">
+      {% if featured_video_project.cover_image %}
+        <img class="video-feature-fallback" src="{{ featured_video_project.cover_image.url }}" alt="" loading="lazy">
+      {% else %}
+        <span class="video-feature-placeholder">Video Showcase</span>
+      {% endif %}
+      <video data-preview-video muted loop playsinline autoplay preload="metadata" poster="{% if featured_video_project.cover_image %}{{ featured_video_project.cover_image.url }}{% endif %}">
         <source src="{{ featured_video_project.video_file.url }}" type="video/mp4">
       </video>
       <span class="video-feature-badge"><i class="bi bi-play-fill"></i> 1080p video preview</span>
@@ -108,22 +113,27 @@
 
 <section class="section showreel-section">
   <div class="container showreel-panel reveal">
-    <div><p class="eyebrow">Showreel</p><h2>{{ site_settings.showreel_title|default:"Showreel coming soon" }}</h2><p>Configure a YouTube, Vimeo, or compressed video URL in Django Admin. The player loads only after a visitor chooses to watch.</p></div>
-    <button class="play-button" type="button" data-bs-toggle="modal" data-bs-target="#showreelModal" aria-label="Open showreel"><i class="bi bi-play-fill"></i></button>
+    <div><p class="eyebrow">Showreel</p><h2>{{ site_settings.showreel_title|default:"Current creative showcase" }}</h2><p>Selected motion, design, and 3D work prepared for a smooth viewing experience.</p></div>
+    {% if site_settings.youtube_url or site_settings.vimeo_url or site_settings.local_video_url %}
+      <button class="play-button" type="button" data-bs-toggle="modal" data-bs-target="#showreelModal" aria-label="Open showreel"><i class="bi bi-play-fill"></i></button>
+    {% else %}
+      <a class="btn btn-accent" href="{% url 'portfolio:portfolio_list' %}">View Work</a>
+    {% endif %}
   </div>
 </section>
 
+{% if site_settings.youtube_url or site_settings.vimeo_url or site_settings.local_video_url %}
 <div class="modal fade" id="showreelModal" tabindex="-1" aria-label="Showreel modal" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content video-modal">
       <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
       {% if site_settings.youtube_url %}<iframe data-src="{{ site_settings.youtube_url }}" title="Showreel" allowfullscreen></iframe>
       {% elif site_settings.vimeo_url %}<iframe data-src="{{ site_settings.vimeo_url }}" title="Showreel" allowfullscreen></iframe>
-      {% elif site_settings.local_video_url %}<video controls data-src="{{ site_settings.local_video_url }}"></video>
-      {% else %}<p class="empty-state">Add a showreel link in Django Admin.</p>{% endif %}
+      {% elif site_settings.local_video_url %}<video controls data-src="{{ site_settings.local_video_url }}"></video>{% endif %}
     </div>
   </div>
 </div>
+{% endif %}
 
 <section class="section cta-section">
   <div class="container"><p class="eyebrow">Start a Conversation</p><h2>Let's create something worth remembering.</h2><p class="khmer-line">{{ khmer.footer_cta }}</p><div class="button-row"><a class="btn btn-accent" href="{% url 'portfolio:contact' %}">Discuss a Project</a><a class="btn btn-outline-light" href="{{ owner.telegram_url }}" target="_blank" rel="noreferrer">Telegram Me</a><a class="btn btn-outline-light" href="mailto:{{ site_settings.email|default:owner.email }}">Email Me</a></div></div>

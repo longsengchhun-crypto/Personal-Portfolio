@@ -15,11 +15,7 @@ urlpatterns = [
     path("track-visit/", views.track_visit, name="track_visit"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/inquiries/<int:inquiry_id>/", views.dashboard_inquiry_detail, name="dashboard_inquiry_detail"),
-    path(
-        "dashboard/login/",
-        auth_views.LoginView.as_view(template_name="portfolio/dashboard_login.html", redirect_authenticated_user=True),
-        name="dashboard_login",
-    ),
+    path("dashboard/login/", views.dashboard_login, name="dashboard_login"),
     path("dashboard/logout/", auth_views.LogoutView.as_view(next_page="portfolio:dashboard_login"), name="dashboard_logout"),
     path("privacy/", views.privacy, name="privacy"),
 ]

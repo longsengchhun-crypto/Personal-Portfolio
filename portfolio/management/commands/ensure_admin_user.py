@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 
@@ -6,8 +7,8 @@ class Command(BaseCommand):
     help = "Create or update the private dashboard admin user."
 
     def add_arguments(self, parser):
-        parser.add_argument("--username", default="Admin12345")
-        parser.add_argument("--password", default="admin@12345")
+        parser.add_argument("--username", default=settings.DASHBOARD_ADMIN_USERNAME)
+        parser.add_argument("--password", default=settings.DASHBOARD_ADMIN_PASSWORD)
 
     def handle(self, *args, **options):
         User = get_user_model()

@@ -103,6 +103,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-preview-video]").forEach((video) => {
+    const player = video.closest(".video-feature-player");
+    const markUnavailable = () => player?.classList.add("is-video-unavailable");
+    video.addEventListener("error", markUnavailable);
+    video.querySelectorAll("source").forEach((source) => source.addEventListener("error", markUnavailable));
+    video.play?.().catch(() => {});
+  });
+
   const successCelebration = document.querySelector("[data-success-celebration]");
   if (successCelebration) {
     const audio = document.getElementById("contactSuccessAudio");

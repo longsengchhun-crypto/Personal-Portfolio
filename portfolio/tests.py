@@ -33,6 +33,19 @@ class ProjectInquiryFlowTests(TestCase):
         self.assertContains(success_response, "contact-success-khmer.m4a")
         self.assertContains(success_response, "សំណើរបស់លោកអ្នកត្រូវបានផ្ញើដោយជោគជ័យ")
 
+    @override_settings(DASHBOARD_ADMIN_USERNAME="Admin12345", DASHBOARD_ADMIN_PASSWORD="admin@12345")
+    def test_dashboard_login_bootstraps_private_admin(self):
+        response = self.client.post(
+            reverse("portfolio:dashboard_login"),
+            {"username": "Admin12345", "password": "admin@12345"},
+        )
+
+        self.assertRedirects(response, reverse("portfolio:dashboard"))
+        user = get_user_model().objects.get(username="Admin12345")
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_superuser)
+
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_dashboard_accepts_inquiry_and_sends_client_email(self):
         user = get_user_model().objects.create_user(

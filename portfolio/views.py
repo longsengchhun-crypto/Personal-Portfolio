@@ -1,8 +1,11 @@
 import json
 import re
 
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
@@ -12,6 +15,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -89,6 +93,65 @@ def parse_user_agent(user_agent):
 
 def admin_only(user):
     return user.is_active and user.is_staff
+
+
+def ensure_dashboard_admin(username=None, password=None):
+    configured_username = settings.DASHBOARD_ADMIN_USERNAME
+    configured_password = settings.DASHBOARD_ADMIN_PASSWORD
+    if not configured_username or not configured_password:
+        return None
+    if username is not None and username != configured_username:
+        return None
+    if password is not None and password != configured_password:
+        return None
+
+    User = get_user_model()
+    user, _created = User.objects.get_or_create(
+        username=configured_username,
+        defaults={"is_staff": True, "is_superuser": True, "is_active": True},
+    )
+    changed_fields = []
+    for field, value in {"is_staff": True, "is_superuser": True, "is_active": True}.items():
+        if getattr(user, field) != value:
+            setattr(user, field, value)
+            changed_fields.append(field)
+    if not user.check_password(configured_password):
+        user.set_password(configured_password)
+        changed_fields.append("password")
+    if changed_fields:
+        user.save(update_fields=changed_fields)
+    return user
+
+
+def dashboard_login(request):
+    if request.user.is_authenticated and admin_only(request.user):
+        return redirect("portfolio:dashboard")
+
+    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
+        ensure_dashboard_admin(username=username, password=password)
+        form = AuthenticationForm(request, data={"username": username, "password": password})
+        if form.is_valid():
+            user = form.get_user()
+            if admin_only(user):
+                login(request, user)
+                redirect_to = request.POST.get("next") or request.GET.get("next") or reverse("portfolio:dashboard")
+                if not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts={request.get_host()}):
+                    redirect_to = reverse("portfolio:dashboard")
+                return redirect(redirect_to)
+            form.add_error(None, "This account does not have dashboard access.")
+
+    return render(
+        request,
+        "portfolio/dashboard_login.html",
+        {
+            "form": form,
+            "next": request.GET.get("next", ""),
+            "page_name": "dashboard",
+        },
+    )
 
 
 def notify_inquiry_client(inquiry, status_label):

@@ -27,6 +27,8 @@ ALLOWED_HOSTS = [
     for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.vercel.app").split(",")
     if host.strip()
 ]
+DASHBOARD_ADMIN_USERNAME = os.getenv("DASHBOARD_ADMIN_USERNAME", "Admin12345")
+DASHBOARD_ADMIN_PASSWORD = os.getenv("DASHBOARD_ADMIN_PASSWORD", "admin@12345")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -68,12 +70,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(os.getenv("SQLITE_DATABASE_PATH") or ("/tmp/db.sqlite3" if IS_VERCEL else BASE_DIR / "db.sqlite3")),
+
+def _sqlite_name_from_env():
+    path = os.getenv("SQLITE_DATABASE_PATH")
+    if path:
+        return Path(path)
+    return Path("/tmp/db.sqlite3") if IS_VERCEL else BASE_DIR / "db.sqlite3"
+
+
+DATABASE_NAME = os.getenv("DATABASE_NAME", "").strip()
+
+if DATABASE_NAME:
+    import pymysql
+
+    pymysql.install_as_MySQLdb()
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": DATABASE_NAME,
+            "USER": os.getenv("DATABASE_USER", ""),
+            "PASSWORD": os.getenv("DATABASE_PASSWORD", ""),
+            "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
+            "PORT": os.getenv("DATABASE_PORT", "3306"),
+            "OPTIONS": {"charset": "utf8mb4"},
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": _sqlite_name_from_env(),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -96,6 +125,10 @@ MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT") or ("/tmp/media" if IS_VERCEL else BAS
 SERVE_MEDIA = env_bool("SERVE_MEDIA", True)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = "portfolio:dashboard_login"
+LOGIN_REDIRECT_URL = "portfolio:dashboard"
+LOGOUT_REDIRECT_URL = "portfolio:dashboard_login"
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
