@@ -7,6 +7,7 @@ except ImportError:
     load_dotenv = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+IS_VERCEL = os.getenv("VERCEL") == "1"
 
 if load_dotenv:
     load_dotenv(BASE_DIR / ".env")
@@ -20,7 +21,7 @@ def env_bool(name, default=False):
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-for-local-development-only")
-DEBUG = env_bool("DEBUG", True)
+DEBUG = env_bool("DEBUG", not IS_VERCEL)
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.vercel.app").split(",")
@@ -70,7 +71,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path(os.getenv("SQLITE_DATABASE_PATH") or ("/tmp/db.sqlite3" if IS_VERCEL else BASE_DIR / "db.sqlite3")),
     }
 }
 
@@ -91,7 +92,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT") or ("/tmp/media" if IS_VERCEL else BASE_DIR / "media"))
 SERVE_MEDIA = env_bool("SERVE_MEDIA", True)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -14,7 +14,7 @@
     },
     {
       "src": "/media/(.*)",
-      "dest": "/media/$1"
+      "dest": "config/wsgi.py"
     },
     {
       "src": "/(.*)",
