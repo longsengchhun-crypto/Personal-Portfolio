@@ -1,0 +1,14 @@
+
+> long-sengchhun-portfolio@2.0.0 dev
+> next dev -p 3100
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3100
+- Network:       http://192.168.56.1:3100
+- Environments: .env.local
+✓ Ready in 1185ms
+Creating turbopack project {
+  dir: 'D:\\SENG CHHUN\\9- All Demo System\\3- Personal Portfolio',
+  testMode: true
+}
+

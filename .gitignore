@@ -2,6 +2,10 @@ __pycache__/
 *.py[cod]
 db.sqlite3
 .env
+.env.local
+.next/
+node_modules/
+*.tsbuildinfo
 media/
 staticfiles/
 .venv/
