@@ -1,0 +1,1 @@
+export default function NotFound() { return <section className="page-hero"><div className="container narrow"><p className="eyebrow">404</p><h1>That page could not be found.</h1><a className="btn btn-accent" href="/">Return Home</a></div></section>; }

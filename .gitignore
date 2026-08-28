@@ -2,11 +2,24 @@ __pycache__/
 *.py[cod]
 db.sqlite3
 .env
+.env.local
+.next/
+node_modules/
+*.tsbuildinfo
 media/
 staticfiles/
 .venv/
 venv/
 runserver*.log
+next-dev-*.log
+
+# Legacy Django static output — superseded by public/static/ in the Next.js app.
+# Anchored to the repo root so this never matches public/static/.
+/static/
+
+# Unoptimized 66MB homepage video — deploys fine via Vercel directly, but would
+# permanently bloat git history. Swap for a compressed version, then track that instead.
+/public/video-editing-and-3d-modeling-showcase.mp4
 
 .vercel
 .tmp-vercel*
