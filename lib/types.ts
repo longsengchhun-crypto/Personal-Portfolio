@@ -110,6 +110,16 @@ export type OrderStatusView = {
 // each of their own orders' tokens) so the account dashboard can link to the guest payment page.
 export type CustomerOrderView = OrderStatusView & { access_token: string };
 
+export type InquiryStatus = "new" | "reviewing" | "replied" | "accepted" | "declined" | "archived";
+
+export type CustomerInquiryMessage = { message_type: "reply" | "accepted" | "declined"; subject: string; body: string; created_at: string };
+
+export type CustomerInquiryView = {
+  id: number; service_needed: string; project_description: string; estimated_budget: string;
+  preferred_timeline: string; status: InquiryStatus; created_at: string; updated_at: string;
+  messages: CustomerInquiryMessage[];
+};
+
 export type DashboardSnapshot = {
   total_visits: number; today_visits: number; unique_visitors: number;
   new_inquiries: number; accepted_projects: number; latest_visits: Visit[];

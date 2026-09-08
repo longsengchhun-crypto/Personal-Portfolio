@@ -53,9 +53,16 @@ export default async function ProductDetailPage({ params, searchParams }: { para
 
   const galleryImages = (product as unknown as { media?: { id: number; media_type: string; file_path: string; caption: string }[] }).media || [];
 
+  const quickSpecs: [string, string][] = [
+    ["Software", product.software],
+    ["File formats", product.file_formats],
+    ["File size", product.file_size],
+  ].filter(([, value]) => value) as [string, string][];
+
   return <article>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <section className="project-detail-hero"><div className="container">
+      <nav className="store-breadcrumb" aria-label="Breadcrumb"><Link href="/3d-store/">3D Store</Link><i className="bi bi-chevron-right" />{product.category?.name ? <Link href={`/3d-store/?category=${product.category.slug}`}>{product.category.name}</Link> : <span>Uncategorized</span>}<i className="bi bi-chevron-right" /><span>{product.title}</span></nav>
       <div className="project-kicker"><span>{product.category?.name || "3D Model"}</span>{product.version && <span>v{product.version}</span>}</div>
       <h1>{product.title}</h1>
       <p>{product.short_description}</p>
@@ -76,6 +83,9 @@ export default async function ProductDetailPage({ params, searchParams }: { para
 
       <aside className="product-buy-panel">
         <div className="product-price"><strong>${product.price_usd.toFixed(2)}</strong>{product.price_khr > 0 && <span>{product.price_khr.toLocaleString()}៛</span>}</div>
+
+        {quickSpecs.length > 0 && <div className="product-quick-specs">{quickSpecs.map(([label, value]) => <span key={label}><i className="bi bi-check2" />{value}</span>)}</div>}
+
         {error && <div className="alert alert-danger" style={{ marginBottom: 14 }}>{error === "rate" ? "Please wait a few minutes before trying again." : "Please check your details and try again."}</div>}
         <form method="post" action="/api/store/orders/">
           <input type="hidden" name="product_id" value={product.id} />
@@ -85,7 +95,14 @@ export default async function ProductDetailPage({ params, searchParams }: { para
           <div className="form-field"><label htmlFor="customer_phone">Phone / Telegram (optional)</label><input className="form-control" id="customer_phone" name="customer_phone" /></div>
           <button className="btn btn-accent" type="submit" style={{ width: "100%", justifyContent: "center", marginTop: 14 }}><i className="bi bi-bag-check" />Buy Now</button>
         </form>
-        <p className="analytics-note" style={{ marginTop: 12 }}>{customer ? <>This order will be saved to your <Link href="/3d-store/account/">account</Link> automatically. </> : <>Have an account? <Link href={`/3d-store/account/login/?next=${encodeURIComponent(`/3d-store/${product.slug}/`)}`}>Sign in</Link> so this order saves to it. </>}You'll pay via ABA QR on the next step, then I'll review and approve your download.</p>
+        <p className="analytics-note" style={{ marginTop: 12 }}>{customer ? <>This order will be saved to your <Link href="/3d-store/account/">account</Link> automatically.</> : <>Have an account? <Link href={`/3d-store/account/login/?next=${encodeURIComponent(`/3d-store/${product.slug}/`)}`}>Sign in</Link> so this order saves to it.</>}</p>
+
+        <div className="product-trust-strip">
+          <span><i className="bi bi-qr-code" />Pay securely via ABA QR</span>
+          <span><i className="bi bi-person-check" />Manually reviewed before release</span>
+          <span><i className="bi bi-folder2-open" />Downloads from your account, anytime</span>
+        </div>
+
         {facts.length > 0 && <ul className="product-detail-facts">{facts.map(([label, value]) => <li key={label}><span>{label}</span><strong>{value}</strong></li>)}</ul>}
       </aside>
     </div></section>

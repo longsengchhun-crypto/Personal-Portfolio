@@ -14,14 +14,19 @@ export default async function StoreLoginPage({ searchParams }: { searchParams: P
   const next = safeNext(params.next);
   if (await getCustomer()) redirect(next);
 
-  return <>
-    <section className="page-hero compact dashboard-auth"><div className="container narrow">
+  return <section className="auth-split">
+    <div className="auth-split-copy">
       <p className="eyebrow">3D Store</p>
-      <h1>Sign in to your account.</h1>
-      <p>Access every model you've purchased, from any device, anytime.</p>
-    </div></section>
-    <section className="section pt-0"><div className="container narrow">
-      <form className="inquiry-form login-form" method="post" action="/api/store/account/login/">
+      <h1>Welcome back.</h1>
+      <p className="auth-split-lede">Sign in to see every order, track a pending payment, or download a model you already own.</p>
+      <ul className="auth-benefit-list">
+        <li><i className="bi bi-clock-history" /><div><strong>Full order history</strong><span>Every purchase, past and present, in one place.</span></div></li>
+        <li><i className="bi bi-download" /><div><strong>Re-download anytime</strong><span>Lost the file? Get a fresh signed link in one click.</span></div></li>
+      </ul>
+    </div>
+    <div className="auth-split-form">
+      <form className="inquiry-form login-form auth-card" method="post" action="/api/store/account/login/">
+        <p className="eyebrow">Sign in</p>
         {params.error === "rate" && <div className="alert alert-danger">Too many attempts. Please wait about 15 minutes and try again.</div>}
         {params.error === "invalid" && <div className="alert alert-danger">Email or password is not correct.</div>}
         <input type="hidden" name="next" value={next} />
@@ -30,6 +35,6 @@ export default async function StoreLoginPage({ searchParams }: { searchParams: P
         <button className="btn btn-accent" type="submit" style={{ width: "100%", justifyContent: "center" }}>Sign In</button>
       </form>
       <p className="analytics-note" style={{ marginTop: 16, textAlign: "center" }}>New here? <Link className="text-link" href={`/3d-store/account/register/?next=${encodeURIComponent(next)}`}>Create a free account</Link></p>
-    </div></section>
-  </>;
+    </div>
+  </section>;
 }

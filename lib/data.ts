@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import type { Category, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
+import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
 
@@ -192,4 +192,10 @@ export async function getCustomerOrders(customerId: number) {
   const { data, error } = await getSupabase().rpc("get_customer_orders", { p_customer_id: customerId });
   if (error) throw error;
   return (data ?? []) as CustomerOrderView[];
+}
+
+export async function getCustomerInquiries(customerId: number) {
+  const { data, error } = await getSupabase().rpc("get_customer_inquiries", { p_customer_id: customerId });
+  if (error) throw error;
+  return (data ?? []) as CustomerInquiryView[];
 }

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import StoreProductCard from "@/components/StoreProductCard";
 import { pageMetadata } from "@/lib/content";
-import { getCustomer } from "@/lib/customerAuth";
 import { getStoreProducts } from "@/lib/data";
 
 export const metadata = pageMetadata("/3d-store/", "3D Store", "Premium 3D assets for creators, designers, and production by LONG SENGCHHUN.");
@@ -16,12 +15,19 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
   const search = typeof params.search === "string" ? params.search : "";
   const sort = typeof params.sort === "string" ? params.sort : "newest";
   const { products, categories } = await getStoreProducts({ category, search, sort });
-  const customer = await getCustomer();
 
   return <>
     <section className="page-hero compact"><div className="container">
-      <div className="store-hero-account"><p className="eyebrow">3D Store</p>{customer ? <Link className="text-link" href="/3d-store/account/"><i className="bi bi-person-circle" /> My Account</Link> : <Link className="text-link" href="/3d-store/account/login/"><i className="bi bi-person-circle" /> Sign In / Register</Link>}</div>
+      <p className="eyebrow">3D Store</p>
       <h1>Premium 3D assets for creators, designers &amp; production.</h1><p>Browse ready-to-use 3D models with clear licensing, file formats, and pricing in USD or KHR.</p>
+    </div></section>
+    <section className="section pt-0 pb-0"><div className="container">
+      <div className="project-process four-step store-how-it-works">
+        <article><span>01</span><strong>Preview in 3D</strong><p>Rotate, zoom, and inspect the real model before buying — no surprises.</p></article>
+        <article><span>02</span><strong>Pay by ABA QR</strong><p>Scan the QR at checkout and submit your payment reference.</p></article>
+        <article><span>03</span><strong>Reviewed by the studio</strong><p>Every payment is verified by hand, usually within a day.</p></article>
+        <article><span>04</span><strong>Download from your account</strong><p>Once approved, your files unlock instantly — no email required.</p></article>
+      </div>
     </div></section>
     <section className="section pt-0"><div className="container">
       <nav className="portfolio-category-nav" aria-label="3D Store categories"><Link className={!category ? "is-active" : ""} href="/3d-store/">All models</Link>{categories.map((item) => <Link className={category === item.slug ? "is-active" : ""} href={`/3d-store/?category=${item.slug}`} key={item.id}>{item.name}</Link>)}</nav>

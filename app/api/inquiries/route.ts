@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
+import { getCustomer } from "@/lib/customerAuth";
 import { getSupabase } from "@/lib/supabase";
 import { inquirySchema } from "@/lib/validation";
 import { clientEmailCopy, sendAdminInquiryNotification, sendInquiryEmail } from "@/lib/notifications";
@@ -25,12 +26,13 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() || null;
+  const customer = await getCustomer();
   const { data: inquiryId, error } = await supabase.rpc("submit_inquiry", {
     p_full_name: parsed.data.full_name, p_email: parsed.data.email,
     p_phone_or_telegram: parsed.data.phone_or_telegram, p_company: parsed.data.company,
     p_service_needed: parsed.data.service_needed, p_estimated_budget: parsed.data.estimated_budget,
     p_preferred_timeline: parsed.data.preferred_timeline, p_project_description: parsed.data.project_description,
-    p_attachment: attachmentPath, p_ip_address: ip,
+    p_attachment: attachmentPath, p_ip_address: ip, p_customer_id: customer?.id ?? null,
   });
   if (error) {
     const reason = error.message.includes("rate_limited") ? "rate" : "form";

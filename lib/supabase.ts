@@ -35,7 +35,10 @@ export function mediaUrl(path: string | null | undefined, transform?: { width: n
   if (!base) return `/media/${path.replace(/^\//, "")}`;
   const cleanPath = path.replace(/^\//, "");
   if (transform) {
-    const params = new URLSearchParams({ width: String(transform.width), quality: String(transform.quality ?? 75) });
+    // resize=contain is required whenever only one dimension is given — Supabase's image
+    // transform otherwise leaves the other dimension at its original pixel size instead of
+    // scaling it proportionally, silently distorting every thumbnail's aspect ratio.
+    const params = new URLSearchParams({ width: String(transform.width), quality: String(transform.quality ?? 75), resize: "contain" });
     return `${base}/storage/v1/render/image/public/portfolio-media/${cleanPath}?${params.toString()}`;
   }
   return `${base}/storage/v1/object/public/portfolio-media/${cleanPath}`;

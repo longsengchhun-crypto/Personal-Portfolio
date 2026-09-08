@@ -11,6 +11,15 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   completed: "Completed",
 };
 
+export const INQUIRY_STATUS_LABELS: Record<string, string> = {
+  new: "Received",
+  reviewing: "Under Review",
+  replied: "Replied",
+  accepted: "Accepted",
+  declined: "Declined",
+  archived: "Archived",
+};
+
 export function pageMetadata(path: string, title: string, description: string): Metadata {
   return {
     title,

@@ -8,10 +8,10 @@ export default function StoreProductCard({ product }: { product: Product }) {
   return <article className="project-card store-product-card reveal">
     <Link href={href} className="project-media" aria-label={`View ${product.title}`}>
       {product.cover_image ? <img src={mediaUrl(product.cover_image, { width: 640 })} alt={product.title} loading="lazy" decoding="async" /> : <div className="project-placeholder"><span>{product.category?.name || "3D Model"}</span></div>}
-      {product.is_featured && <span className="featured-pill">Featured</span>}
     </Link>
     <div className="project-card-body">
       <div className="project-meta"><span>{product.category?.name || "Uncategorized"}</span></div>
+      {product.is_featured && <div className="card-badge-row"><span className="card-badge card-badge-accent"><i className="bi bi-star-fill" />Featured</span></div>}
       <h3><Link href={href}>{product.title}</Link></h3>
       <p>{product.short_description}</p>
       {formats.length > 0 && <div className="product-format-tags">{formats.map((f) => <span key={f}>{f}</span>)}</div>}
