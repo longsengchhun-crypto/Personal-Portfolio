@@ -115,7 +115,20 @@ const initializePortfolioSite = () => {
     const markUnavailable = () => player?.classList.add("is-video-unavailable");
     video.addEventListener("error", markUnavailable);
     video.querySelectorAll("source").forEach((source) => source.addEventListener("error", markUnavailable));
-    video.play?.().catch(() => {});
+    // Only start downloading/playing once the player actually scrolls into view — this
+    // section sits well below the fold, and calling play() unconditionally on load forced
+    // the browser to start streaming a large video file before the page was even interactive.
+    if ("IntersectionObserver" in window) {
+      const playObserver = new IntersectionObserver((entries, observer) => entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          video.play?.().catch(() => {});
+          observer.unobserve(entry.target);
+        }
+      }), { rootMargin: "200px 0px" });
+      playObserver.observe(video);
+    } else {
+      video.play?.().catch(() => {});
+    }
   });
 
   const successCelebration = document.querySelector("[data-success-celebration]");

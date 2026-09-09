@@ -1,5 +1,5 @@
 import Link from "next/link";
-import StoreProductCard from "@/components/StoreProductCard";
+import StoreLiveGrid from "@/components/StoreLiveGrid";
 import { pageMetadata } from "@/lib/content";
 import { getStoreProducts } from "@/lib/data";
 
@@ -36,7 +36,7 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
 
       <div className="portfolio-result-summary"><p><strong>{products.length}</strong> model{products.length === 1 ? "" : "s"}{category || search ? " matching your filters" : " available"}.</p>{(category || search) && <Link className="text-link" href="/3d-store/"><i className="bi bi-x-circle" />Clear all filters</Link>}</div>
 
-      {products.length ? <div className="project-grid editorial-grid">{products.map((product) => <StoreProductCard product={product} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
+      <StoreLiveGrid initialProducts={products} category={category} search={search} />
     </div></section>
   </>;
 }

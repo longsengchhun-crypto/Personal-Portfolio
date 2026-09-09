@@ -2,6 +2,10 @@ import { getSupabase } from "@/lib/supabase";
 import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
+// Card/list views only render these fields — the long-form case-study text (introduction,
+// objective, creative_approach, process, final_result, credits, etc.) only matters on the
+// single-project detail page, so list queries skip it to avoid shipping unused payload.
+const projectCardSelect = "id, slug, title, year, short_description, project_type, cover_image, video_file, is_featured, category:categories(*)";
 
 function dashboardToken() {
   const token = process.env.SUPABASE_DASHBOARD_TOKEN;
@@ -19,13 +23,13 @@ export async function getSiteContext() {
 }
 
 export async function getFeaturedProjects() {
-  const { data, error } = await getSupabase().from("projects").select(projectSelect).eq("status", "published").eq("is_featured", true).order("order").order("year", { ascending: false }).limit(8);
+  const { data, error } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").eq("is_featured", true).order("order").order("year", { ascending: false }).limit(8);
   if (error) throw error;
   return data as unknown as Project[];
 }
 
 export async function getFeaturedVideoProject() {
-  const { data } = await getSupabase().from("projects").select(projectSelect).eq("status", "published").eq("categories.slug", "video-and-3d-modeling").neq("video_file", "").order("order").limit(1).maybeSingle();
+  const { data } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").eq("categories.slug", "video-and-3d-modeling").neq("video_file", "").order("order").limit(1).maybeSingle();
   return data as unknown as Project | null;
 }
 
@@ -34,7 +38,7 @@ export async function getPortfolio(filters: { category?: string; type?: string; 
   const page = Math.max(1, filters.page || 1);
   const pageSize = 60;
   const from = (page - 1) * pageSize;
-  let query = supabase.from("projects").select(projectSelect, { count: "exact" }).eq("status", "published").order("order").order("year", { ascending: false });
+  let query = supabase.from("projects").select(projectCardSelect, { count: "exact" }).eq("status", "published").order("order").order("year", { ascending: false });
   if (filters.category) query = query.eq("categories.slug", filters.category);
   if (filters.type) query = query.eq("project_type", filters.type);
   if (filters.year && /^\d{4}$/.test(filters.year)) query = query.eq("year", Number(filters.year));
@@ -63,10 +67,12 @@ export async function getProject(slug: string) {
   if (error) throw error;
   if (!data) return null;
   const project = data as unknown as Project;
-  const { data: related } = await supabase.from("projects").select(projectSelect).eq("status", "published").eq("category_id", project.category_id).neq("id", project.id).order("order").limit(3);
-  const [{ data: previous }, { data: next }] = await Promise.all([
-    supabase.from("projects").select(projectSelect).eq("status", "published").lt("order", project.order).order("order", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("projects").select(projectSelect).eq("status", "published").gt("order", project.order).order("order").limit(1).maybeSingle(),
+  // related/previous/next are all independent of each other once `project` is known, so they
+  // run as one round-trip instead of three sequential ones.
+  const [{ data: related }, { data: previous }, { data: next }] = await Promise.all([
+    supabase.from("projects").select(projectCardSelect).eq("status", "published").eq("category_id", project.category_id).neq("id", project.id).order("order").limit(3),
+    supabase.from("projects").select(projectCardSelect).eq("status", "published").lt("order", project.order).order("order", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("projects").select(projectCardSelect).eq("status", "published").gt("order", project.order).order("order").limit(1).maybeSingle(),
   ]);
   return { project, related: (related ?? []) as unknown as Project[], previous: previous as unknown as Project | null, next: next as unknown as Project | null };
 }
@@ -115,6 +121,9 @@ export async function getDashboardContent() {
 }
 
 const productSelect = "*, category:product_categories(*)";
+// Store cards don't render license/requirements/notes/compatibility/polygon_count/etc. —
+// those only matter on the single-product detail page.
+const productCardSelect = "id, slug, title, short_description, price_usd, price_khr, cover_image, file_formats, is_featured, category:product_categories(*)";
 
 export async function getStoreCategories() {
   const { data, error } = await getSupabase().from("product_categories").select("*").order("order");
@@ -124,7 +133,7 @@ export async function getStoreCategories() {
 
 export async function getStoreProducts(filters: { category?: string; search?: string; sort?: string }) {
   const supabase = getSupabase();
-  let query = supabase.from("products").select(productSelect).eq("status", "published");
+  let query = supabase.from("products").select(productCardSelect).eq("status", "published");
   if (filters.category) query = query.eq("category.slug", filters.category);
   if (filters.search) {
     const search = filters.search.replace(/[%(),]/g, "");
@@ -148,7 +157,7 @@ export async function getStoreProduct(slug: string) {
   if (error) throw error;
   if (!data) return null;
   const product = data as unknown as Product & { media: ProductMedia[] };
-  const { data: related } = await supabase.from("products").select(productSelect).eq("status", "published").eq("category_id", product.category_id).neq("id", product.id).limit(3);
+  const { data: related } = await supabase.from("products").select(productCardSelect).eq("status", "published").eq("category_id", product.category_id).neq("id", product.id).limit(3);
   return { product, related: (related ?? []) as unknown as Product[] };
 }
 
