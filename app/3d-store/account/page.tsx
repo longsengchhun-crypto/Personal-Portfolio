@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { INQUIRY_STATUS_LABELS, ORDER_STATUS_LABELS } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
-import { getCustomerInquiries, getCustomerOrders } from "@/lib/data";
+import WishlistButton from "@/components/WishlistButton";
+import { getCustomerInquiries, getCustomerOrders, getCustomerWishlist } from "@/lib/data";
 import { getProductDownloadLinks, mediaUrl } from "@/lib/supabase";
 
 export const metadata = { title: "Client Studio" };
@@ -13,7 +14,7 @@ export default async function ClientStudioPage() {
   const customer = await getCustomer();
   if (!customer) redirect("/3d-store/account/login/?next=/3d-store/account/");
 
-  const [orders, inquiries] = await Promise.all([getCustomerOrders(customer.id), getCustomerInquiries(customer.id)]);
+  const [orders, inquiries, wishlist] = await Promise.all([getCustomerOrders(customer.id), getCustomerInquiries(customer.id), getCustomerWishlist(customer.id)]);
   const ordersWithLinks = await Promise.all(orders.map(async (order) => {
     const isPaid = order.status === "paid" || order.status === "completed";
     const downloadLinks = isPaid ? await getProductDownloadLinks(order.product.id) : [];
@@ -50,6 +51,7 @@ export default async function ClientStudioPage() {
         <article><span>Pending</span><strong>{pendingOrderCount}</strong></article>
         <article><span>Total Spent</span><strong>${totalSpent.toFixed(2)}</strong></article>
         <article><span>Service Requests</span><strong>{inquiries.length}</strong></article>
+        <article><span>Wishlist</span><strong>{wishlist.length}</strong></article>
       </div>
     </div></section>
 
@@ -106,6 +108,25 @@ export default async function ClientStudioPage() {
               </div>
               <p style={{ color: "var(--muted)", whiteSpace: "pre-line" }}>{inquiry.project_description}</p>
               {inquiry.messages.length > 0 && <ul className="message-history studio-message-history">{inquiry.messages.map((message, index) => <li key={index}><div><strong>{message.subject}</strong><p style={{ whiteSpace: "pre-line" }}>{message.body}</p><time>{new Date(message.created_at).toLocaleString()}</time></div></li>)}</ul>}
+            </div>
+          </article>)}
+        </div>
+      )}
+
+      <h2 className="studio-section-title">My Wishlist</h2>
+      {wishlist.length === 0 ? <div className="empty-state portfolio-empty"><i className="bi bi-heart" /><h3>Your wishlist is empty</h3><p>Save models you want to revisit later.</p><Link className="btn btn-accent" href="/3d-store/" style={{ marginTop: 14 }}>Explore the Store</Link></div> : (
+        <div className="account-order-list">
+          {wishlist.map((item) => <article className="account-order-card" key={item.id}>
+            <div className="account-order-media">
+              {item.cover_image ? <img src={mediaUrl(item.cover_image, { width: 320 })} alt={item.title} /> : <div className="project-placeholder"><span>3D Model</span></div>}
+            </div>
+            <div className="account-order-body">
+              <div className="account-order-head">
+                <div><h3><Link href={`/3d-store/${item.slug}/`}>{item.title}</Link></h3><p className="analytics-note">${item.price_usd.toFixed(2)}{item.status !== "published" && " · No longer available"}</p></div>
+                <div className="wishlist-button-labeled"><WishlistButton productId={item.id} initialWishlisted signedIn /></div>
+              </div>
+              <p className="analytics-note">{item.short_description}</p>
+              {item.status === "published" && <Link className="btn btn-outline-light" href={`/3d-store/${item.slug}/`}>View Model</Link>}
             </div>
           </article>)}
         </div>

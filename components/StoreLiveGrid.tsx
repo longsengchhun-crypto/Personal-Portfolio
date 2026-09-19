@@ -7,7 +7,8 @@ import type { Product } from "@/lib/types";
 
 const PRODUCT_CARD_SELECT = "id, slug, title, short_description, price_usd, price_khr, cover_image, file_formats, is_featured, category:product_categories(*)";
 
-export default function StoreLiveGrid({ initialProducts, category, search }: { initialProducts: Product[]; category: string; search: string }) {
+export default function StoreLiveGrid({ initialProducts, category, search, signedIn = false, wishlistIds = [] }: { initialProducts: Product[]; category: string; search: string; signedIn?: boolean; wishlistIds?: number[] }) {
+  const wishlistSet = new Set(wishlistIds);
   const [products, setProducts] = useState(initialProducts);
   const [live, setLive] = useState(false);
 
@@ -74,6 +75,6 @@ export default function StoreLiveGrid({ initialProducts, category, search }: { i
 
   return <>
     <p className="store-live-indicator" role="status"><span className={`status-dot${live ? "" : " is-refreshing"}`} />{live ? "Live — updates automatically" : "Connecting…"}</p>
-    {products.length ? <div className="project-grid editorial-grid">{products.map((product) => <StoreProductCard product={product} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
+    {products.length ? <div className="project-grid editorial-grid">{products.map((product) => <StoreProductCard product={product} signedIn={signedIn} isWishlisted={wishlistSet.has(product.id)} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
   </>;
 }

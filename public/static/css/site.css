@@ -15,7 +15,9 @@
   --danger: #E5696D;
   --border: rgba(255,255,255,0.10);
   --shadow: rgba(0,0,0,0.38);
-  --font-display: "Fraunces", "Kantumruy Pro", serif;
+  --font-sans: "Inter", "Kantumruy Pro", -apple-system, "Segoe UI", sans-serif;
+  --font-khmer: "Kantumruy Pro", "Noto Sans Khmer", Arial, sans-serif;
+  --font-display: var(--font-sans);
 }
 
 /* 2026 portfolio workflow, curated work, and analytics refinements */
@@ -262,13 +264,16 @@ html[data-theme="light"] {
 html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   margin: 0;
-  font-family: "Kantumruy Pro", "Noto Sans Khmer", Arial, sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--text);
   line-height: 1.7;
   font-size: 16px;
   overflow-x: hidden;
 }
+/* Khmer text keeps Kantumruy Pro even though the base UI font is now Inter — Inter has no
+   Khmer glyphs, so anything actually written in Khmer needs the dedicated typeface. */
+.khmer-line, .nav-link small, [lang="km"] { font-family: var(--font-khmer); }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 .container,
@@ -378,7 +383,7 @@ html:not([data-theme="light"]) .navbar-toggler-icon { filter: invert(1); }
   font-family: var(--font-display);
   font-size: clamp(2.25rem, 5.2vw, 4.8rem);
   line-height: 1.02;
-  font-weight: 500;
+  font-weight: 700;
   max-width: 980px;
   text-wrap: balance;
 }
@@ -626,8 +631,8 @@ html[data-theme="light"] .profile-frame::before { border-color: rgba(17,24,32,0.
 
 .section { padding: clamp(72px, 9vw, 132px) 0; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 34px; }
-.section-heading h2, .split-section h2, .cta-section h2 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.8rem, 3.8vw, 3.6rem); line-height: 1.05; max-width: 780px; }
-.portfolio-collection > header h2, .project-detail-hero h2 { font-family: var(--font-display); font-weight: 500; }
+.section-heading h2, .split-section h2, .cta-section h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.8rem, 3.8vw, 3.6rem); line-height: 1.05; max-width: 780px; }
+.portfolio-collection > header h2, .project-detail-hero h2 { font-family: var(--font-display); font-weight: 700; }
 .project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .editorial-grid .project-card:nth-child(2), .editorial-grid .project-card:nth-child(5) { transform: translateY(42px); }
 .project-card {
@@ -678,6 +683,29 @@ html[data-theme="light"] .profile-frame::before { border-color: rgba(17,24,32,0.
 .card-badge { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; padding: 5px 9px; border-radius: 4px; }
 .card-badge i { font-size: 0.7rem; }
 .card-badge-accent { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--accent); }
+
+.wishlist-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: rgba(11,13,16,0.72);
+  backdrop-filter: blur(4px);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+.wishlist-button:hover { border-color: var(--accent); transform: scale(1.06); }
+.wishlist-button:disabled { opacity: 0.7; }
+.wishlist-button.is-active { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, var(--border)); }
+.wishlist-button-labeled .wishlist-button { position: static; width: 46px; height: 46px; font-size: 1.15rem; background: var(--bg-2); }
+.product-price-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .project-card-body { padding: 20px; }
 .project-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 0.9rem; }
 .project-card h3 { font-size: 1.35rem; margin: 10px 0; }
@@ -707,7 +735,7 @@ html[data-theme="light"] .profile-frame::before { border-color: rgba(17,24,32,0.
   color: var(--accent);
   font-family: var(--font-display);
   font-size: clamp(2.1rem, 4vw, 3.1rem);
-  font-weight: 500;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -989,7 +1017,7 @@ body.success-dialog-open { overflow: hidden; }
     var(--bg-2);
   border-right: 1px solid var(--border);
 }
-.auth-split-copy h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.2rem, 4vw, 3.6rem); line-height: 1.06; margin: 10px 0 16px; }
+.auth-split-copy h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.2rem, 4vw, 3.6rem); line-height: 1.06; margin: 10px 0 16px; }
 .auth-split-lede { color: var(--muted); font-size: 1.08rem; max-width: 480px; margin: 0 0 34px; }
 .auth-benefit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; max-width: 460px; }
 .auth-benefit-list li { display: flex; gap: 16px; align-items: flex-start; }
@@ -1025,13 +1053,13 @@ body.success-dialog-open { overflow: hidden; }
 .account-stat-row { display: flex; gap: 1px; background: var(--border); border: 1px solid var(--border); max-width: 560px; }
 .account-stat-row article { flex: 1; background: var(--surface); padding: 16px 20px; }
 .account-stat-row span { display: block; color: var(--muted); font-size: 0.74rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 6px; }
-.account-stat-row strong { font-family: var(--font-display); font-size: 1.7rem; font-weight: 500; }
+.account-stat-row strong { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; }
 @media (max-width: 640px) {
   .account-hero-head { flex-direction: column; align-items: flex-start; gap: 12px; }
   .account-stat-row { max-width: none; }
 }
 
-.studio-section-title { font-family: var(--font-display); font-weight: 500; font-size: 1.5rem; margin: 44px 0 20px; }
+.studio-section-title { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; margin: 44px 0 20px; }
 .studio-section-title:first-of-type { margin-top: 0; }
 .studio-actions-panel { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
 .studio-action-list { list-style: none; margin: 0; padding: 0; }

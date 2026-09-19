@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
+import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink, WishlistProductView } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
 // Card/list views only render these fields — the long-form case-study text (introduction,
@@ -207,4 +207,16 @@ export async function getCustomerInquiries(customerId: number) {
   const { data, error } = await getSupabase().rpc("get_customer_inquiries", { p_customer_id: customerId });
   if (error) throw error;
   return (data ?? []) as CustomerInquiryView[];
+}
+
+export async function getCustomerWishlistIds(customerId: number) {
+  const { data, error } = await getSupabase().rpc("get_customer_wishlist_ids", { p_customer_id: customerId });
+  if (error) throw error;
+  return new Set((data ?? []) as number[]);
+}
+
+export async function getCustomerWishlist(customerId: number) {
+  const { data, error } = await getSupabase().rpc("get_customer_wishlist", { p_customer_id: customerId });
+  if (error) throw error;
+  return (data ?? []) as WishlistProductView[];
 }

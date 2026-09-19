@@ -1,7 +1,8 @@
 import Link from "next/link";
 import StoreLiveGrid from "@/components/StoreLiveGrid";
 import { pageMetadata } from "@/lib/content";
-import { getStoreProducts } from "@/lib/data";
+import { getCustomer } from "@/lib/customerAuth";
+import { getCustomerWishlistIds, getStoreProducts } from "@/lib/data";
 
 export const metadata = pageMetadata("/3d-store/", "3D Store", "Premium 3D assets for creators, designers, and production by LONG SENGCHHUN.");
 
@@ -14,7 +15,8 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
   const category = typeof params.category === "string" ? params.category : "";
   const search = typeof params.search === "string" ? params.search : "";
   const sort = typeof params.sort === "string" ? params.sort : "newest";
-  const { products, categories } = await getStoreProducts({ category, search, sort });
+  const [{ products, categories }, customer] = await Promise.all([getStoreProducts({ category, search, sort }), getCustomer()]);
+  const wishlistIds = customer ? [...(await getCustomerWishlistIds(customer.id))] : [];
 
   return <>
     <section className="page-hero compact"><div className="container">
@@ -36,7 +38,7 @@ export default async function StorePage({ searchParams }: { searchParams: Promis
 
       <div className="portfolio-result-summary"><p><strong>{products.length}</strong> model{products.length === 1 ? "" : "s"}{category || search ? " matching your filters" : " available"}.</p>{(category || search) && <Link className="text-link" href="/3d-store/"><i className="bi bi-x-circle" />Clear all filters</Link>}</div>
 
-      <StoreLiveGrid initialProducts={products} category={category} search={search} />
+      <StoreLiveGrid initialProducts={products} category={category} search={search} signedIn={Boolean(customer)} wishlistIds={wishlistIds} />
     </div></section>
   </>;
 }

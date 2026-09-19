@@ -3,9 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ModelViewer from "@/components/ModelViewer";
 import StoreProductCard from "@/components/StoreProductCard";
+import WishlistButton from "@/components/WishlistButton";
 import { OWNER, SITE_URL } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
-import { getStoreProduct } from "@/lib/data";
+import { getCustomerWishlistIds, getStoreProduct } from "@/lib/data";
 import { mediaUrl } from "@/lib/supabase";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -28,6 +29,7 @@ export default async function ProductDetailPage({ params, searchParams }: { para
   const { product, related } = result;
   const { error } = await searchParams;
   const customer = await getCustomer();
+  const wishlistIds = customer ? await getCustomerWishlistIds(customer.id) : new Set<number>();
 
   const facts: [string, string][] = [
     ["Category", product.category?.name || "Uncategorized"],
@@ -82,7 +84,10 @@ export default async function ProductDetailPage({ params, searchParams }: { para
       </div>
 
       <aside className="product-buy-panel">
-        <div className="product-price"><strong>${product.price_usd.toFixed(2)}</strong>{product.price_khr > 0 && <span>{product.price_khr.toLocaleString()}៛</span>}</div>
+        <div className="product-price-row">
+          <div className="product-price"><strong>${product.price_usd.toFixed(2)}</strong>{product.price_khr > 0 && <span>{product.price_khr.toLocaleString()}៛</span>}</div>
+          <div className="wishlist-button-labeled"><WishlistButton productId={product.id} initialWishlisted={wishlistIds.has(product.id)} signedIn={Boolean(customer)} /></div>
+        </div>
 
         {quickSpecs.length > 0 && <div className="product-quick-specs">{quickSpecs.map(([label, value]) => <span key={label}><i className="bi bi-check2" />{value}</span>)}</div>}
 
@@ -107,7 +112,7 @@ export default async function ProductDetailPage({ params, searchParams }: { para
       </aside>
     </div></section>
 
-    {!!related.length && <section className="section pt-0"><div className="container"><div className="section-heading"><div><p className="eyebrow">Related Models</p><h2>More from this category.</h2></div></div><div className="project-grid">{related.map((item) => <StoreProductCard product={item} key={item.id} />)}</div></div></section>}
+    {!!related.length && <section className="section pt-0"><div className="container"><div className="section-heading"><div><p className="eyebrow">Related Models</p><h2>More from this category.</h2></div></div><div className="project-grid">{related.map((item) => <StoreProductCard product={item} signedIn={Boolean(customer)} isWishlisted={wishlistIds.has(item.id)} key={item.id} />)}</div></div></section>}
 
     <section className="section project-navigation"><div className="container"><div /><Link className="text-link" href="/3d-store/">All Models</Link><div /></div></section>
   </article>;
