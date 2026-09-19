@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AddToCartButton from "@/components/AddToCartButton";
 import WishlistButton from "@/components/WishlistButton";
 import { mediaUrl } from "@/lib/supabase";
 import type { Product } from "@/lib/types";
@@ -18,7 +19,7 @@ export default function StoreProductCard({ product, signedIn = false, isWishlist
       <p>{product.short_description}</p>
       {formats.length > 0 && <div className="product-format-tags">{formats.map((f) => <span key={f}>{f}</span>)}</div>}
       <div className="product-price"><strong>${product.price_usd.toFixed(2)}</strong>{product.price_khr > 0 && <span>{product.price_khr.toLocaleString()}៛</span>}</div>
-      <Link className="text-link" href={href}>View Model</Link>
+      <div className="store-card-actions"><Link className="text-link" href={href}>View Model</Link><AddToCartButton productId={product.id} /></div>
     </div>
   </article>;
 }

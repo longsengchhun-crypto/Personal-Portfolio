@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddToCartButton from "@/components/AddToCartButton";
 import ModelViewer from "@/components/ModelViewer";
 import StoreProductCard from "@/components/StoreProductCard";
 import WishlistButton from "@/components/WishlistButton";
@@ -100,7 +101,8 @@ export default async function ProductDetailPage({ params, searchParams }: { para
           <div className="form-field"><label htmlFor="customer_phone">Phone / Telegram (optional)</label><input className="form-control" id="customer_phone" name="customer_phone" /></div>
           <button className="btn btn-accent" type="submit" style={{ width: "100%", justifyContent: "center", marginTop: 14 }}><i className="bi bi-bag-check" />Buy Now</button>
         </form>
-        <p className="analytics-note" style={{ marginTop: 12 }}>{customer ? <>This order will be saved to your <Link href="/3d-store/account/">account</Link> automatically.</> : <>Have an account? <Link href={`/3d-store/account/login/?next=${encodeURIComponent(`/3d-store/${product.slug}/`)}`}>Sign in</Link> so this order saves to it.</>}</p>
+        <div style={{ marginTop: 10 }}><AddToCartButton productId={product.id} labeled /></div>
+        <p className="analytics-note" style={{ marginTop: 12 }}>{customer ? <>This order will be saved to your <Link href="/3d-store/account/">account</Link> automatically.</> : <>Have an account? <Link href={`/3d-store/account/login/?next=${encodeURIComponent(`/3d-store/${product.slug}/`)}`}>Sign in</Link> so this order saves to it.</>} Buying more than one model? <Link href="/3d-store/cart/">Add items to your cart</Link> and check out together.</p>
 
         <div className="product-trust-strip">
           <span><i className="bi bi-qr-code" />Pay securely via ABA QR</span>

@@ -100,10 +100,18 @@ export type OrderMessage = { id: number; order_id: number; message_type: "create
 // customer's order link; dashboard_store_orders (list) deliberately strips it.
 export type DashboardStoreOrder = Order & { access_token: string; product: Product; messages: OrderMessage[] };
 
+export type OrderProductRef = { id: number; title: string; slug: string; cover_image: string; version: string; updated_at: string };
+
+export type BatchSiblingOrder = {
+  id: number; status: OrderStatus; price_usd: number; price_khr: number;
+  product: OrderProductRef;
+};
+
 export type OrderStatusView = {
   id: number; order_number: string; status: OrderStatus; customer_name: string; customer_email: string;
   price_usd: number; price_khr: number; created_at: string; reviewed_at: string | null; admin_notes: string;
-  product: { id: number; title: string; slug: string; cover_image: string };
+  batch_id: string | null; batch_items: BatchSiblingOrder[];
+  product: OrderProductRef;
 };
 
 // get_customer_orders additionally returns access_token (the customer already fully controls

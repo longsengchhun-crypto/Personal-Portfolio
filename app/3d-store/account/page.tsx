@@ -86,6 +86,7 @@ export default async function ClientStudioPage() {
                   <div className={`status-badge status-${isPaid ? "accepted" : order.status === "rejected" ? "declined" : "new"}`}>{ORDER_STATUS_LABELS[order.status] || order.status}</div>
                 </div>
 
+                {isPaid && order.product.version && <p className="analytics-note">{order.product.version ? `v${order.product.version}` : ""}{order.product.updated_at ? ` · Updated ${new Date(order.product.updated_at).toLocaleDateString()}` : ""} — updates to this model are included free, automatically.</p>}
                 {isPaid && (downloadLinks.length ? <ul className="content-item-list">{downloadLinks.map((link) => <li className="content-item-form" key={link.name}><strong>{link.name}</strong><div className="content-item-actions"><a className="btn btn-accent" href={link.url!} target="_blank" rel="noreferrer"><i className="bi bi-download" /> Download</a></div></li>)}</ul> : <p className="analytics-note">Files are being prepared — check back shortly.</p>)}
 
                 {order.status === "pending_payment" && <p className="analytics-note"><Link className="text-link" href={`/3d-store/orders/${order.access_token}/`}>Complete payment</Link> to unlock your download.</p>}
