@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import Script from "next/script";
 import Nav from "@/components/Nav";
@@ -42,5 +43,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <a className="skip-link" href="#main">Skip to content</a><Nav isAdmin={admin} customerName={customer?.fullName || null} /><main id="main">{children}</main><Footer />
     <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
     <Script src="/static/js/site.js?v=20260909-perf-video-lazy" strategy="afterInteractive" />
+    <Analytics />
   </body></html>;
 }
