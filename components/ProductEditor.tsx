@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import StoreUploader from "@/components/StoreUploader";
+import { PREVIEW_FILE_ACCEPT, PREVIEW_FILE_EXTENSIONS, PRODUCT_FILE_ACCEPT, PRODUCT_FILE_EXTENSIONS } from "@/lib/fileFormats";
 import { mediaUrl } from "@/lib/supabase";
 import type { DashboardStoreProduct, ProductCategory, ProductFile, ProductMedia } from "@/lib/types";
 
@@ -152,13 +153,23 @@ export default function ProductEditor({ product, categories }: { product: Dashbo
       </div></div>
     </section>
 
+    <section className="console-panel content-editor-panel product-files-panel">
+      <div className="console-panel-head"><div><span className="status-dot" /><h2>Product Files</h2></div><small>Private — what the customer actually buys, released only after a paid order</small></div>
+      <div className="inquiry-form">
+        {productId ? <>
+          {files.length > 0 && <div className="content-item-list">{files.map((file) => <div className="content-item-form" key={file.id}><div className="form-field"><label>File</label><strong>{file.file_name}</strong>{file.file_size ? <small style={{ color: "var(--muted)" }}>{(file.file_size / (1024 * 1024)).toFixed(1)} MB</small> : null}</div><div className="content-item-actions"><button className="btn btn-outline-danger" type="button" onClick={() => removeFile(file.id)}>Remove</button></div></div>)}</div>}
+          <StoreUploader mode="file" accept={PRODUCT_FILE_ACCEPT} label="Drag &amp; drop product files, ZIP packages, or a whole folder here" onUploaded={addFile} multiple allowFolder />
+          <p className="analytics-note" style={{ marginTop: 10 }}>Supported: {PRODUCT_FILE_EXTENSIONS.join(" · ").toUpperCase()}. This is the ORIGINAL file the customer downloads — no conversion needed, and a GLB is never required to sell a product.</p>
+        </> : <p className="analytics-note">Save the product first to add product files.</p>}
+      </div>
+    </section>
+
     <section className="console-panel content-editor-panel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Preview Media</h2></div><small>Public — visitors will see these</small></div>
       <div className="inquiry-form">
         <div className="form-grid">
           <div className="form-field"><label>Cover image</label>{form.cover_image && <img src={mediaUrl(form.cover_image, { width: 300 })} alt="" style={{ maxWidth: 160, marginBottom: 10, display: "block" }} />}<StoreUploader mode="media" kind="image" accept="image/jpeg,image/png,image/webp" label="Drop cover image" onUploaded={(r) => setForm((p) => ({ ...p, cover_image: r.path }))} /></div>
           <div className="form-field"><label>Preview video (optional)</label>{form.preview_video && <small>Uploaded ✓</small>}<StoreUploader mode="media" kind="video" accept="video/mp4,video/webm" label="Drop preview video" onUploaded={(r) => setForm((p) => ({ ...p, preview_video: r.path }))} /></div>
-          <div className="form-field"><label>Interactive 3D preview — GLB (optional)</label>{form.viewer_model ? <small>Uploaded ✓ — rotate/zoom preview is now live on the product page automatically, no other steps needed.</small> : <small>Drop a .glb export here and the rotate/zoom/scale preview turns on by itself — proprietary formats (ZTL, ZPR, BLEND, MAX, MA/MB, C4D) can't preview live in-browser; export a .glb from your 3D software first.</small>}<StoreUploader mode="media" kind="model" accept=".glb" label="Drop .glb file" onUploaded={(r) => setForm((p) => ({ ...p, viewer_model: r.path }))} /></div>
         </div>
 
         <div className="form-field wide" style={{ marginTop: 18 }}>
@@ -171,13 +182,12 @@ export default function ProductEditor({ product, categories }: { product: Dashbo
       </div>
     </section>
 
-    <section className="console-panel content-editor-panel">
-      <div className="console-panel-head"><div><span className="status-dot" /><h2>Purchasable Files</h2></div><small>Private — only released after a paid order</small></div>
+    <section className="console-panel content-editor-panel optional-preview-panel">
+      <div className="console-panel-head"><div><span className="status-dot muted-dot" /><h2>Interactive 3D Preview <span className="optional-badge">Optional</span></h2></div></div>
       <div className="inquiry-form">
-        {productId ? <>
-          <div className="content-item-list">{files.map((file) => <div className="content-item-form" key={file.id}><div className="form-field"><label>File</label><strong>{file.file_name}</strong></div><div className="content-item-actions"><button className="btn btn-outline-danger" type="button" onClick={() => removeFile(file.id)}>Remove</button></div></div>)}</div>
-          <StoreUploader mode="file" accept=".blend,.fbx,.obj,.glb,.gltf,.stl,.3ds,.dae,.abc,.max,.ma,.mb,.c4d,.zip,.rar" label="Drop 3D file package" onUploaded={addFile} />
-        </> : <p className="analytics-note">Save the product first to add purchasable files.</p>}
+        <p className="analytics-note">Lets customers rotate, zoom, and inspect the model directly in the browser before buying. <strong>Not required to sell a product</strong> — plenty of products sell fine with just the cover image and gallery above. Only {PREVIEW_FILE_EXTENSIONS.join("/").toUpperCase()} can preview live in a browser; proprietary formats (ZTL, ZPR, BLEND, MAX, MA/MB, C4D) can't — export one from your 3D software first if you want this.</p>
+        {form.viewer_model ? <small className="is-ready"><i className="bi bi-check2-circle" /> Uploaded — the rotate/zoom preview is live on the product page automatically.</small> : null}
+        <StoreUploader mode="media" kind="model" accept={PREVIEW_FILE_ACCEPT} label="Drop a GLB/GLTF preview here (optional)" onUploaded={(r) => setForm((p) => ({ ...p, viewer_model: r.path }))} />
       </div>
     </section>
 

@@ -112,6 +112,18 @@
 .showreel-upload-status strong { overflow-wrap: anywhere; }
 .showreel-progress-bar { height: 8px; background: var(--border); overflow: hidden; }
 .showreel-progress-bar > div { height: 100%; background: var(--accent); transition: width 200ms ease; }
+
+.uploader-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.uploader-queue { width: 100%; display: grid; gap: 8px; margin-top: 6px; }
+.uploader-queue-item { padding: 12px 14px; border: 1px solid var(--border); background: var(--bg-2); display: grid; gap: 6px; text-align: left; }
+.uploader-queue-info { display: flex; justify-content: space-between; gap: 12px; }
+.uploader-queue-info strong { overflow-wrap: anywhere; font-size: 0.88rem; }
+.uploader-queue-info span { color: var(--muted); font-size: 0.8rem; flex: none; }
+.uploader-queue-item small { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.product-files-panel { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
+.optional-preview-panel { opacity: 0.92; }
+.optional-badge { display: inline-block; margin-left: 10px; padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: middle; }
 .showreel-upload-status small { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .portfolio-category-nav { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 18px; }

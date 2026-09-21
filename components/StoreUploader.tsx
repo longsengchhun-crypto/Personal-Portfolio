@@ -11,33 +11,62 @@ function formatBytes(bytes: number) {
 
 // The browser's native `accept` attribute only filters the file-picker dialog — drag-and-drop
 // bypasses it entirely, so a JPG dropped onto the "GLB preview" slot uploads with no complaint.
-// This checks the real file against the same accept list on both paths.
-function isAcceptedFile(file: File, accept: string) {
+// This checks the real file against the same accept list on both paths. Checks both the
+// filename extension (relativePath, so a folder-nested file is judged on its own name, not the
+// folder's) and the browser-reported MIME type, since the image/video uploaders use MIME-style
+// accept rules ("image/jpeg") rather than extensions.
+function isAcceptedFile(relativePath: string, mimeType: string, accept: string) {
   const rules = accept.split(",").map((rule) => rule.trim().toLowerCase()).filter(Boolean);
   if (!rules.length) return true;
-  const name = file.name.toLowerCase();
-  const type = (file.type || "").toLowerCase();
+  const name = relativePath.toLowerCase();
+  const type = (mimeType || "").toLowerCase();
   return rules.some((rule) => (rule.startsWith(".") ? name.endsWith(rule) : rule.endsWith("/*") ? type.startsWith(rule.slice(0, -1)) : type === rule));
 }
 
-type Status = "idle" | "uploading" | "done" | "error";
+// Recursively reads a dropped folder via the (Chromium-only) FileSystem Entry API. Firefox and
+// Safari don't expose directory entries on drop — for those, the plain-file fallback below
+// still accepts individually dropped files, and the "Select Folder" button (a real <input
+// webkitdirectory>) works everywhere Chromium-based, which covers the vast majority of admin
+// use. There's no way to fake real directory drag-and-drop where the browser doesn't support it.
+async function readEntry(entry: FileSystemEntry, path = ""): Promise<{ file: File; relativePath: string }[]> {
+  if (entry.isFile) {
+    const file = await new Promise<File>((resolve, reject) => (entry as FileSystemFileEntry).file(resolve, reject));
+    return [{ file, relativePath: path + entry.name }];
+  }
+  if (entry.isDirectory) {
+    const reader = (entry as FileSystemDirectoryEntry).createReader();
+    const entries: FileSystemEntry[] = await new Promise((resolve, reject) => {
+      const all: FileSystemEntry[] = [];
+      const readBatch = () => reader.readEntries((batch) => {
+        if (!batch.length) { resolve(all); return; }
+        all.push(...batch);
+        readBatch();
+      }, reject);
+      readBatch();
+    });
+    const nested = await Promise.all(entries.map((child) => readEntry(child, `${path}${entry.name}/`)));
+    return nested.flat();
+  }
+  return [];
+}
+
+type Status = "queued" | "uploading" | "done" | "error";
+type QueueItem = { key: string; name: string; size: number; status: Status; progress: number; error: string };
 
 type PublicMediaResult = { publicUrl: string; path: string };
 type PrivateFileResult = { path: string; fileName: string; fileSize: number };
 
 type Props =
   | { mode: "media"; kind: "image" | "video" | "model"; accept: string; label: string; onUploaded: (result: PublicMediaResult) => void }
-  | { mode: "file"; accept: string; label: string; onUploaded: (result: PrivateFileResult) => void };
+  | { mode: "file"; accept: string; label: string; onUploaded: (result: PrivateFileResult) => void; multiple?: boolean; allowFolder?: boolean };
 
 export default function StoreUploader(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [status, setStatus] = useState<Status>("idle");
-  const [progress, setProgress] = useState(0);
-  const [fileInfo, setFileInfo] = useState<{ name: string; size: number } | null>(null);
-  const [error, setError] = useState("");
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  async function putToSignedUrl(signedUrl: string, file: File) {
+  async function putToSignedUrl(signedUrl: string, file: File, onProgress: (pct: number) => void) {
     const formData = new FormData();
     formData.append("cacheControl", "3600");
     formData.append("", file);
@@ -47,71 +76,122 @@ export default function StoreUploader(props: Props) {
       xhr.setRequestHeader("x-upsert", "false");
       xhr.setRequestHeader("apikey", ANON_KEY);
       xhr.setRequestHeader("Authorization", `Bearer ${ANON_KEY}`);
-      xhr.upload.onprogress = (event) => { if (event.lengthComputable) setProgress(Math.round((event.loaded / event.total) * 100)); };
+      xhr.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
       xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status}).`)));
       xhr.onerror = () => reject(new Error("Upload failed. Check your connection and try again."));
       xhr.send(formData);
     });
   }
 
-  async function upload(file: File) {
-    if (!isAcceptedFile(file, props.accept)) {
-      setFileInfo({ name: file.name, size: file.size });
-      setError(`"${file.name}" isn't one of the accepted file types (${props.accept}). Nothing was uploaded.`);
-      setStatus("error");
+  function updateItem(key: string, patch: Partial<QueueItem>) {
+    setQueue((current) => current.map((item) => (item.key === key ? { ...item, ...patch } : item)));
+  }
+
+  async function uploadOne(file: File, relativePath: string, key: string) {
+    if (!isAcceptedFile(relativePath, file.type, props.accept)) {
+      updateItem(key, { status: "error", error: `Not a supported file type (${props.accept}).` });
       return;
     }
-    setError("");
-    setFileInfo({ name: file.name, size: file.size });
-    setStatus("uploading");
-    setProgress(0);
+    updateItem(key, { status: "uploading", progress: 0 });
     try {
       if (props.mode === "media") {
         const prep = await fetch("/api/dashboard/store/media-upload-url/", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contentType: file.type, kind: props.kind }),
+          body: JSON.stringify({ contentType: file.type, kind: props.kind, fileName: relativePath }),
         }).then((res) => res.json());
         if (prep.error) throw new Error(prep.error);
-        await putToSignedUrl(prep.signedUrl, file);
-        setStatus("done");
+        await putToSignedUrl(prep.signedUrl, file, (pct) => updateItem(key, { progress: pct }));
+        updateItem(key, { status: "done", progress: 100 });
         props.onUploaded({ publicUrl: prep.publicUrl, path: prep.path });
       } else {
         const prep = await fetch("/api/dashboard/store/file-upload-url/", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fileName: file.name }),
+          body: JSON.stringify({ fileName: relativePath }),
         }).then((res) => res.json());
         if (prep.error) throw new Error(prep.error);
-        await putToSignedUrl(prep.signedUrl, file);
-        setStatus("done");
+        await putToSignedUrl(prep.signedUrl, file, (pct) => updateItem(key, { progress: pct }));
+        updateItem(key, { status: "done", progress: 100 });
         props.onUploaded({ path: prep.path, fileName: prep.fileName, fileSize: file.size });
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Upload failed.");
-      setStatus("error");
+      updateItem(key, { status: "error", error: caught instanceof Error ? caught.message : "Upload failed." });
     }
+  }
+
+  async function enqueue(incoming: { file: File; relativePath: string }[]) {
+    if (!incoming.length) return;
+    const items = incoming.map(({ file, relativePath }) => ({ key: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: relativePath, size: file.size, status: "queued" as Status, progress: 0, error: "" }));
+    setQueue((current) => [...current, ...items]);
+    // Sequential, not parallel — these are often large 3D files, and uploading many at once
+    // would fight each other for bandwidth and make individual progress meaningless.
+    for (let i = 0; i < incoming.length; i++) await uploadOne(incoming[i].file, incoming[i].relativePath, items[i].key);
+  }
+
+  function retry(key: string, fileByKey: Map<string, { file: File; relativePath: string }>) {
+    const entry = fileByKey.get(key);
+    if (entry) void uploadOne(entry.file, entry.relativePath, key);
+  }
+
+  const recentFilesRef = useRef(new Map<string, { file: File; relativePath: string }>());
+
+  function stageAndEnqueue(picked: { file: File; relativePath: string }[]) {
+    const allowMultiple = props.mode === "file" && props.multiple;
+    const files = allowMultiple ? picked : picked.slice(0, 1);
+    for (const entry of files) recentFilesRef.current.set(entry.relativePath, entry);
+    void enqueue(files);
   }
 
   return <div
     className={`showreel-dropzone store-uploader${isDragging ? " is-dragging" : ""}`}
     onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
     onDragLeave={() => setIsDragging(false)}
-    onDrop={(event) => {
+    onDrop={async (event) => {
       event.preventDefault();
       setIsDragging(false);
-      const file = event.dataTransfer.files?.[0];
-      if (file) void upload(file);
+      const items = event.dataTransfer.items;
+      const entries = items ? Array.from(items).map((item) => item.webkitGetAsEntry?.()).filter((e): e is FileSystemEntry => Boolean(e)) : [];
+      if (entries.length) {
+        const results = (await Promise.all(entries.map((entry) => readEntry(entry)))).flat();
+        stageAndEnqueue(results);
+        return;
+      }
+      const files = Array.from(event.dataTransfer.files || []);
+      stageAndEnqueue(files.map((file) => ({ file, relativePath: file.name })));
     }}
   >
     <i className="bi bi-cloud-upload" aria-hidden="true" />
     <p><strong>{props.label}</strong></p>
-    <button className="btn btn-outline-light" type="button" onClick={() => inputRef.current?.click()} disabled={status === "uploading"}>Select File</button>
-    <input ref={inputRef} type="file" accept={props.accept} hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file); event.target.value = ""; }} />
+    <div className="uploader-actions">
+      <button className="btn btn-outline-light" type="button" onClick={() => inputRef.current?.click()}>Select File{props.mode === "file" && props.multiple ? "s" : ""}</button>
+      {props.mode === "file" && props.allowFolder && <button className="btn btn-outline-light" type="button" onClick={() => folderInputRef.current?.click()}>Select Folder</button>}
+    </div>
+    <input
+      ref={inputRef} type="file" accept={props.accept} hidden multiple={props.mode === "file" && props.multiple}
+      onChange={(event) => {
+        const files = Array.from(event.target.files || []);
+        stageAndEnqueue(files.map((file) => ({ file, relativePath: file.name })));
+        event.target.value = "";
+      }}
+    />
+    {props.mode === "file" && props.allowFolder && <input
+      ref={folderInputRef} type="file" hidden multiple
+      // webkitdirectory isn't in React's input типing — spread it past the type checker.
+      {...{ webkitdirectory: "" }}
+      onChange={(event) => {
+        const files = Array.from(event.target.files || []);
+        stageAndEnqueue(files.map((file) => ({ file, relativePath: (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name })));
+        event.target.value = "";
+      }}
+    />}
 
-    {fileInfo && status !== "idle" && <div className="showreel-upload-status">
-      <div><strong>{fileInfo.name}</strong><span>{formatBytes(fileInfo.size)}</span></div>
-      {status === "uploading" && <><div className="showreel-progress-bar"><div style={{ width: `${progress}%` }} /></div><small>Uploading… {progress}%</small></>}
-      {status === "done" && <small className="is-ready"><i className="bi bi-check2-circle" /> Uploaded</small>}
-      {status === "error" && <small className="needs-setup"><i className="bi bi-exclamation-triangle" /> {error}<button className="btn btn-quiet" type="button" onClick={() => inputRef.current?.click()}>Retry</button></small>}
+    {queue.length > 0 && <div className="uploader-queue">
+      {queue.map((item) => <div className="uploader-queue-item" key={item.key}>
+        <div className="uploader-queue-info"><strong>{item.name}</strong><span>{formatBytes(item.size)}</span></div>
+        {item.status === "uploading" && <div className="showreel-progress-bar"><div style={{ width: `${item.progress}%` }} /></div>}
+        {item.status === "queued" && <small className="analytics-note">Waiting…</small>}
+        {item.status === "done" && <small className="is-ready"><i className="bi bi-check2-circle" /> Uploaded</small>}
+        {item.status === "error" && <small className="needs-setup"><i className="bi bi-exclamation-triangle" /> {item.error}<button className="btn btn-quiet" type="button" onClick={() => retry(item.key, recentFilesRef.current)}>Retry</button></small>}
+      </div>)}
     </div>}
   </div>;
 }
