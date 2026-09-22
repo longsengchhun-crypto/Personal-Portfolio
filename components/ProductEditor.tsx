@@ -73,11 +73,18 @@ export default function ProductEditor({ product, categories }: { product: Dashbo
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ product_id: productId, media_type: mediaType, file_path: result.path, order: media.length }),
     }).then((r) => r.json());
-    if (res.id) setMedia((prev) => [...prev, { id: res.id, product_id: productId, media_type: mediaType, file_path: result.path, caption: "", order: prev.length }]);
+    if (res.id) {
+      setMedia((prev) => [...prev, { id: res.id, product_id: productId, media_type: mediaType, file_path: result.path, caption: "", order: prev.length }]);
+    } else {
+      // The file already landed in Storage before this call — failing silently here would leave
+      // it orphaned (uploaded, but with no DB row and no indication to the admin anything's wrong).
+      setError(res.error || "Uploaded, but saving it to the product failed. Try adding it again.");
+    }
   }
 
   async function removeMedia(id: number) {
-    await fetch("/api/dashboard/store/products/media/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id }) });
+    const res = await fetch("/api/dashboard/store/products/media/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id }) }).then((r) => r.json());
+    if (res.error) { setError(res.error); return; }
     setMedia((prev) => prev.filter((m) => m.id !== id));
   }
 
@@ -117,11 +124,15 @@ export default function ProductEditor({ product, categories }: { product: Dashbo
       const nextFiles = [...files, { id: res.id, product_id: productId, file_name: result.fileName, file_path: result.path, file_size: result.fileSize, order: files.length, created_at: new Date().toISOString() }];
       setFiles(nextFiles);
       syncFileMeta(nextFiles);
+    } else {
+      // Same as addMedia — the file already landed in Storage; don't let that vanish silently.
+      setError(res.error || "Uploaded, but saving it to the product failed. Try adding it again.");
     }
   }
 
   async function removeFile(id: number) {
-    await fetch("/api/dashboard/store/products/files/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id }) });
+    const res = await fetch("/api/dashboard/store/products/files/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id }) }).then((r) => r.json());
+    if (res.error) { setError(res.error); return; }
     const nextFiles = files.filter((f) => f.id !== id);
     setFiles(nextFiles);
     syncFileMeta(nextFiles);

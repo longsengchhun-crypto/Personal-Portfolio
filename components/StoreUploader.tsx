@@ -1,8 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
+import * as tus from "tus-js-client";
 
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+
+// Supabase's storage gateway serves resumable (TUS) uploads from a dedicated
+// `<project-ref>.storage.supabase.co` host, not the regular `<project-ref>.supabase.co` API host.
+const PROJECT_REF = SUPABASE_URL.replace(/^https?:\/\//, "").replace(/\.supabase\.co\/?$/, "");
+const TUS_ENDPOINT = PROJECT_REF ? `https://${PROJECT_REF}.storage.supabase.co/storage/v1/upload/resumable` : "";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -66,20 +73,32 @@ export default function StoreUploader(props: Props) {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  async function putToSignedUrl(signedUrl: string, file: File, onProgress: (pct: number) => void) {
-    const formData = new FormData();
-    formData.append("cacheControl", "3600");
-    formData.append("", file);
+  // Resumable (TUS) upload, chunked, with automatic retry-with-backoff on transient network
+  // drops. Supabase itself recommends this over a single whole-file PUT for anything above a
+  // few MB — a plain PUT has to complete start-to-finish in one shot, which is exactly why
+  // large (30MB+) product/model files were failing with 400/404s under real-world connections.
+  // Auth is the per-object `token` from createSignedUploadUrl (minted server-side with the
+  // service-role key), sent as `x-signature` — this needs no storage RLS policy and never
+  // exposes the service-role key to the browser.
+  async function uploadViaTus(
+    file: File, bucket: string, path: string, token: string, contentType: string,
+    onProgress: (pct: number) => void,
+  ) {
+    if (!TUS_ENDPOINT) throw new Error("Upload is misconfigured (missing Supabase URL).");
     await new Promise<void>((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", signedUrl);
-      xhr.setRequestHeader("x-upsert", "false");
-      xhr.setRequestHeader("apikey", ANON_KEY);
-      xhr.setRequestHeader("Authorization", `Bearer ${ANON_KEY}`);
-      xhr.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
-      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status}).`)));
-      xhr.onerror = () => reject(new Error("Upload failed. Check your connection and try again."));
-      xhr.send(formData);
+      const upload = new tus.Upload(file, {
+        endpoint: TUS_ENDPOINT,
+        retryDelays: [0, 1000, 3000, 5000, 10000, 20000],
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        chunkSize: 6 * 1024 * 1024,
+        headers: { apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}`, "x-signature": token, "x-upsert": "true" },
+        metadata: { bucketName: bucket, objectName: path, contentType: contentType || "application/octet-stream", cacheControl: "3600" },
+        onError: (error) => reject(error instanceof Error ? error : new Error(String(error))),
+        onProgress: (bytesUploaded, bytesTotal) => onProgress(Math.round((bytesUploaded / bytesTotal) * 100)),
+        onSuccess: () => resolve(),
+      });
+      upload.start();
     });
   }
 
@@ -100,7 +119,7 @@ export default function StoreUploader(props: Props) {
           body: JSON.stringify({ contentType: file.type, kind: props.kind, fileName: relativePath }),
         }).then((res) => res.json());
         if (prep.error) throw new Error(prep.error);
-        await putToSignedUrl(prep.signedUrl, file, (pct) => updateItem(key, { progress: pct }));
+        await uploadViaTus(file, prep.bucket, prep.path, prep.token, file.type, (pct) => updateItem(key, { progress: pct }));
         updateItem(key, { status: "done", progress: 100 });
         props.onUploaded({ publicUrl: prep.publicUrl, path: prep.path });
       } else {
@@ -109,7 +128,7 @@ export default function StoreUploader(props: Props) {
           body: JSON.stringify({ fileName: relativePath }),
         }).then((res) => res.json());
         if (prep.error) throw new Error(prep.error);
-        await putToSignedUrl(prep.signedUrl, file, (pct) => updateItem(key, { progress: pct }));
+        await uploadViaTus(file, prep.bucket, prep.path, prep.token, file.type, (pct) => updateItem(key, { progress: pct }));
         updateItem(key, { status: "done", progress: 100 });
         props.onUploaded({ path: prep.path, fileName: prep.fileName, fileSize: file.size });
       }

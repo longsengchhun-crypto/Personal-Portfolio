@@ -131,9 +131,14 @@ export async function getStoreCategories() {
   return (data ?? []) as ProductCategory[];
 }
 
+const productCardSelectFilteredByCategory = productCardSelect.replace("category:product_categories(*)", "category:product_categories!inner(*)");
+
 export async function getStoreProducts(filters: { category?: string; search?: string; sort?: string }) {
   const supabase = getSupabase();
-  let query = supabase.from("products").select(productCardSelect).eq("status", "published");
+  // A dot-path filter (`category.slug`) on a left-joined embed only filters which embedded row
+  // comes back, not whether the parent `products` row is included — it takes an `!inner` join to
+  // actually restrict the product list by category (PostgREST semantics).
+  let query = supabase.from("products").select(filters.category ? productCardSelectFilteredByCategory : productCardSelect).eq("status", "published");
   if (filters.category) query = query.eq("category.slug", filters.category);
   if (filters.search) {
     const search = filters.search.replace(/[%(),]/g, "");

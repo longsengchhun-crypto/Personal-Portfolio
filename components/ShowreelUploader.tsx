@@ -2,10 +2,16 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import * as tus from "tus-js-client";
 
-const MAX_BYTES = 500 * 1024 * 1024;
+const MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const TYPE_BY_EXTENSION: Record<string, string> = { mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime" };
 const ALLOWED_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
+
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const PROJECT_REF = SUPABASE_URL.replace(/^https?:\/\//, "").replace(/\.supabase\.co\/?$/, "");
+const TUS_ENDPOINT = PROJECT_REF ? `https://${PROJECT_REF}.storage.supabase.co/storage/v1/upload/resumable` : "";
 
 function resolveContentType(file: File) {
   if (ALLOWED_TYPES.has(file.type)) return file.type;
@@ -33,7 +39,7 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
     setError("");
     const contentType = resolveContentType(file);
     if (!contentType) return setError("Unsupported file type. Use MP4, WebM, or MOV.");
-    if (file.size > MAX_BYTES) return setError(`File is too large (${formatBytes(file.size)}). Maximum is 500 MB.`);
+    if (file.size > MAX_BYTES) return setError(`File is too large (${formatBytes(file.size)}). Maximum is 2 GB.`);
 
     setFileInfo({ name: file.name, size: file.size });
     setStatus("uploading");
@@ -46,21 +52,22 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
         body: JSON.stringify({ contentType }),
       }).then((res) => res.json());
       if (prep.error) throw new Error(prep.error);
-
-      const formData = new FormData();
-      formData.append("cacheControl", "31536000");
-      formData.append("", file);
+      if (!TUS_ENDPOINT) throw new Error("Upload is misconfigured (missing Supabase URL).");
 
       await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", prep.signedUrl);
-        xhr.setRequestHeader("x-upsert", "false");
-        xhr.setRequestHeader("apikey", process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "");
-        xhr.setRequestHeader("Authorization", `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || ""}`);
-        xhr.upload.onprogress = (event) => { if (event.lengthComputable) setProgress(Math.round((event.loaded / event.total) * 100)); };
-        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status}).`)));
-        xhr.onerror = () => reject(new Error("Upload failed. Check your connection and try again."));
-        xhr.send(formData);
+        const uploadHandle = new tus.Upload(file, {
+          endpoint: TUS_ENDPOINT,
+          retryDelays: [0, 1000, 3000, 5000, 10000, 20000],
+          uploadDataDuringCreation: true,
+          removeFingerprintOnSuccess: true,
+          chunkSize: 6 * 1024 * 1024,
+          headers: { apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}`, "x-signature": prep.token, "x-upsert": "true" },
+          metadata: { bucketName: "portfolio-media", objectName: prep.path, contentType, cacheControl: "31536000" },
+          onError: (uploadError) => reject(uploadError instanceof Error ? uploadError : new Error(String(uploadError))),
+          onProgress: (bytesUploaded, bytesTotal) => setProgress(Math.round((bytesUploaded / bytesTotal) * 100)),
+          onSuccess: () => resolve(),
+        });
+        uploadHandle.start();
       });
 
       setStatus("saving");
@@ -94,7 +101,7 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
       <i className="bi bi-camera-reels" aria-hidden="true" />
       <p><strong>Drop a showreel video here</strong> or</p>
       <button className="btn btn-outline-light" type="button" onClick={() => inputRef.current?.click()} disabled={status === "uploading" || status === "saving"}>Select Video</button>
-      <small>MP4, WebM, or MOV · up to 500 MB</small>
+      <small>MP4, WebM, or MOV · up to 2 GB</small>
       <input ref={inputRef} type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file); event.target.value = ""; }} />
     </div>
 

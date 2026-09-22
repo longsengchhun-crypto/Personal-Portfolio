@@ -24,5 +24,5 @@ export async function POST(request: NextRequest) {
   const { data, error } = await getSupabaseAdmin().storage.from("product-downloads").createSignedUploadUrl(path);
   if (error || !data) return NextResponse.json({ error: error?.message || "Could not prepare upload." }, { status: 500 });
 
-  return NextResponse.json({ signedUrl: data.signedUrl, path: data.path, fileName });
+  return NextResponse.json({ signedUrl: data.signedUrl, path: data.path, token: data.token, bucket: "product-downloads", fileName });
 }

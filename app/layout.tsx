@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import RealtimeSync from "@/components/RealtimeSync";
 import { isAdmin } from "@/lib/auth";
 import { SITE_URL } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
@@ -40,7 +41,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     {supabaseUrl && <link rel="preconnect" href={supabaseUrl} />}
     <link href="/static/css/site.css?v=20260921-upload-system" rel="stylesheet" />
   </head><body data-track-url="/api/track-visit/">
-    <a className="skip-link" href="#main">Skip to content</a><Nav isAdmin={admin} customerName={customer?.fullName || null} /><main id="main">{children}</main><Footer />
+    <a className="skip-link" href="#main">Skip to content</a><Nav isAdmin={admin} customerName={customer?.fullName || null} /><main id="main">{children}</main><Footer /><RealtimeSync />
     <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
     <Script src="/static/js/site.js?v=20260909-perf-video-lazy" strategy="afterInteractive" />
     <Analytics />

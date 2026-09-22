@@ -6,11 +6,13 @@ import { getSupabase } from "@/lib/supabase";
 import type { Product } from "@/lib/types";
 
 const PRODUCT_CARD_SELECT = "id, slug, title, short_description, price_usd, price_khr, cover_image, file_formats, is_featured, category:product_categories(*)";
+// `!inner` is required for `.eq("category.slug", …)` to actually restrict the parent row set —
+// a plain left-joined embed only filters which embedded row comes back (PostgREST semantics).
+const PRODUCT_CARD_SELECT_BY_CATEGORY = PRODUCT_CARD_SELECT.replace("category:product_categories(*)", "category:product_categories!inner(*)");
 
 export default function StoreLiveGrid({ initialProducts, category, search, signedIn = false, wishlistIds = [] }: { initialProducts: Product[]; category: string; search: string; signedIn?: boolean; wishlistIds?: number[] }) {
   const wishlistSet = new Set(wishlistIds);
   const [products, setProducts] = useState(initialProducts);
-  const [live, setLive] = useState(false);
 
   // Server-rendered props change on filter/search navigation — resync local state to match.
   useEffect(() => { setProducts(initialProducts); }, [initialProducts]);
@@ -46,7 +48,7 @@ export default function StoreLiveGrid({ initialProducts, category, search, signe
     }
 
     async function resync() {
-      let query = supabase.from("products").select(PRODUCT_CARD_SELECT).eq("status", "published");
+      let query = supabase.from("products").select(category ? PRODUCT_CARD_SELECT_BY_CATEGORY : PRODUCT_CARD_SELECT).eq("status", "published");
       if (category) query = query.eq("category.slug", category);
       const { data } = await query;
       if (data) setProducts((data as unknown as Product[]).filter(matchesFilters));
@@ -62,7 +64,6 @@ export default function StoreLiveGrid({ initialProducts, category, search, signe
       })
       .subscribe((status) => {
         const isLive = status === "SUBSCRIBED";
-        setLive(isLive);
         // A fresh (re)subscription — including after a dropped connection reconnects — may
         // have missed events while it was down, so do one safe targeted refetch to resync.
         if (isLive && !wasLive) resync();
@@ -73,8 +74,8 @@ export default function StoreLiveGrid({ initialProducts, category, search, signe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, search]);
 
+  // No visible "Live" badge — the sync happens silently in the background.
   return <>
-    <p className="store-live-indicator" role="status"><span className={`status-dot${live ? "" : " is-refreshing"}`} />{live ? "Live — updates automatically" : "Connecting…"}</p>
     {products.length ? <div className="project-grid editorial-grid">{products.map((product) => <StoreProductCard product={product} signedIn={signedIn} isWishlisted={wishlistSet.has(product.id)} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
   </>;
 }

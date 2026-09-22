@@ -32,5 +32,5 @@ export async function POST(request: NextRequest) {
   if (error || !data) return NextResponse.json({ error: error?.message || "Could not prepare upload." }, { status: 500 });
 
   const { data: publicUrlData } = getSupabase().storage.from("portfolio-media").getPublicUrl(path);
-  return NextResponse.json({ signedUrl: data.signedUrl, path: data.path, publicUrl: publicUrlData.publicUrl || mediaUrl(path) });
+  return NextResponse.json({ signedUrl: data.signedUrl, path: data.path, token: data.token, bucket: "portfolio-media", publicUrl: publicUrlData.publicUrl || mediaUrl(path) });
 }
