@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
+import { suggestCategory } from "@/lib/productCategorization";
 import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
@@ -16,11 +17,32 @@ export async function POST(request: NextRequest) {
   const title = String(body.title || "").trim();
   if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
   const slug = String(body.slug || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const supabase = getSupabase();
 
-  const { data, error } = await getSupabase().rpc("dashboard_upsert_product", {
+  // Auto-categorize only on first creation, and only when the admin hasn't picked a category —
+  // never overrides a later, deliberate choice (including deliberately clearing it back to
+  // "Uncategorized" on an edit, which looks identical to "never set" from here otherwise).
+  let categoryId: number | null = body.category_id || null;
+  if (!body.id && !categoryId) {
+    const { data: existingCategories } = await supabase.from("product_categories").select("id, name, slug").order("order");
+    const suggestion = suggestCategory({ title, short_description: body.short_description, tags: body.tags, file_formats: body.file_formats }, existingCategories ?? []);
+    if (suggestion && "categoryId" in suggestion) {
+      categoryId = suggestion.categoryId;
+    } else if (suggestion && "newCategoryName" in suggestion) {
+      const { data: newId } = await supabase.rpc("dashboard_upsert_product_category", {
+        p_token: token, p_id: null, p_name: suggestion.newCategoryName, p_order: (existingCategories ?? []).length,
+      });
+      // Never let a category-creation hiccup (e.g. a name collision from a concurrent save)
+      // block the actual product save — worst case the product just lands as Uncategorized,
+      // same as if auto-categorization had found nothing at all.
+      if (typeof newId === "number") categoryId = newId;
+    }
+  }
+
+  const { data, error } = await supabase.rpc("dashboard_upsert_product", {
     p_token: token,
     p_id: body.id || null,
-    p_category_id: body.category_id || null,
+    p_category_id: categoryId,
     p_title: title,
     p_slug: slug,
     p_short_description: body.short_description || "",
