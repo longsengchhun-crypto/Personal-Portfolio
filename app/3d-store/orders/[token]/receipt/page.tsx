@@ -7,7 +7,9 @@ import { getOrderByToken, getSiteContext } from "@/lib/data";
 export const metadata = { title: "Receipt" };
 
 const SIGNATURE_IMAGE = "/static/site-assets/signature/signature.png";
-const LOGO_IMAGE = "/static/site-assets/profile/profile-cutout-fade.png";
+// A dedicated square headshot crop, not the homepage's full-body cutout — that photo is
+// 1355x2490, and center-cropping it into a small circle shows the torso, not the face.
+const LOGO_IMAGE = "/static/site-assets/profile/headshot-square.png";
 
 export default async function ReceiptPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
