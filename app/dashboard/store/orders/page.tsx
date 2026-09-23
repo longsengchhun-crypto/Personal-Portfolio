@@ -12,6 +12,10 @@ export default async function OrdersPage() {
   await requireAdmin("/dashboard/store/orders/");
   const orders = await getDashboardStoreOrders();
   const needsReview = orders.filter((o) => o.status === "payment_submitted" || o.status === "under_review");
+  // One cart checkout creates one order row per product, sharing a batch_id and a single
+  // payment screenshot — approving/rejecting is still per-row, so make that grouping visible
+  // here rather than letting sibling items look like unrelated, separately-paid orders.
+  const batchCounts = orders.reduce<Record<string, number>>((acc, o) => { if (o.batch_id) acc[o.batch_id] = (acc[o.batch_id] || 0) + 1; return acc; }, {});
 
   return <section className="dashboard-console"><div className="container">
     <header className="console-head compact-console-head"><div><p className="eyebrow">3D Store</p><h1>Orders</h1></div><div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/store/"><i className="bi bi-arrow-left" />Store</Link></div></header>
@@ -22,7 +26,7 @@ export default async function OrdersPage() {
       <div className="request-table-wrap"><table className="request-table"><thead><tr><th>Status</th><th>Order</th><th>Customer</th><th>Product</th><th>Amount</th><th>Date</th><th>Action</th></tr></thead><tbody>
         {orders.length ? orders.map((order) => <tr key={order.id}>
           <td><span className={`status-badge status-${STATUS_TONE[order.status] || "new"}`}>{STATUS_LABEL[order.status] || order.status}</span></td>
-          <td><strong>{order.order_number}</strong></td>
+          <td><strong>{order.order_number}</strong>{order.batch_id && batchCounts[order.batch_id] > 1 && <small><i className="bi bi-link-45deg" /> 1 of {batchCounts[order.batch_id]} in this payment</small>}</td>
           <td><strong>{order.customer_name}</strong><small>{order.customer_email}</small></td>
           <td>{order.product_title}</td>
           <td><strong>${order.price_usd.toFixed(2)}</strong></td>

@@ -8,17 +8,17 @@ import { isAdmin } from "@/lib/auth";
 import { SITE_URL } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
 
-const DEFAULT_DESCRIPTION = "Portfolio and creative services by LONG SENGCHHUN, a multidisciplinary creative designer based in Phnom Penh, Cambodia.";
+const DEFAULT_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "LONG SENGCHHUN | Multidisciplinary Creative Designer", template: "%s | LONG SENGCHHUN" },
+  title: { default: "LONG SENGCHHUN | Visual Creative & Media", template: "%s | LONG SENGCHHUN" },
   description: DEFAULT_DESCRIPTION,
   icons: { icon: "/static/site-assets/profile/profile-cutout-fade.png" },
   openGraph: {
     siteName: "LONG SENGCHHUN",
     type: "website",
-    title: "LONG SENGCHHUN | Multidisciplinary Creative Designer",
+    title: "LONG SENGCHHUN | Visual Creative & Media",
     description: DEFAULT_DESCRIPTION,
     url: "/",
     images: [{ url: "/static/site-assets/profile/profile-cutout-fade.png" }],

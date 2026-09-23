@@ -13,6 +13,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { data: order } = await supabase.rpc("get_order_by_token", { p_access_token: token });
   if (!order) return NextResponse.redirect(new URL("/3d-store/", request.url), 303);
 
+  // A screenshot is the only proof of payment the admin has to go on — without one, the order
+  // would silently move to "payment_submitted" with nothing for the admin to actually review.
+  if (order.status === "pending_payment" && !screenshotPath) {
+    return NextResponse.redirect(new URL(`/3d-store/orders/${token}/?error=screenshot`, request.url), 303);
+  }
+
   if (order.status === "pending_payment") {
     const { error } = await supabase.rpc("submit_order_payment", { p_access_token: token, p_payment_reference: reference, p_payment_screenshot: screenshotPath });
     if (!error) {

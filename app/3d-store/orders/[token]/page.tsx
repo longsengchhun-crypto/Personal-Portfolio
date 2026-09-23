@@ -11,8 +11,9 @@ export const metadata = { title: "Order Status" };
 
 const STATUS_LABELS = ORDER_STATUS_LABELS;
 
-export default async function OrderStatusPage({ params }: { params: Promise<{ token: string }> }) {
+export default async function OrderStatusPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ error?: string }> }) {
   const { token } = await params;
+  const { error } = await searchParams;
   const [order, customer] = await Promise.all([getOrderByToken(token), getCustomer()]);
   if (!order) notFound();
 
@@ -69,6 +70,7 @@ export default async function OrderStatusPage({ params }: { params: Promise<{ to
     </div>
 
     {anyPending && <>
+      {error === "screenshot" && <div className="alert alert-danger" role="alert" style={{ marginBottom: 18 }}>Please upload a payment screenshot before submitting — we can&rsquo;t review an order with no proof of payment.</div>}
       {site?.aba_qr_image ? <div className="inquiry-form" style={{ textAlign: "center", marginBottom: 26 }}>
         <p className="eyebrow">Scan to Pay</p>
         <img src={mediaUrl(site.aba_qr_image, { width: 400 })} alt="ABA QR code" style={{ maxWidth: 260, margin: "0 auto", display: "block" }} />

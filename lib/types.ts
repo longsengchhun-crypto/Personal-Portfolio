@@ -92,7 +92,7 @@ export type Order = {
   id: number; order_number: string; product_id: number; customer_name: string; customer_email: string;
   customer_phone: string; price_usd: number; price_khr: number; payment_reference: string;
   payment_screenshot: string; status: OrderStatus; admin_notes: string; created_at: string;
-  updated_at: string; reviewed_at: string | null; product_title?: string;
+  updated_at: string; reviewed_at: string | null; product_title?: string; batch_id: string | null;
 };
 
 export type OrderMessage = { id: number; order_id: number; message_type: "created" | "submitted" | "approved" | "rejected"; subject: string; body: string; delivery_status: string; created_at: string };

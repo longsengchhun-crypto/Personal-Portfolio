@@ -31,8 +31,8 @@ export function pageMetadata(path: string, title: string, description: string): 
 
 export const OWNER = {
   name: "LONG SENGCHHUN",
-  title: "Multidisciplinary Creative Designer",
-  roles: "Film | Motion | Design | Photography | 3D",
+  title: "Visual Creative & Media",
+  roles: "VFX · Film · Photography · Video · Motion · 3D",
   location: "Phnom Penh, Cambodia",
   phone: "016 590 899",
   email: "longsengchhun@gmail.com",

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getCartIds, onCartChange } from "@/lib/cart";
-import { KHMER } from "@/lib/content";
+import { KHMER, OWNER } from "@/lib/content";
 
 const links = [
   ["Home", KHMER.home, "/"], ["Showreel", KHMER.showreel, "/showreel/"], ["Work", KHMER.work, "/portfolio/"],
@@ -41,7 +41,7 @@ export default function Nav({ isAdmin, customerName }: { isAdmin: boolean; custo
   return <>
     <nav className="navbar navbar-expand-lg portfolio-nav fixed-top" aria-label="Primary navigation">
       <div className="container">
-        <Link className="navbar-brand" href="/"><span>LONG SENGCHHUN</span><small>Creative Designer</small></Link>
+        <Link className="navbar-brand" href="/"><span>LONG SENGCHHUN</span><small>{OWNER.title}</small></Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-controls="mobileNav" aria-label="Open navigation"><span className="navbar-toggler-icon" /></button>
         <div className="collapse navbar-collapse justify-content-end"><ul className="navbar-nav"><NavLinks /></ul><CartLink /><AccountControl isAdmin={isAdmin} customerName={customerName} /><button className="theme-toggle" type="button" aria-label="Toggle light and dark mode" title="Toggle theme"><i className="bi bi-moon-stars" /></button></div>
       </div>

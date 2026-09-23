@@ -71,6 +71,7 @@ export default function PaymentProofForm({ accessToken }: { accessToken: string 
       </div>}
     </div>
 
-    <button className="btn btn-accent" type="submit" disabled={status === "uploading"} style={{ marginTop: 18, width: "100%", justifyContent: "center" }}>I've Paid — Submit for Review</button>
+    {status !== "done" && <p className="analytics-note" style={{ marginTop: 10 }}>Upload your payment screenshot before submitting — we can&rsquo;t review an order with no proof of payment.</p>}
+    <button className="btn btn-accent" type="submit" disabled={status !== "done"} style={{ marginTop: 18, width: "100%", justifyContent: "center" }}>I've Paid — Submit for Review</button>
   </form>;
 }
