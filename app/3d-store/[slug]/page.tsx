@@ -114,7 +114,7 @@ export default async function ProductDetailPage({ params, searchParams }: { para
       </aside>
     </div></section>
 
-    {!!related.length && <section className="section pt-0"><div className="container"><div className="section-heading"><div><p className="eyebrow">Related Models</p><h2>More from this category.</h2></div></div><div className="project-grid">{related.map((item) => <StoreProductCard product={item} signedIn={Boolean(customer)} isWishlisted={wishlistIds.has(item.id)} key={item.id} />)}</div></div></section>}
+    {!!related.length && <section className="section pt-0"><div className="container"><div className="section-heading"><div><p className="eyebrow">Related Models</p><h2>More from this category.</h2></div></div><div className="project-grid store-grid">{related.map((item) => <StoreProductCard product={item} signedIn={Boolean(customer)} isWishlisted={wishlistIds.has(item.id)} key={item.id} />)}</div></div></section>}
 
     <section className="section project-navigation"><div className="container"><div /><Link className="text-link" href="/3d-store/">All Models</Link><div /></div></section>
   </article>;

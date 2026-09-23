@@ -76,6 +76,6 @@ export default function StoreLiveGrid({ initialProducts, category, search, signe
 
   // No visible "Live" badge — the sync happens silently in the background.
   return <>
-    {products.length ? <div className="project-grid editorial-grid">{products.map((product) => <StoreProductCard product={product} signedIn={signedIn} isWishlisted={wishlistSet.has(product.id)} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
+    {products.length ? <div className="project-grid store-grid">{products.map((product) => <StoreProductCard product={product} signedIn={signedIn} isWishlisted={wishlistSet.has(product.id)} key={product.id} />)}</div> : <div className="empty-state portfolio-empty"><i className="bi bi-box-seam" /><h2>No models yet</h2><p>New 3D assets are on the way — check back soon.</p></div>}
   </>;
 }

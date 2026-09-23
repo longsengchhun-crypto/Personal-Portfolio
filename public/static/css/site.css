@@ -1071,12 +1071,29 @@ body.success-dialog-open { overflow: hidden; }
 .store-breadcrumb a:hover { color: var(--accent); }
 .store-breadcrumb i { font-size: 0.62rem; }
 .store-breadcrumb span:last-child { color: var(--text); }
+/* Product cards get a rounded, "marketplace" treatment distinct from the portfolio grid's
+   sharp-edged editorial look — the radius has to live on both the card (so the body's bottom
+   corners round) and the media block (clipped separately since it isn't the outermost element
+   the way it is on a plain .project-card). */
+.store-product-card {
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+}
 .store-product-card .project-media {
   aspect-ratio: 1 / 1;
+  border-radius: 14px 14px 0 0;
   background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent), var(--bg-2);
 }
 .store-product-card .project-media img { object-fit: contain; padding: 16px; }
 .store-product-card:hover img { transform: scale(1.03); }
+.store-product-card .project-card-body { display: flex; flex-direction: column; flex: 1; }
+.store-product-card .store-card-actions { margin-top: auto; padding-top: 12px; }
+
+/* The store's own grid — same column behavior as .project-grid, just without the
+   .editorial-grid stagger (translateY on the 2nd/5th card), which is a deliberate portfolio
+   showcase effect that reads as a broken, misaligned row on a product listing. */
+.store-grid { align-items: start; }
 
 .auth-split {
   display: grid;
