@@ -21,7 +21,11 @@ export async function getProductDownloadLinks(productId: number) {
   const { data: files } = await admin.from("product_files").select("*").eq("product_id", productId).order("order");
   if (!files?.length) return [];
   const links = await Promise.all(files.map(async (file) => {
-    const { data } = await admin.storage.from("product-downloads").createSignedUrl(file.file_path, 3600);
+    // Without `download`, the signed URL has no Content-Disposition header, so the browser
+    // saves it under the last segment of the storage path — a randomized
+    // "<timestamp>-<uuid>-<name>" string, not the clean original filename the customer
+    // actually uploaded/expects. This forces the real filename on save.
+    const { data } = await admin.storage.from("product-downloads").createSignedUrl(file.file_path, 3600, { download: file.file_name as string });
     return { name: file.file_name as string, url: data?.signedUrl || null };
   }));
   return links.filter((link): link is { name: string; url: string } => Boolean(link.url));
