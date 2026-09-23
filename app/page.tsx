@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
-import { DISCIPLINES, EDITING_TOOLS, KHMER, OWNER, SITE_URL } from "@/lib/content";
+import { DEFAULT_OG_IMAGE, DISCIPLINES, EDITING_TOOLS, KHMER, OWNER, SITE_URL } from "@/lib/content";
 import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext, getSoftwareTools } from "@/lib/data";
 import { mediaUrl } from "@/lib/supabase";
 
@@ -11,7 +11,10 @@ export const metadata = {
   title: { absolute: HOME_TITLE },
   description: HOME_DESCRIPTION,
   alternates: { canonical: "/" },
-  openGraph: { title: HOME_TITLE, description: HOME_DESCRIPTION, url: "/" },
+  openGraph: {
+    title: HOME_TITLE, description: HOME_DESCRIPTION, url: "/",
+    siteName: "LONG SENGCHHUN", type: "website", images: [{ url: DEFAULT_OG_IMAGE }],
+  },
 };
 
 const PROJECT_STARTERS = [

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://creativeservices.vercel.app";
+export const SITE_URL = "https://sengchhun.site";
+export const DEFAULT_OG_IMAGE = "/static/site-assets/profile/profile-cutout-fade.png";
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending_payment: "Awaiting Payment",
@@ -20,12 +21,19 @@ export const INQUIRY_STATUS_LABELS: Record<string, string> = {
   archived: "Archived",
 };
 
+// Next.js does not merge a route's `openGraph` object with the root layout's — a route that
+// defines its own `openGraph` replaces the parent's entirely, dropping `images`/`siteName`/`type`
+// unless the route repeats them. Every page here goes through this helper specifically so a
+// pasted link always carries a preview image instead of silently losing one.
 export function pageMetadata(path: string, title: string, description: string): Metadata {
   return {
     title,
     description,
     alternates: { canonical: path },
-    openGraph: { title: `${title} | LONG SENGCHHUN`, description, url: path },
+    openGraph: {
+      title: `${title} | LONG SENGCHHUN`, description, url: path,
+      siteName: "LONG SENGCHHUN", type: "website", images: [{ url: DEFAULT_OG_IMAGE }],
+    },
   };
 }
 
