@@ -88,6 +88,7 @@ export default async function ClientStudioPage() {
 
                 {isPaid && order.product.version && <p className="analytics-note">{order.product.version ? `v${order.product.version}` : ""}{order.product.updated_at ? ` · Updated ${new Date(order.product.updated_at).toLocaleDateString()}` : ""} — updates to this model are included free, automatically.</p>}
                 {isPaid && (downloadLinks.length ? <ul className="content-item-list">{downloadLinks.map((link) => <li className="content-item-form" key={link.name}><strong>{link.name}</strong><div className="content-item-actions"><a className="btn btn-accent" href={link.url!} target="_blank" rel="noreferrer"><i className="bi bi-download" /> Download</a></div></li>)}</ul> : <p className="analytics-note">Files are being prepared — check back shortly.</p>)}
+                {isPaid && <p className="analytics-note"><Link className="text-link" href={`/3d-store/orders/${order.access_token}/receipt/`}><i className="bi bi-receipt" /> View Receipt</Link></p>}
 
                 {order.status === "pending_payment" && <p className="analytics-note"><Link className="text-link" href={`/3d-store/orders/${order.access_token}/`}>Complete payment</Link> to unlock your download.</p>}
                 {(order.status === "payment_submitted" || order.status === "under_review") && <p className="analytics-note"><i className="bi bi-hourglass-split" /> Payment under review — usually confirmed within a day.</p>}

@@ -197,8 +197,10 @@ export async function getDashboardStoreOrder(id: number) {
 }
 
 export async function getOrderByToken(accessToken: string) {
+  // p_access_token is a `uuid` column, so a malformed/garbled token in the URL (not just a
+  // valid-but-nonexistent one) fails at the Postgres cast boundary — that's a 404, not a 500.
   const { data, error } = await getSupabase().rpc("get_order_by_token", { p_access_token: accessToken });
-  if (error) throw error;
+  if (error) return null;
   return data as OrderStatusView | null;
 }
 

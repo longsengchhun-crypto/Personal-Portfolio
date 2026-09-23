@@ -49,6 +49,7 @@ export default async function OrderDetailPage({ params, searchParams }: { params
             </dl>
             {screenshotUrl ? <div className="message-copy"><h2>Payment Screenshot</h2><a href={screenshotUrl} target="_blank" rel="noreferrer"><img src={screenshotUrl} alt="Payment screenshot" style={{ maxWidth: 320, border: "1px solid var(--border)" }} /></a></div>
               : canReview && <div className="alert alert-danger" role="alert">No payment screenshot on file for this order — verify payment another way before approving.</div>}
+            {(order.status === "paid" || order.status === "completed") && <p style={{ marginTop: 14 }}><Link className="btn btn-outline-light" href={`/3d-store/orders/${order.access_token}/receipt/`} target="_blank"><i className="bi bi-receipt" /> View Customer Receipt</Link></p>}
           </div>
         </article>
 

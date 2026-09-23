@@ -41,6 +41,7 @@ export default async function OrderStatusPage({ params, searchParams }: { params
   const anyPending = allItems.some((item) => item.status === "pending_payment");
   const anyReviewing = allItems.some((item) => item.status === "payment_submitted" || item.status === "under_review");
   const anyRejected = allItems.some((item) => item.status === "rejected");
+  const anyPaid = allItems.some((item) => item.status === "paid" || item.status === "completed");
 
   const downloadLinksByItem = await Promise.all(allItems.map(async (item) => ({
     item,
@@ -96,6 +97,8 @@ export default async function OrderStatusPage({ params, searchParams }: { params
       })}
       <small className="analytics-note">Download links expire after 1 hour for security. Revisit this page anytime to get fresh links.</small>
     </div>}
+
+    {anyPaid && <p style={{ marginTop: 18 }}><Link className="btn btn-outline-light" href={`/3d-store/orders/${token}/receipt/`}><i className="bi bi-receipt" /> View Receipt</Link></p>}
 
     <p style={{ marginTop: 26 }}><Link className="text-link" href="/3d-store/">Back to 3D Store</Link></p>
   </div></section>;
