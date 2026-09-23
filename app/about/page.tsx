@@ -1,6 +1,7 @@
 import { pageMetadata } from "@/lib/content";
 import { getSkillGroups, getSoftwareTools } from "@/lib/data";
 
+export const revalidate = 60;
 export const metadata = pageMetadata("/about/", "About", "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.");
 
 export default async function AboutPage() {

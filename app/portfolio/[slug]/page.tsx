@@ -6,6 +6,8 @@ import { OWNER, SITE_URL } from "@/lib/content";
 import { getProject } from "@/lib/data";
 import { mediaUrl } from "@/lib/supabase";
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const result = await getProject((await params).slug);
   if (!result) return { title: "Project not found" };

@@ -5,6 +5,7 @@ import { pageMetadata } from "@/lib/content";
 import { getFeaturedProjects, getFeaturedVideoProject, getSiteContext, getSkillGroups } from "@/lib/data";
 import { mediaUrl } from "@/lib/supabase";
 
+export const revalidate = 60;
 export const metadata = pageMetadata("/showreel/", "Showreel", "Watch the LONG SENGCHHUN showreel — selected film, motion, editing, and 3D work.");
 
 function toEmbedUrl(url: string) {

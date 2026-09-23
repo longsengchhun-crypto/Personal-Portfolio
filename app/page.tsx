@@ -7,6 +7,13 @@ import { mediaUrl } from "@/lib/supabase";
 const HOME_TITLE = "LONG SENGCHHUN | Visual Creative & Media";
 const HOME_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
 
+// This page has no per-visitor data (the layout's own cookie reads were moved to a client-fetched
+// API route specifically so pages like this could be cached instead of re-rendered from scratch
+// on every request) — ISR here means most visits are served from cache, and admin edits still
+// show up within a minute even for a first-time visitor, on top of already being instant for
+// anyone with the page open via RealtimeSync.
+export const revalidate = 60;
+
 export const metadata = {
   title: { absolute: HOME_TITLE },
   description: HOME_DESCRIPTION,

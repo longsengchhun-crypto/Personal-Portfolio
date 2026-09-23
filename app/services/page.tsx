@@ -2,6 +2,7 @@ import Link from "next/link";
 import { KHMER, pageMetadata } from "@/lib/content";
 import { getServices } from "@/lib/data";
 
+export const revalidate = 60;
 export const metadata = pageMetadata("/services/", "Services", "Graphic design, poster design, video editing, photography, and 3D services by LONG SENGCHHUN.");
 
 const PRODUCTION_PROCESS = [
