@@ -145,7 +145,10 @@
 .portfolio-collection > header h2 { margin: 2px 0 8px; font-size: clamp(1.8rem, 4vw, 3.4rem); }
 .portfolio-collection > header p:last-child { max-width: 700px; margin: 0; color: var(--muted); }
 .portfolio-collection > header > strong { color: var(--muted); white-space: nowrap; }
-.curated-grid { align-items: start; }
+/* Stretch (the grid default) so every card in a row shares the tallest card's height — needed
+   for .project-card-body's bottom-pinned "View Project" link to actually land on a shared
+   edge across a row instead of trailing right after each card's own, differently-long text. */
+.curated-grid { align-items: stretch; }
 .portfolio-empty { display: grid; justify-items: start; gap: 12px; }
 .portfolio-empty i { color: var(--accent); font-size: 2rem; }
 .portfolio-empty h2, .portfolio-empty p { margin: 0; }
@@ -682,9 +685,20 @@ html[data-theme="light"] .profile-frame::before { border-color: rgba(17,24,32,0.
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-radius: 14px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   transition: transform 320ms ease, border-color 320ms ease, box-shadow 320ms ease;
 }
+/* .project-media has its own overflow:hidden box (a separate clip region for the aspect-ratio
+   crop), so the parent's rounded corners don't automatically carry over to it — needs its own
+   top radius, or the image renders with sharp corners despite the card around it being rounded. */
+.project-media { border-radius: 14px 14px 0 0; }
+.project-card-body { display: flex; flex-direction: column; flex: 1; }
+/* Pins "View Project" to the same bottom edge across a row regardless of how long each card's
+   description happens to be, instead of every card ending at a different height. */
+.project-card-body > .text-link { margin-top: auto; padding-top: 14px; }
 .project-card::after {
   content: "";
   position: absolute;
@@ -1092,8 +1106,10 @@ body.success-dialog-open { overflow: hidden; }
 
 /* The store's own grid — same column behavior as .project-grid, just without the
    .editorial-grid stagger (translateY on the 2nd/5th card), which is a deliberate portfolio
-   showcase effect that reads as a broken, misaligned row on a product listing. */
-.store-grid { align-items: start; }
+   showcase effect that reads as a broken, misaligned row on a product listing. Stretch (the
+   grid default) so cards in a row share the tallest card's height, letting the bottom-pinned
+   price/buy row land on a shared edge instead of trailing right after each card's own text. */
+.store-grid { align-items: stretch; }
 
 .auth-split {
   display: grid;

@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink, WishlistProductView } from "@/lib/types";
+import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardPortfolioContent, DashboardPortfolioProject, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink, WishlistProductView } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
 // Card/list views only render these fields — the long-form case-study text (introduction,
@@ -176,6 +176,18 @@ export async function getDashboardStoreContent() {
   const { data, error } = await getSupabase().rpc("dashboard_store_content", { p_token: dashboardToken() });
   if (error) throw error;
   return data as DashboardStoreContent;
+}
+
+export async function getDashboardPortfolioContent() {
+  const { data, error } = await getSupabase().rpc("dashboard_portfolio_content", { p_token: dashboardToken() });
+  if (error) throw error;
+  return data as DashboardPortfolioContent;
+}
+
+export async function getDashboardPortfolioProject(id: number) {
+  const { data, error } = await getSupabase().rpc("dashboard_portfolio_project", { p_token: dashboardToken(), p_id: id });
+  if (error) throw error;
+  return data as DashboardPortfolioProject | null;
 }
 
 export async function getDashboardStoreProduct(id: number) {

@@ -86,6 +86,9 @@ export type ProductFile = { id: number; product_id: number; file_name: string; f
 export type DashboardStoreContent = { categories: ProductCategory[]; products: Product[] };
 export type DashboardStoreProduct = Product & { media: ProductMedia[]; files: ProductFile[] };
 
+export type DashboardPortfolioContent = { categories: Category[]; projects: Project[] };
+export type DashboardPortfolioProject = Project & { gallery_items: GalleryItem[] };
+
 export type OrderStatus = "pending_payment" | "payment_submitted" | "under_review" | "paid" | "rejected" | "completed";
 
 export type Order = {

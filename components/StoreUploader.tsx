@@ -64,7 +64,7 @@ type PublicMediaResult = { publicUrl: string; path: string };
 type PrivateFileResult = { path: string; fileName: string; fileSize: number };
 
 type Props =
-  | { mode: "media"; kind: "image" | "video" | "model"; accept: string; label: string; onUploaded: (result: PublicMediaResult) => void }
+  | { mode: "media"; kind: "image" | "video" | "model"; accept: string; label: string; onUploaded: (result: PublicMediaResult) => void; mediaUploadUrl?: string }
   | { mode: "file"; accept: string; label: string; onUploaded: (result: PrivateFileResult) => void; multiple?: boolean; allowFolder?: boolean };
 
 export default function StoreUploader(props: Props) {
@@ -114,7 +114,7 @@ export default function StoreUploader(props: Props) {
     updateItem(key, { status: "uploading", progress: 0 });
     try {
       if (props.mode === "media") {
-        const prep = await fetch("/api/dashboard/store/media-upload-url/", {
+        const prep = await fetch(props.mediaUploadUrl || "/api/dashboard/store/media-upload-url/", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contentType: file.type, kind: props.kind, fileName: relativePath }),
         }).then((res) => res.json());
