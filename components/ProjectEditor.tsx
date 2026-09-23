@@ -36,7 +36,13 @@ const MEDIA_UPLOAD_URL = "/api/dashboard/portfolio/media-upload-url/";
 
 export default function ProjectEditor({ project, categories }: { project: DashboardPortfolioProject | null; categories: Category[] }) {
   const router = useRouter();
-  const [form, setForm] = useState<FormState>(initialState(project));
+  // Unlike products, a project's category_id is NOT NULL in the database — every project must
+  // belong to a category, so a new project defaults to the first one instead of allowing a
+  // blank/"Uncategorized" state the database would just reject.
+  const [form, setForm] = useState<FormState>(() => {
+    const initial = initialState(project);
+    return initial.category_id === null ? { ...initial, category_id: categories[0]?.id ?? null } : initial;
+  });
   const [projectId, setProjectId] = useState<number | null>(project?.id ?? null);
   const [gallery, setGallery] = useState<GalleryItem[]>(project?.gallery_items || []);
   const [saving, setSaving] = useState(false);
@@ -109,7 +115,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
         <div className="form-field"><label>Title</label><input className="form-control" {...field("title")} onBlur={() => { if (!form.slug) setForm((p) => ({ ...p, slug: p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") })); }} required /></div>
         <div className="form-field"><label>Slug (URL)</label><input className="form-control" {...field("slug")} placeholder="auto-generated-from-title" /></div>
         <div className="form-field wide"><label>Short description</label><input className="form-control" {...field("short_description")} maxLength={420} /></div>
-        <div className="form-field"><label>Category</label><select className="form-select" value={form.category_id ?? ""} onChange={(e) => setForm((p) => ({ ...p, category_id: e.target.value ? Number(e.target.value) : null }))}><option value="">Uncategorized</option>{categories.map((c) => <option value={c.id} key={c.id}>{c.name}</option>)}</select></div>
+        <div className="form-field"><label>Category</label><select className="form-select" value={form.category_id ?? ""} onChange={(e) => setForm((p) => ({ ...p, category_id: e.target.value ? Number(e.target.value) : null }))} required>{categories.length === 0 && <option value="">Add a category below first</option>}{categories.map((c) => <option value={c.id} key={c.id}>{c.name}</option>)}</select></div>
         <div className="form-field"><label>Project type</label><input className="form-control" {...field("project_type")} placeholder="Poster Design, Video Editing…" /></div>
         <div className="form-field"><label>Year</label><input className="form-control" type="number" {...field("year")} /></div>
         <div className="form-field"><label>Order</label><input className="form-control" type="number" min={0} value={form.order} onChange={(e) => setForm((p) => ({ ...p, order: Number(e.target.value) || 0 }))} /></div>

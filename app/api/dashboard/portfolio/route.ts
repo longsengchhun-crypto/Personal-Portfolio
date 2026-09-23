@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
 
   const title = String(body.title || "").trim();
   if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
+  // category_id is NOT NULL on projects (unlike products, which allows "Uncategorized") — catch
+  // this here with a clear message instead of letting a raw Postgres constraint error through.
+  if (!body.category_id) return NextResponse.json({ error: "Category is required. Add one under Categories first if the list is empty." }, { status: 400 });
   const slug = String(body.slug || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
   const { data, error } = await supabase.rpc("dashboard_upsert_project", {
