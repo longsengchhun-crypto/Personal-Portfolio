@@ -21,12 +21,21 @@ export async function getProductDownloadLinks(productId: number) {
   const { data: files } = await admin.from("product_files").select("*").eq("product_id", productId).order("order");
   if (!files?.length) return [];
   const links = await Promise.all(files.map(async (file) => {
-    // Without `download`, the signed URL has no Content-Disposition header, so the browser
-    // saves it under the last segment of the storage path — a randomized
+    // Without a `download` filename, the signed URL has no Content-Disposition header, so the
+    // browser saves it under the last segment of the storage path — a randomized
     // "<timestamp>-<uuid>-<name>" string, not the clean original filename the customer
-    // actually uploaded/expects. This forces the real filename on save.
-    const { data } = await admin.storage.from("product-downloads").createSignedUrl(file.file_path, 3600, { download: file.file_name as string });
-    return { name: file.file_name as string, url: data?.signedUrl || null };
+    // actually uploaded/expects.
+    //
+    // NOT using storage-js's own `{ download }` option for this: it builds the query string
+    // with URLSearchParams (which correctly percent-encodes the filename), then wraps the
+    // *entire already-encoded URL* in `encodeURI()` again — which re-encodes every `%` into
+    // `%25`, double-encoding it. For any non-ASCII filename (several products here have Khmer
+    // filenames) the browser then downloads the file with the literal, undecoded
+    // "%E1%9E%9A%E1..." string as its name instead of the real filename. Appending the
+    // `download` param ourselves, after the SDK call, avoids that second encoding pass.
+    const { data } = await admin.storage.from("product-downloads").createSignedUrl(file.file_path, 3600);
+    const url = data?.signedUrl ? `${data.signedUrl}&download=${encodeURIComponent(file.file_name as string)}` : null;
+    return { name: file.file_name as string, url };
   }));
   return links.filter((link): link is { name: string; url: string } => Boolean(link.url));
 }
