@@ -2329,3 +2329,12 @@ html[data-theme="light"] .dashboard-console {
   .profile-frame-copy { padding: 36px 18px 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .profile-glass-note i { animation: none; } }
+
+/* Availability status now lives in the hero copy (above the name), clear of the portrait. */
+.availability-pill {
+  display: inline-flex; align-items: center; gap: 9px; margin: 0 0 18px; padding: 7px 14px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+  color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
+}
+.availability-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: profile-pulse 2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .availability-pill i { animation: none; } }
