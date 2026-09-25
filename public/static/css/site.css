@@ -2305,3 +2305,27 @@ html[data-theme="light"] .dashboard-console {
   .store-chip-featured + .store-chip { display: none; }
   .store-card .wishlist-button { top: 8px; right: 8px; width: 32px; height: 32px; }
 }
+
+/* Profile card — one clean caption bar at the bottom of the frame and a compact availability pill
+   at the top, so nothing overlaps the portrait's caption or each other. */
+.profile-frame-copy {
+  left: 0; right: 0; bottom: 0;
+  padding: 44px 24px 20px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(0deg, rgba(11,13,16,0.96) 0%, rgba(11,13,16,0.9) 55%, rgba(11,13,16,0) 100%);
+}
+.profile-frame-copy span { color: var(--accent); font-size: 0.74rem; letter-spacing: .12em; margin-bottom: 4px; }
+.profile-frame-copy strong { color: #F4F4F2; font-size: clamp(0.95rem, 1.35vw, 1.15rem); font-weight: 700; line-height: 1.3; }
+.profile-glass-note {
+  top: 24px; right: 22px; bottom: auto; left: auto; max-width: none;
+  display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
+  padding: 8px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; color: #F4F4F2;
+  background: rgba(11,13,16,0.72); border-color: rgba(255,255,255,0.14);
+}
+.profile-glass-note i { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(123,201,111,0.6); animation: profile-pulse 2s ease-out infinite; }
+@keyframes profile-pulse { 70% { box-shadow: 0 0 0 8px rgba(123,201,111,0); } 100% { box-shadow: 0 0 0 0 rgba(123,201,111,0); } }
+@media (max-width: 720px) {
+  .profile-glass-note { top: 14px; right: 14px; left: auto; bottom: auto; font-size: 0.72rem; padding: 7px 12px; }
+  .profile-frame-copy { padding: 36px 18px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .profile-glass-note i { animation: none; } }
