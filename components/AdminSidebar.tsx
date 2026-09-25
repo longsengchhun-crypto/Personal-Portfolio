@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV: { section: string; links: [string, string, string][] }[] = [
   { section: "Overview", links: [["bi-speedometer2", "Dashboard", "/dashboard/"]] },
-  { section: "Content", links: [["bi-pencil-square", "Site Content", "/dashboard/content/"]] },
+  { section: "Content", links: [["bi-pencil-square", "Site Content", "/dashboard/content/"], ["bi-easel2", "Hero Slides", "/dashboard/hero/"]] },
   { section: "Portfolio", links: [["bi-images", "Projects", "/dashboard/portfolio/"]] },
   {
     section: "3D Store",
