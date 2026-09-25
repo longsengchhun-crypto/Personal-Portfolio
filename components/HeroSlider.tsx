@@ -5,7 +5,7 @@ import type { HeroSlide } from "@/lib/heroSlides";
 
 const INTERVAL_MS = 6000;
 
-export default function HeroSlider({ slides, children }: { slides: HeroSlide[]; children: React.ReactNode }) {
+export default function HeroSlider({ slides, children, variant }: { slides: HeroSlide[]; children: React.ReactNode; variant?: "band" }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
@@ -20,7 +20,7 @@ export default function HeroSlider({ slides, children }: { slides: HeroSlide[]; 
   }, [index, paused, count]);
 
   return <section
-    className="hero-slider"
+    className={`hero-slider${variant === "band" ? " hero-slider--band" : ""}`}
     aria-roledescription="carousel"
     aria-label="Featured creative disciplines"
     onMouseEnter={() => setPaused(true)}
