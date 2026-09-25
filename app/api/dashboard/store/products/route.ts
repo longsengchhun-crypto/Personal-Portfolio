@@ -9,9 +9,22 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
 
   if (body.action === "delete") {
-    const { error } = await getSupabase().rpc("dashboard_delete_product", { p_token: token, p_id: body.id });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
+    const supabase = getSupabase();
+    const { error } = await supabase.rpc("dashboard_delete_product", { p_token: token, p_id: body.id });
+    if (!error) return NextResponse.json({ ok: true });
+
+    // Orders keep a hard reference to the product they bought (foreign key, on delete restrict) so
+    // customers' purchase history and downloads never break. Such a product can't be erased — hide
+    // it from the store instead (draft), which is what "delete" means to a shop owner here.
+    if (error.code === "23503") {
+      const { data: product } = await supabase.rpc("dashboard_store_product", { p_token: token, p_id: body.id });
+      if (product) {
+        const hidden = await POST(new NextRequest(request.url, { method: "POST", headers: request.headers, body: JSON.stringify({ ...product, status: "draft" }) }));
+        if (hidden.ok) return NextResponse.json({ ok: true, archived: true });
+      }
+      return NextResponse.json({ error: "This product has customer orders, so it can't be erased. Set it to Draft to hide it from the store." }, { status: 409 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   const title = String(body.title || "").trim();
