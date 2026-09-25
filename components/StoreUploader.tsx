@@ -60,11 +60,11 @@ async function readEntry(entry: FileSystemEntry, path = ""): Promise<{ file: Fil
 type Status = "queued" | "uploading" | "done" | "error";
 type QueueItem = { key: string; name: string; size: number; status: Status; progress: number; error: string };
 
-type PublicMediaResult = { publicUrl: string; path: string };
+type PublicMediaResult = { publicUrl: string; path: string; fileName: string };
 type PrivateFileResult = { path: string; fileName: string; fileSize: number };
 
 type Props =
-  | { mode: "media"; kind: "image" | "video" | "model"; accept: string; label: string; onUploaded: (result: PublicMediaResult) => void; mediaUploadUrl?: string }
+  | { mode: "media"; kind: "image" | "video" | "model"; accept: string; label: string; onUploaded: (result: PublicMediaResult) => void; mediaUploadUrl?: string; multiple?: boolean }
   | { mode: "file"; accept: string; label: string; onUploaded: (result: PrivateFileResult) => void; multiple?: boolean; allowFolder?: boolean };
 
 export default function StoreUploader(props: Props) {
@@ -121,7 +121,7 @@ export default function StoreUploader(props: Props) {
         if (prep.error) throw new Error(prep.error);
         await uploadViaTus(file, prep.bucket, prep.path, prep.token, file.type, (pct) => updateItem(key, { progress: pct }));
         updateItem(key, { status: "done", progress: 100 });
-        props.onUploaded({ publicUrl: prep.publicUrl, path: prep.path });
+        props.onUploaded({ publicUrl: prep.publicUrl, path: prep.path, fileName: relativePath });
       } else {
         const prep = await fetch("/api/dashboard/store/file-upload-url/", {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -154,7 +154,7 @@ export default function StoreUploader(props: Props) {
   const recentFilesRef = useRef(new Map<string, { file: File; relativePath: string }>());
 
   function stageAndEnqueue(picked: { file: File; relativePath: string }[]) {
-    const allowMultiple = props.mode === "file" && props.multiple;
+    const allowMultiple = Boolean(props.multiple);
     const files = allowMultiple ? picked : picked.slice(0, 1);
     for (const entry of files) recentFilesRef.current.set(entry.relativePath, entry);
     void enqueue(files);
@@ -181,11 +181,11 @@ export default function StoreUploader(props: Props) {
     <i className="bi bi-cloud-upload" aria-hidden="true" />
     <p><strong>{props.label}</strong></p>
     <div className="uploader-actions">
-      <button className="btn btn-outline-light" type="button" onClick={() => inputRef.current?.click()}>Select File{props.mode === "file" && props.multiple ? "s" : ""}</button>
+      <button className="btn btn-outline-light" type="button" onClick={() => inputRef.current?.click()}>Select File{props.multiple ? "s" : ""}</button>
       {props.mode === "file" && props.allowFolder && <button className="btn btn-outline-light" type="button" onClick={() => folderInputRef.current?.click()}>Select Folder</button>}
     </div>
     <input
-      ref={inputRef} type="file" accept={props.accept} hidden multiple={props.mode === "file" && props.multiple}
+      ref={inputRef} type="file" accept={props.accept} hidden multiple={Boolean(props.multiple)}
       onChange={(event) => {
         const files = Array.from(event.target.files || []);
         stageAndEnqueue(files.map((file) => ({ file, relativePath: file.name })));

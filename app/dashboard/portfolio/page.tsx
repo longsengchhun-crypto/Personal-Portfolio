@@ -1,5 +1,6 @@
 import Link from "next/link";
-import ProjectRowActions from "@/components/ProjectRowActions";
+import ProjectQuickRow from "@/components/ProjectQuickRow";
+import QuickProjectUpload from "@/components/QuickProjectUpload";
 import { requireAdmin } from "@/lib/auth";
 import { getDashboardPortfolioContent } from "@/lib/data";
 
@@ -16,10 +17,12 @@ export default async function PortfolioAdminPage({ searchParams }: { searchParam
   return <section className="dashboard-console"><div className="container">
     <header className="console-head compact-console-head">
       <div><p className="eyebrow">Portfolio</p><h1>Manage categories and projects.</h1></div>
-      <div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link><Link className="btn btn-accent" href="/dashboard/portfolio/new/"><i className="bi bi-plus-lg" />New Project</Link></div>
+      <div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link><Link className="btn btn-outline-light" href="/dashboard/content/"><i className="bi bi-camera-reels" />Showreel Video</Link><Link className="btn btn-outline-light" href="/dashboard/portfolio/new/"><i className="bi bi-plus-lg" />Detailed Project</Link></div>
     </header>
 
     {saved && <div className={`alert ${saved === "error" ? "alert-danger" : "alert-success"}`} role="alert">{saved === "error" ? "That change could not be saved." : SAVED_LABELS[saved] || "Saved."}</div>}
+
+    <QuickProjectUpload categories={categories} />
 
     <section className="console-panel content-editor-panel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Categories</h2></div><small>Shown as filters on the Work page</small></div>
@@ -39,15 +42,8 @@ export default async function PortfolioAdminPage({ searchParams }: { searchParam
     </section>
 
     <section className="console-panel message-board"><div className="console-panel-head"><div><span className="status-dot message-dot" /><h2>Projects</h2></div><small>{projects.length} project{projects.length === 1 ? "" : "s"}</small></div>
-      <div className="request-table-wrap"><table className="request-table"><thead><tr><th>Status</th><th>Project</th><th>Category</th><th>Year</th><th>Featured</th><th>Action</th></tr></thead><tbody>
-        {projects.length ? projects.map((project) => <tr key={project.id}>
-          <td><span className={`status-badge status-${project.status === "published" ? "accepted" : "new"}`}>{project.status[0].toUpperCase() + project.status.slice(1)}</span></td>
-          <td><strong>{project.title}</strong><small>{project.short_description}</small></td>
-          <td>{categoryName(project.category_id)}</td>
-          <td>{project.year}</td>
-          <td>{project.is_featured ? <i className="bi bi-star-fill" style={{ color: "var(--accent)" }} /> : <i className="bi bi-star" />}</td>
-          <td><div className="request-actions"><Link className="btn btn-accent" href={`/dashboard/portfolio/${project.id}/`}>Edit</Link><ProjectRowActions projectId={project.id} /></div></td>
-        </tr>) : <tr><td colSpan={6}><p className="empty-state">No projects yet. Create your first one.</p></td></tr>}
+      <div className="request-table-wrap"><table className="request-table"><thead><tr><th></th><th>Title</th><th>Status</th><th>Featured</th><th>Action</th></tr></thead><tbody>
+        {projects.length ? projects.map((project) => <ProjectQuickRow key={project.id} project={project} categoryName={categoryName(project.category_id)} />) : <tr><td colSpan={5}><p className="empty-state">No projects yet. Drop your first poster above.</p></td></tr>}
       </tbody></table></div>
     </section>
   </div></section>;
