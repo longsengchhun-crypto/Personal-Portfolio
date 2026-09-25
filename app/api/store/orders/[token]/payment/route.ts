@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { sendOrderAdminNotification, sendOrderCustomerEmail } from "@/lib/notifications";
+import { sendPaymentTelegramAlert } from "@/lib/telegram";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -25,6 +26,30 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       const dashboardToken = process.env.SUPABASE_DASHBOARD_TOKEN;
       const orderUrl = new URL(`/3d-store/orders/${token}/`, request.url).toString();
       after(async () => {
+        // Telegram alert for the studio owner: who paid, what, how much, which account, plus the
+        // screenshot. Runs on its own so a Telegram problem can never hold up the other emails.
+        const telegram = (async () => {
+          const [{ data: site }, { data: full }] = await Promise.all([
+            supabase.from("site_settings").select("aba_account_info").order("id").limit(1).maybeSingle(),
+            dashboardToken ? supabase.rpc("dashboard_store_order", { p_token: dashboardToken, p_id: order.id }) : Promise.resolve({ data: null }),
+          ]);
+          const siblings = (order.batch_items || []) as { price_usd: number; price_khr: number; product: { title: string } }[];
+          await sendPaymentTelegramAlert({
+            orderNumber: order.order_number,
+            submittedAt: new Date(),
+            customerName: order.customer_name,
+            customerEmail: order.customer_email,
+            customerPhone: full?.customer_phone || "",
+            items: [
+              { title: order.product.title, priceUsd: order.price_usd, priceKhr: order.price_khr },
+              ...siblings.map((item) => ({ title: item.product.title, priceUsd: item.price_usd, priceKhr: item.price_khr })),
+            ],
+            paidToAccount: site?.aba_account_info || "",
+            paymentReference: reference,
+            screenshotPath,
+            reviewUrl: new URL(`/dashboard/store/orders/${order.id}/`, request.url).toString(),
+          });
+        })().catch((error) => console.error("Telegram alert error", error));
         const [adminNotify, customerEmail] = await Promise.all([
           sendOrderAdminNotification({
             orderId: order.id, orderNumber: order.order_number, customerName: order.customer_name,
@@ -36,6 +61,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             orderNumber: order.order_number, customerName: order.customer_name, productTitle: order.product.title, orderUrl,
           }),
         ]);
+        await telegram;
         if (dashboardToken) {
           await Promise.all([
             supabase.rpc("dashboard_record_order_message", { p_token: dashboardToken, p_id: order.id, p_message_type: "submitted", p_subject: adminNotify.subject, p_body: adminNotify.body, p_delivery_status: adminNotify.status }),
