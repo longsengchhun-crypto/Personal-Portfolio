@@ -17,9 +17,7 @@ next-dev-*.log
 # Anchored to the repo root so this never matches public/static/.
 /static/
 
-# Unoptimized 66MB homepage video — deploys fine via Vercel directly, but would
-# permanently bloat git history. Swap for a compressed version, then track that instead.
-/public/video-editing-and-3d-modeling-showcase.mp4
+# (The showreel mp4 in public/ is now a compressed ~7MB copy and is tracked so Git deploys serve it.)
 
 .vercel
 .tmp-vercel*

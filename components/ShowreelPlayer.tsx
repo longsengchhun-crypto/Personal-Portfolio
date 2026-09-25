@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props =
   | { type: "local"; src: string; poster?: string }
@@ -8,6 +8,16 @@ type Props =
 
 export default function ShowreelPlayer(props: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // The video can finish loading (or fail) before React hydrates, in which case its events were
+  // missed — sync from the element's actual state on mount so the overlay never gets stuck.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.error) setStatus("error");
+    else if (video.readyState >= 2) setStatus("ready");
+  }, []);
 
   if (props.type === "embed") {
     return <div className="video-embed showreel-frame">
@@ -17,6 +27,7 @@ export default function ShowreelPlayer(props: Props) {
 
   return <div className="detail-video-frame showreel-frame">
     <video
+      ref={videoRef}
       controls
       playsInline
       preload="metadata"
