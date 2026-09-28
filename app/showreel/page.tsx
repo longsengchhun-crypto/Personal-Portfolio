@@ -1,8 +1,7 @@
 import Link from "next/link";
-import ProjectCard from "@/components/ProjectCard";
 import ShowreelPlayer from "@/components/ShowreelPlayer";
 import { pageMetadata } from "@/lib/content";
-import { getFeaturedProjects, getFeaturedVideoProject, getSiteContext, getSkillGroups } from "@/lib/data";
+import { getFeaturedVideoProject, getSiteContext, getSkillGroups } from "@/lib/data";
 import { mediaUrl } from "@/lib/supabase";
 
 export const revalidate = 60;
@@ -17,8 +16,8 @@ function toEmbedUrl(url: string) {
 }
 
 export default async function ShowreelPage() {
-  const [{ site }, videoProject, featured, skillGroups] = await Promise.all([
-    getSiteContext(), getFeaturedVideoProject(), getFeaturedProjects(), getSkillGroups(),
+  const [{ site }, videoProject, skillGroups] = await Promise.all([
+    getSiteContext(), getFeaturedVideoProject(), getSkillGroups(),
   ]);
 
   const configuredEmbed = site?.youtube_url || site?.vimeo_url || "";
@@ -38,6 +37,5 @@ export default async function ShowreelPage() {
 
       {roleTags.length > 0 && <div className="showreel-roles"><p className="eyebrow">Capabilities shown</p><div className="tag-cloud">{roleTags.map((skill) => <span key={skill.id}>{skill.name}</span>)}</div></div>}
     </div></section>
-    <section className="section"><div className="container"><div className="section-heading"><div><p className="eyebrow">Selected Work</p><h2>Recent projects across film, design, and 3D.</h2></div><Link className="text-link" href="/portfolio/">View all work</Link></div><div className="project-grid editorial-grid">{featured.length ? featured.map((project) => <ProjectCard project={project} key={project.id} />) : <div className="empty-state"><p>No featured projects yet.</p></div>}</div></div></section>
   </>;
 }
