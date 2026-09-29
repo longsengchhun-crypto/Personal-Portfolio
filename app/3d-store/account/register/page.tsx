@@ -19,6 +19,7 @@ export default async function StoreRegisterPage({ searchParams }: { searchParams
   const params = await searchParams;
   const next = safeNext(params.next);
   if (await getCustomer()) redirect(next);
+  const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID);
 
   return <section className="auth-split">
     <div className="auth-split-copy">
@@ -30,17 +31,23 @@ export default async function StoreRegisterPage({ searchParams }: { searchParams
       </ul>
     </div>
     <div className="auth-split-form">
-      <form className="inquiry-form login-form auth-card" method="post" action="/api/store/account/register/">
+      <div className="auth-card">
         <p className="eyebrow">Create your account</p>
         {params.error === "taken" && <div className="alert alert-danger">That email already has an account. Try signing in instead.</div>}
         {params.error === "weak" && <div className="alert alert-danger">Password must be at least 8 characters.</div>}
         {params.error === "form" && <div className="alert alert-danger">Please check your details and try again.</div>}
-        <input type="hidden" name="next" value={next} />
-        <div className="form-field"><label htmlFor="full_name">Full name</label><input className="form-control" id="full_name" name="full_name" autoComplete="name" required maxLength={120} /></div>
-        <div className="form-field"><label htmlFor="email">Email</label><input className="form-control" id="email" name="email" type="email" autoComplete="email" required /></div>
-        <div className="form-field"><label htmlFor="password">Password</label><input className="form-control" id="password" name="password" type="password" autoComplete="new-password" minLength={8} required /><small>At least 8 characters.</small></div>
-        <button className="btn btn-accent" type="submit" style={{ width: "100%", justifyContent: "center" }}>Create Account</button>
-      </form>
+        {googleEnabled && <>
+          <a className="btn btn-outline-light btn-google" href={`/api/store/account/google/?next=${encodeURIComponent(next)}`} style={{ width: "100%", justifyContent: "center" }}><i className="bi bi-google" /> Continue with Google</a>
+          <div className="auth-divider"><span>or</span></div>
+        </>}
+        <form className="inquiry-form login-form" method="post" action="/api/store/account/register/">
+          <input type="hidden" name="next" value={next} />
+          <div className="form-field"><label htmlFor="full_name">Full name</label><input className="form-control" id="full_name" name="full_name" autoComplete="name" required maxLength={120} /></div>
+          <div className="form-field"><label htmlFor="email">Email</label><input className="form-control" id="email" name="email" type="email" autoComplete="email" required /></div>
+          <div className="form-field"><label htmlFor="password">Password</label><input className="form-control" id="password" name="password" type="password" autoComplete="new-password" minLength={8} required /><small>At least 8 characters.</small></div>
+          <button className="btn btn-accent" type="submit" style={{ width: "100%", justifyContent: "center" }}>Create Account</button>
+        </form>
+      </div>
       <p className="analytics-note" style={{ marginTop: 16, textAlign: "center" }}>Already have an account? <Link className="text-link" href={`/3d-store/account/login/?next=${encodeURIComponent(next)}`}>Sign in</Link></p>
     </div>
   </section>;

@@ -1096,6 +1096,10 @@ body.success-dialog-open { overflow: hidden; }
 .auth-split-form { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 140px 24px 60px; background: var(--bg); }
 .auth-card { width: 100%; max-width: 420px; border: 1px solid var(--border); background: var(--surface); padding: 34px; }
 .auth-card .eyebrow { display: block; margin-bottom: 18px; }
+.btn-google { display: flex; align-items: center; gap: 10px; }
+.btn-google i { color: #E8BE6C; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 @media (max-width: 960px) {
   .auth-split { grid-template-columns: 1fr; min-height: auto; }
   .auth-split-copy { padding: 116px 24px 44px; border-right: 0; border-bottom: 1px solid var(--border); }
