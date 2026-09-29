@@ -4,20 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getCartIds, onCartChange } from "@/lib/cart";
-import { KHMER, OWNER } from "@/lib/content";
+import { OWNER } from "@/lib/content";
 
 const links = [
-  ["Home", KHMER.home, "/"], ["Showreel", KHMER.showreel, "/showreel/"], ["Work", KHMER.work, "/portfolio/"],
-  ["3D Store", KHMER.store, "/3d-store/"],
-  ["Services", KHMER.services, "/services/"], ["About", KHMER.about, "/about/"],
-  ["Contact", KHMER.contact, "/contact/"],
+  ["Home", "/"], ["Showreel", "/showreel/"], ["Work", "/portfolio/"],
+  ["3D Store", "/3d-store/"],
+  ["Services", "/services/"], ["About", "/about/"],
+  ["Contact", "/contact/"],
 ] as const;
 
 function NavLinks() {
   const path = usePathname();
-  return links.map(([label, khmer, href]) => {
+  return links.map(([label, href]) => {
     const active = href === "/" ? path === "/" : path.startsWith(href);
-    return <li className="nav-item" key={href}><Link className={`nav-link ${active ? "active" : ""}`} href={href}><span>{label}</span><small>{khmer}</small></Link></li>;
+    return <li className="nav-item" key={href}><Link className={`nav-link ${active ? "active" : ""}`} href={href}><span>{label}</span></Link></li>;
   });
 }
 

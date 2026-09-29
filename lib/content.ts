@@ -48,30 +48,12 @@ export const OWNER = {
   telegramUrl: "https://t.me/SENGCHHUN11",
 };
 
-export const KHMER = {
-  home: "ទំព័រដើម",
-  showreel: "សូវរីល",
-  store: "ហាងម៉ូដែល 3D",
-  work: "ស្នាដៃ",
-  services: "សេវាកម្ម",
-  about: "អំពីខ្ញុំ",
-  contact: "ទំនាក់ទំនង",
-  hero: "បង្កើតស្នាដៃដែលភ្ជាប់ជាមួយគំនិត និងការរចនារបស់លោកអ្នកជាមួយយើងឥឡូវនេះ",
-  projectCta: "មានគម្រោងចង់សហការជាមួយខ្ញុំមែនទេ?",
-  footerCta: "តោះបង្កើតស្នាដៃដែលមានអត្ថន័យជាមួយគ្នា។",
-};
-
 export const DISCIPLINES = [
   ["Graphic Design", "graphic-design"],
   ["Video and Film", "video-editing"],
   ["Photography", "photography"],
   ["3D Design and Modeling", "video-and-3d-modeling"],
 ] as const;
-
-export const EDITING_TOOLS = ["after-effects", "audition", "illustrator", "indesign", "lightroom", "photoshop", "blender", "capcut", "coreldraw", "davinci-resolve", "creative-tool-1", "creative-tool-2"].map((slug) => ({
-  name: slug.split("-").map((part) => part[0].toUpperCase() + part.slice(1)).join(" "),
-  image: `/static/site-assets/tools/${slug}.png`,
-}));
 
 export const SERVICE_CHOICES = ["Graphic Design", "Poster Design", "Video Editing", "Photo / Video Production", "Photography", "Videography", "Filmmaking", "3D Design and Modeling", "3D Modeling", "3D Animation", "Product Visualization", "Motion Graphics", "Social Media Content", "Other"] as const;
 export const BUDGET_CHOICES = ["Not decided yet", "Under $100", "$100-$300", "$300-$700", "$700-$1,500", "Above $1,500", "Prefer to discuss privately"] as const;

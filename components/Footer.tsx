@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { getSiteContext } from "@/lib/data";
-import { KHMER, OWNER } from "@/lib/content";
+import { OWNER } from "@/lib/content";
 
 export default async function Footer() {
   const { site, social } = await getSiteContext();
   return <footer className="site-footer"><div className="container">
     <div className="footer-grid">
-      <div><p className="eyebrow">Available for selected collaborations</p><h2>Let&apos;s create something worth remembering.</h2><p className="khmer-line">{KHMER.footerCta}</p></div>
+      <div><p className="eyebrow">Available for selected collaborations</p><h2>Let&apos;s create something worth remembering.</h2></div>
       <div className="footer-contact">
         <a href={`mailto:${site?.email || OWNER.email}`}>{site?.email || OWNER.email}</a>
         <a href={`tel:${site?.phone || OWNER.phone}`}>{site?.phone || OWNER.phone}</a>
