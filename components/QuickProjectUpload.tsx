@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MediaUploader from "@/components/MediaUploader";
+import { adminJson } from "@/lib/adminApi";
 import type { Category } from "@/lib/types";
 
 const MEDIA_UPLOAD_URL = "/api/dashboard/portfolio/media-upload-url/";
@@ -17,8 +18,8 @@ function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-async function createProject(body: Record<string, unknown>) {
-  return fetch("/api/dashboard/portfolio/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
+function createProject(body: Record<string, unknown>) {
+  return adminJson<{ id: number }>("/api/dashboard/portfolio/", body);
 }
 
 // Drop one or many posters / reels → each becomes a published project card instantly. Title comes
@@ -35,7 +36,7 @@ export default function QuickProjectUpload({ categories }: { categories: Categor
   function handleUploaded({ path, fileName }: { path: string; fileName: string }) {
     // Chain creations so slugs/order stay deterministic when several files finish together.
     pending.current = pending.current.then(async () => {
-      if (!categoryId) { setError("Pick a category first, then upload again."); return; }
+      if (!categoryId) { setError("The file was uploaded, but no category was selected, so no project was created. Pick a category and upload it again."); return; }
       setError("");
       const title = titleFromFile(fileName);
       const isVideo = VIDEO_EXTENSIONS.has(fileName.split(".").pop()?.toLowerCase() || "");
@@ -46,8 +47,8 @@ export default function QuickProjectUpload({ categories }: { categories: Categor
       };
       let res = await createProject({ ...base, slug: slugify(title) });
       // Same title as an existing project → slug collision; retry once with a short unique suffix.
-      if (res.error) res = await createProject({ ...base, slug: `${slugify(title)}-${Date.now().toString(36).slice(-4)}` });
-      if (res.error) { setError(res.error); return; }
+      if (!res.ok && res.status !== 401) res = await createProject({ ...base, slug: `${slugify(title)}-${Date.now().toString(36).slice(-4)}` });
+      if (!res.ok) { setError(res.error); return; }
       setCreated((n) => n + 1);
       router.refresh();
     });
@@ -70,7 +71,7 @@ export default function QuickProjectUpload({ categories }: { categories: Categor
           <label className="review-toggle"><input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} /> Mark as featured (shows on Showreel page)</label>
         </div>
       </div>
-      <MediaUploader kind="image" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop posters (JPG, PNG, WebP) or reels (MP4, WebM) here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} />
+      <MediaUploader kind="image" disabled={!categoryId} disabledMessage="Add a category first (below), then upload." multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop posters (JPG, PNG, WebP) or reels (MP4, WebM) here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} />
     </div>
   </section>;
 }

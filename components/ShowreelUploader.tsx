@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as tus from "tus-js-client";
+import { adminJson, describeUploadError, formatBytes } from "@/lib/adminApi";
 
 const MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const TYPE_BY_EXTENSION: Record<string, string> = { mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime" };
@@ -19,11 +20,6 @@ function resolveContentType(file: File) {
   return TYPE_BY_EXTENSION[extension] || "";
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 type Status = "idle" | "uploading" | "saving" | "done" | "error";
 
 export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLabel: string }) {
@@ -38,20 +34,18 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
   async function upload(file: File) {
     setError("");
     const contentType = resolveContentType(file);
-    if (!contentType) return setError("Unsupported file type. Use MP4, WebM, or MOV.");
-    if (file.size > MAX_BYTES) return setError(`File is too large (${formatBytes(file.size)}). Maximum is 2 GB.`);
+    const reject = (message: string) => { setFileInfo({ name: file.name, size: file.size }); setStatus("error"); setError(message); };
+    if (!contentType) return reject(`"${file.name}" is not supported. Use an MP4, WebM or MOV video.`);
+    if (file.size === 0) return reject("This file is empty.");
+    if (file.size > MAX_BYTES) return reject(`This file is ${formatBytes(file.size)}. The maximum is 2 GB.`);
 
     setFileInfo({ name: file.name, size: file.size });
     setStatus("uploading");
     setProgress(0);
 
     try {
-      const prep = await fetch("/api/dashboard/content/showreel-upload-url/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contentType }),
-      }).then((res) => res.json());
-      if (prep.error) throw new Error(prep.error);
+      const prep = await adminJson<{ token: string; path: string; publicUrl: string }>("/api/dashboard/content/showreel-upload-url/", { contentType });
+      if (!prep.ok) throw new Error(prep.error);
       if (!TUS_ENDPOINT) throw new Error("Upload is misconfigured (missing Supabase URL).");
 
       await new Promise<void>((resolve, reject) => {
@@ -61,8 +55,8 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
           uploadDataDuringCreation: true,
           removeFingerprintOnSuccess: true,
           chunkSize: 6 * 1024 * 1024,
-          headers: { apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}`, "x-signature": prep.token, "x-upsert": "true" },
-          metadata: { bucketName: "portfolio-media", objectName: prep.path, contentType, cacheControl: "31536000" },
+          headers: { apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}`, "x-signature": prep.data.token, "x-upsert": "true" },
+          metadata: { bucketName: "portfolio-media", objectName: prep.data.path, contentType, cacheControl: "31536000" },
           onError: (uploadError) => reject(uploadError instanceof Error ? uploadError : new Error(String(uploadError))),
           onProgress: (bytesUploaded, bytesTotal) => setProgress(Math.round((bytesUploaded / bytesTotal) * 100)),
           onSuccess: () => resolve(),
@@ -71,17 +65,13 @@ export default function ShowreelUploader({ currentVideoLabel }: { currentVideoLa
       });
 
       setStatus("saving");
-      const finalize = await fetch("/api/dashboard/content/showreel-video/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publicUrl: prep.publicUrl }),
-      }).then((res) => res.json());
-      if (finalize.error) throw new Error(finalize.error);
+      const finalize = await adminJson("/api/dashboard/content/showreel-video/", { publicUrl: prep.data.publicUrl });
+      if (!finalize.ok) throw new Error(finalize.error);
 
       setStatus("done");
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Upload failed.");
+      setError(describeUploadError(caught));
       setStatus("error");
     }
   }

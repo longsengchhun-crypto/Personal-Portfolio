@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import MediaUploader from "@/components/MediaUploader";
+import { adminJson } from "@/lib/adminApi";
 import { mediaUrl } from "@/lib/supabase";
 import type { HeroSlide } from "@/lib/heroSlides";
 
@@ -16,13 +17,17 @@ export default function HeroSlidesManager({ initial, isDefault }: { initial: Her
 
   // Every change saves immediately (there is no separate Save button to forget).
   async function persist(next: HeroSlide[], message = "Saved. Live on the home page within a minute.") {
+    const previous = latest.current;
     latest.current = next;
     setSlides(next);
     setSaving(true); setError("");
-    const res = await fetch("/api/dashboard/hero-slides/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slides: next }) })
-      .then((r) => r.json()).catch(() => ({ error: "Network error." }));
+    const res = await adminJson("/api/dashboard/hero-slides/", { slides: next });
     setSaving(false);
-    if (res.error) setError(res.error); else setNotice(message);
+    if (!res.ok) {
+      latest.current = previous; setSlides(previous); setError(res.error);
+      return;
+    }
+    setNotice(message);
   }
 
   function handleUploaded({ path, fileName }: { path: string; fileName: string }) {
@@ -50,7 +55,7 @@ export default function HeroSlidesManager({ initial, isDefault }: { initial: Her
     </section>
 
     <section className="console-panel content-editor-panel">
-      <div className="console-panel-head"><div><span className="status-dot" /><h2>Slides ({slides.length})</h2></div><small>Plays in this order, changing every 6 seconds</small></div>
+      <div className="console-panel-head"><div><span className="status-dot" /><h2>Slides ({slides.length})</h2></div><small>Crossfades on the home page in this order</small></div>
       <div className="content-item-list">
         {slides.length === 0 && <p className="analytics-note">No slides. The slider is hidden on the home page.</p>}
         {slides.map((slide, index) => <div className="content-item-form" key={slide.id}>

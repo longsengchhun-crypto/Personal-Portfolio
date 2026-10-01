@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { adminJson } from "@/lib/adminApi";
 import { mediaUrl } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
 
@@ -16,21 +17,19 @@ export default function ProjectQuickRow({ project, categoryName }: { project: Pr
 
   async function save(patch: Partial<Project>) {
     setBusy(true); setError("");
-    const res = await fetch("/api/dashboard/portfolio/", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...project, ...patch }),
-    }).then((r) => r.json()).catch(() => ({ error: "Network error." }));
+    const res = await adminJson("/api/dashboard/portfolio/", { ...project, ...patch });
     setBusy(false);
-    if (res.error) { setError(res.error); return; }
+    if (!res.ok) { setError(res.error); setTitle(project.title); return; }
     router.refresh();
   }
 
   async function remove() {
-    if (!window.confirm(`Delete "${project.title}" permanently?`)) return;
-    setBusy(true);
-    const res = await fetch("/api/dashboard/portfolio/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id: project.id }) });
+    if (!window.confirm(`Delete "${project.title}" permanently? This cannot be undone.`)) return;
+    setBusy(true); setError("");
+    const res = await adminJson("/api/dashboard/portfolio/", { action: "delete", id: project.id });
     setBusy(false);
-    if (res.ok) router.refresh(); else setError("Could not delete.");
+    if (!res.ok) { setError(res.error); return; }
+    router.refresh();
   }
 
   const published = project.status === "published";

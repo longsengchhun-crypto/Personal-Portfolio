@@ -10,7 +10,7 @@ export default async function HeroSlidesPage() {
   await requireAdmin("/dashboard/hero/");
   const { slides, isDefault } = await getHeroSlides();
   return <section className="dashboard-console"><div className="container">
-    <header className="console-head compact-console-head"><div><p className="eyebrow">Home page</p><h1>Hero Slides</h1></div><div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link><Link className="btn btn-outline-light" href="/" target="_blank"><i className="bi bi-box-arrow-up-right" />View Site</Link></div></header>
+    <header className="console-head compact-console-head"><div><p className="eyebrow">Home page</p><h1>Hero Slides</h1></div><div className="console-actions"><Link className="btn btn-outline-light" href="/" target="_blank"><i className="bi bi-box-arrow-up-right" />View Site</Link></div></header>
     <HeroSlidesManager initial={slides} isDefault={isDefault} />
   </div></section>;
 }

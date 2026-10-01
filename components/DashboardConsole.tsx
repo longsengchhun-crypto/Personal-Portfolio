@@ -55,6 +55,14 @@ export default function DashboardConsole({ initialData, emailReady, emailReadine
   const needsReply = counts.open;
 
   return <>
+    <nav className="ad-quick" aria-label="Quick actions">
+      <Link className="ad-btn ad-btn-primary" href="/dashboard/portfolio/"><i className="bi bi-cloud-upload" />Upload work</Link>
+      <Link className="ad-btn" href="/dashboard/hero/"><i className="bi bi-easel2" />Hero slides</Link>
+      <Link className="ad-btn" href="/dashboard/content/#showreel"><i className="bi bi-camera-reels" />Update showreel</Link>
+      <Link className="ad-btn" href="/dashboard/clients/"><i className="bi bi-people" />Clients</Link>
+      <Link className="ad-btn" href="/" target="_blank"><i className="bi bi-box-arrow-up-right" />View site</Link>
+    </nav>
+
     <section className="ad-attention" aria-label="Needs attention">
       <Link className={`ad-card${needsReply ? " is-hot" : ""}`} href="#inquiries" onClick={() => setFilter("open")}><strong>{needsReply}</strong><span>{needsReply === 1 ? "inquiry needs a reply" : "inquiries need a reply"}</span></Link>
       <div className={`ad-card${emailReady ? "" : " is-warn"}`} title={emailReadinessMessage}><strong>{emailReady ? "OK" : "!"}</strong><span>{emailReady ? "Client email ready" : emailReadinessMode === "testing" ? "Client email in test mode" : "Client email sender invalid"}{smsReady ? "" : " · SMS off"}</span></div>

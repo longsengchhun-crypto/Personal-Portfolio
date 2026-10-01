@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeroBackdrop from "@/components/HeroBackdrop";
 import { DEFAULT_OG_IMAGE, DISCIPLINES, OWNER, SITE_URL } from "@/lib/content";
 import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext, getSoftwareTools } from "@/lib/data";
 import { getHeroSlides } from "@/lib/heroSlides";
@@ -26,7 +27,7 @@ export default async function HomePage() {
   const [{ site, social }, heroSlides, videoProject, services, software, featured] = await Promise.all([
     getSiteContext(), getHeroSlides(), getFeaturedVideoProject(), getServices(), getSoftwareTools(), getFeaturedProjects().catch(() => []),
   ]);
-  const heroImage = heroSlides.slides[0] ? mediaUrl(heroSlides.slides[0].image, { width: 2000, quality: 80 }) : "/static/site-assets/hero/hero-vfx.jpg";
+  const heroSlideList = heroSlides.slides.map((slide) => ({ ...slide, image: mediaUrl(slide.image, { width: 2000, quality: 80 }) }));
   const email = site?.email || OWNER.email;
   const work = featured.filter((project) => project.cover_image).slice(0, 5);
   const jsonLd = {
@@ -46,7 +47,7 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
     <section className="st-hero">
-      <img className="st-hero-media" src={heroImage} alt="" decoding="async" fetchPriority="high" />
+      <HeroBackdrop slides={heroSlideList} />
       <div className="st-hero-shade" aria-hidden="true" />
       <div className="container st-hero-inner">
         <p className="st-kicker">Visual Creative &amp; Media</p>

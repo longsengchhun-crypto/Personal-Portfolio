@@ -17,7 +17,7 @@ export default async function PortfolioAdminPage({ searchParams }: { searchParam
   return <section className="dashboard-console"><div className="container">
     <header className="console-head compact-console-head">
       <div><p className="eyebrow">Portfolio</p><h1>Manage categories and projects.</h1></div>
-      <div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link><Link className="btn btn-outline-light" href="/dashboard/content/"><i className="bi bi-camera-reels" />Showreel Video</Link><Link className="btn btn-outline-light" href="/dashboard/portfolio/new/"><i className="bi bi-plus-lg" />Detailed Project</Link></div>
+      <div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/content/"><i className="bi bi-camera-reels" />Showreel Video</Link><Link className="btn btn-outline-light" href="/dashboard/portfolio/new/"><i className="bi bi-plus-lg" />Detailed Project</Link></div>
     </header>
 
     {saved && <div className={`alert ${saved === "error" ? "alert-danger" : "alert-success"}`} role="alert">{saved === "error" ? "That change could not be saved." : SAVED_LABELS[saved] || "Saved."}</div>}

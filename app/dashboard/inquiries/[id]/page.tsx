@@ -30,7 +30,7 @@ export default async function InquiryDetailPage({ params, searchParams }: { para
   const phoneMessage = inquiry.phone_or_telegram ? messageLink(inquiry.phone_or_telegram) : null;
 
   return <section className="dashboard-console"><div className="container">
-    <header className="console-head compact-console-head"><div><p className="eyebrow">Project Message</p><h1>{inquiry.full_name}</h1></div><div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link><a className="btn btn-outline-light" href={`mailto:${inquiry.email}`}><i className="bi bi-envelope" />Open Email App</a></div></header>
+    <header className="console-head compact-console-head"><div><p className="eyebrow">Project Message</p><h1>{inquiry.full_name}</h1></div><div className="console-actions"><a className="btn btn-outline-light" href={`mailto:${inquiry.email}`}><i className="bi bi-envelope" />Open Email App</a></div></header>
     <NotificationBanner emailStatus={notification.email} smsStatus={notification.sms} actionStatus={notification.action} dismissHref={`/dashboard/inquiries/${inquiry.id}/`} />
     {notification.form === "message-required" && <div className="alert alert-danger inquiry-form-alert" role="alert">Write a client-facing message before selecting “Send Reply”.</div>}
     {notification.action === "duplicate" && <div className="alert alert-success inquiry-form-alert" role="alert">This request was already {inquiry.status} and the client was already notified — no duplicate email or SMS was sent. Use “Resend Notification” if the client needs it again.</div>}

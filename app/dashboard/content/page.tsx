@@ -22,7 +22,7 @@ export default async function DashboardContentPage({ searchParams }: { searchPar
   return <section className="dashboard-console"><div className="container">
     <header className="console-head compact-console-head">
       <div><p className="eyebrow">Content</p><h1>Edit hero, services, skills, and software without touching code.</h1></div>
-      <div className="console-actions"><Link className="btn btn-outline-light" href="/dashboard/"><i className="bi bi-arrow-left" />Dashboard</Link></div>
+      <div className="console-actions"></div>
     </header>
 
     {saved && <div className={`alert ${saved === "error" ? "alert-danger" : "alert-success"}`} role="alert">{saved === "error" ? "That change could not be saved. Please try again." : SAVED_LABELS[saved] || "Saved."}</div>}
@@ -47,7 +47,7 @@ export default async function DashboardContentPage({ searchParams }: { searchPar
       </div>
     </section>
 
-    <section className="console-panel content-editor-panel">
+    <section className="console-panel content-editor-panel" id="showreel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Showreel Video</h2></div><small>Drag and drop, or select a file</small></div>
       <ShowreelUploader currentVideoLabel={site?.local_video_url ? "a local video is set" : site?.youtube_url ? "YouTube link is set" : site?.vimeo_url ? "Vimeo link is set" : "none set — falls back to the featured video project"} />
     </section>

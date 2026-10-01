@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MediaUploader from "@/components/MediaUploader";
+import { adminJson } from "@/lib/adminApi";
 import { mediaUrl } from "@/lib/supabase";
 import type { Category, DashboardPortfolioProject, GalleryItem } from "@/lib/types";
 
@@ -48,6 +49,12 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [savedNotice, setSavedNotice] = useState("");
+  const savedSnapshot = useRef(JSON.stringify(form));
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (JSON.stringify(form) !== savedSnapshot.current) { event.preventDefault(); event.returnValue = ""; } };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [form]);
 
   const field = <K extends keyof FormState>(key: K) => ({
     value: form[key] as never,
@@ -58,34 +65,28 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
   });
 
   async function save(nextStatus?: "draft" | "published") {
+    if (!form.title.trim()) { setError("Give the project a title before saving."); return; }
     setSaving(true);
     setError("");
     const payload = { ...form, status: nextStatus || form.status, id: projectId, year: Number(form.year) || new Date().getFullYear() };
-    const res = await fetch("/api/dashboard/portfolio/", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
-    }).then((r) => r.json());
+    const res = await adminJson<{ id: number }>("/api/dashboard/portfolio/", payload);
     setSaving(false);
-    if (res.error) { setError(res.error); return; }
+    if (!res.ok) { setError(res.error); return; }
     if (nextStatus) setForm((prev) => ({ ...prev, status: nextStatus }));
     if (!projectId) {
-      setProjectId(res.id);
-      router.replace(`/dashboard/portfolio/${res.id}/`);
+      setProjectId(res.data.id);
+      router.replace(`/dashboard/portfolio/${res.data.id}/`);
     }
+    savedSnapshot.current = JSON.stringify(nextStatus ? { ...form, status: nextStatus } : form);
     setSavedNotice(nextStatus === "published" ? "Published." : "Saved.");
     window.setTimeout(() => setSavedNotice(""), 3000);
   }
 
   async function addGalleryImage(result: { publicUrl: string; path: string }) {
     if (!projectId) return;
-    const res = await fetch("/api/dashboard/portfolio/gallery/", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ project_id: projectId, item_type: "image", image: result.path, layout: "landscape", order: gallery.length }),
-    }).then((r) => r.json());
-    if (res.id) {
-      setGallery((prev) => [...prev, { id: res.id, project_id: projectId, item_type: "image", image: result.path, video_url: "", video_file: "", caption: "", alt_text: "", layout: "landscape", order: prev.length }]);
-    } else {
-      setError(res.error || "Uploaded, but saving it to the project failed. Try adding it again.");
-    }
+    const res = await adminJson<{ id: number }>("/api/dashboard/portfolio/gallery/", { project_id: projectId, item_type: "image", image: result.path, layout: "landscape", order: gallery.length });
+    if (!res.ok) { setError(`The image uploaded but could not be attached to the project: ${res.error}`); return; }
+    setGallery((prev) => [...prev, { id: res.data.id, project_id: projectId, item_type: "image", image: result.path, video_url: "", video_file: "", caption: "", alt_text: "", layout: "landscape", order: prev.length }]);
   }
 
   async function updateGalleryItem(id: number, patch: Partial<GalleryItem>) {
@@ -93,15 +94,13 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
     if (!item) return;
     const next = { ...item, ...patch };
     setGallery((prev) => prev.map((g) => (g.id === id ? next : g)));
-    await fetch("/api/dashboard/portfolio/gallery/", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ project_id: next.project_id, item_type: next.item_type, image: next.image, video_url: next.video_url, video_file: next.video_file, caption: next.caption, alt_text: next.alt_text, layout: next.layout, order: next.order, id }),
-    });
+    const res = await adminJson("/api/dashboard/portfolio/gallery/", { action: "update", id, caption: next.caption, alt_text: next.alt_text, layout: next.layout, order: next.order });
+    if (!res.ok) { setGallery((prev) => prev.map((g) => (g.id === id ? item : g))); setError(res.error); }
   }
 
   async function removeGalleryItem(id: number) {
-    const res = await fetch("/api/dashboard/portfolio/gallery/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete", id }) }).then((r) => r.json());
-    if (res.error) { setError(res.error); return; }
+    const res = await adminJson("/api/dashboard/portfolio/gallery/", { action: "delete", id });
+    if (!res.ok) { setError(res.error); return; }
     setGallery((prev) => prev.filter((g) => g.id !== id));
   }
 
@@ -142,7 +141,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
             <div className="form-field"><label>Layout</label><select className="form-select" defaultValue={item.layout} onChange={(e) => updateGalleryItem(item.id, { layout: e.target.value as GalleryItem["layout"] })}><option value="landscape">Landscape</option><option value="portrait">Portrait</option><option value="full">Full width</option></select></div>
             <div className="content-item-actions"><button className="btn btn-outline-danger" type="button" onClick={() => removeGalleryItem(item.id)}>Remove</button></div>
           </div>)}</div>}
-          <MediaUploader kind="image" accept="image/jpeg,image/png,image/webp" label="Add gallery image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={addGalleryImage} />
+          <MediaUploader kind="image" disabled={!projectId} disabledMessage="Save the project first, then add gallery images." accept="image/jpeg,image/png,image/webp" label="Add gallery image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={addGalleryImage} />
         </> : <p className="analytics-note">Save the project first to add gallery images.</p>}
       </div>
     </section>

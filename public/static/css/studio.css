@@ -264,3 +264,30 @@ html[data-theme="light"] .theme-switch .theme-switch-sun, html:not([data-theme="
 .st-request-reply time { font-size: 0.78rem; color: var(--muted); }
 .st-account-side form { margin-top: 20px; }
 @media (max-width: 900px) { .st-auth-grid, .st-account { grid-template-columns: 1fr; } .st-auth { padding-top: 120px; } }
+
+/* Hero slides (admin-managed) */
+.st-hero-slides { position: absolute; inset: 0; z-index: -2; }
+.st-hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1600ms ease; }
+.st-hero-slide.is-active { opacity: 1; animation: st-drift 14s ease-out both; }
+.st-hero-pager { position: absolute; right: max(24px, calc((100vw - 1320px) / 2 + 12px)); bottom: 84px; display: flex; align-items: center; gap: 16px; color: rgba(244,244,242,0.85); font-size: 0.82rem; }
+.st-hero-dots { display: flex; gap: 6px; }
+.st-hero-dots button { width: 26px; height: 20px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.st-hero-dots button::after { content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: rgba(244,244,242,0.35); transition: background-color 250ms; }
+.st-hero-dots button.is-active::after, .st-hero-dots button:hover::after { background: var(--accent); }
+@media (max-width: 560px) { .st-hero-pager { left: 16px; right: auto; bottom: 66px; } .st-hero-caption { display: none; } }
+@media (prefers-reduced-motion: reduce) { .st-hero-slide, .st-hero-slide.is-active { animation: none; transition: none; } }
+
+/* Admin polish: dark-tinted notices, wider content, quick actions */
+.admin-content .alert { border-radius: 0; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.admin-content .alert-success { border-left: 3px solid var(--success); }
+.admin-content .alert-danger { border-left: 3px solid var(--danger); }
+.admin-content .alert-info, .admin-content .alert-warning { border-left: 3px solid var(--accent); }
+.admin-content > .dashboard-console > .container, .admin-content .dashboard-console .container { max-width: 1240px; }
+.ad-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.ad-quick .ad-btn i { margin-right: 8px; opacity: 0.8; }
+.showreel-dropzone { transition: border-color 200ms ease, background-color 200ms ease; }
+.showreel-dropzone.is-dragging { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.showreel-dropzone.is-disabled { opacity: 0.55; }
+.uploader-hint { display: block; margin-bottom: 10px; color: var(--muted); }
+.review-toggle { display: flex; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; }
+.form-field > label:first-child { display: block; margin-bottom: 6px; }

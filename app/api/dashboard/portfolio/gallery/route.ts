@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -10,6 +10,17 @@ export async function POST(request: NextRequest) {
 
   if (body.action === "delete") {
     const { error } = await supabase.rpc("dashboard_delete_project_gallery_item", { p_token: token, p_id: body.id });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "update") {
+    const id = Number(body.id);
+    if (!Number.isInteger(id)) return NextResponse.json({ error: "Missing gallery item." }, { status: 400 });
+    const layout = ["landscape", "portrait", "full"].includes(body.layout) ? body.layout : "landscape";
+    const { error } = await getSupabaseAdmin().from("project_gallery_items").update({
+      caption: String(body.caption || "").slice(0, 300), alt_text: String(body.alt_text || "").slice(0, 300), layout, order: Number(body.order) || 0,
+    }).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
   }
