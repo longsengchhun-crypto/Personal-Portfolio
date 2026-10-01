@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCustomerSession } from "@/lib/customerAuth";
+import { safeInternalPath } from "@/lib/safeRedirect";
 import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
   const email = String(form.get("email") || "").trim();
   const password = String(form.get("password") || "");
   const fullName = String(form.get("full_name") || "").trim();
-  const next = String(form.get("next") || "/3d-store/account/");
+  const next = safeInternalPath(form.get("next"), "/3d-store/", "/3d-store/account/");
 
   if (!email || !fullName || password.length < 8) {
     return NextResponse.redirect(new URL(`/3d-store/account/register/?error=form&next=${encodeURIComponent(next)}`, request.url), 303);

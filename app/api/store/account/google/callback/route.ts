@@ -1,12 +1,13 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { createCustomerSession } from "@/lib/customerAuth";
+import { safeInternalPath } from "@/lib/safeRedirect";
 import { getSupabase } from "@/lib/supabase";
 
 const STATE_COOKIE = "google_oauth_state";
 
 function safeNext(value: string) {
-  return value.startsWith("/3d-store/") ? value : "/3d-store/account/";
+  return safeInternalPath(value, "/3d-store/", "/3d-store/account/");
 }
 
 function fail(request: NextRequest, next: string, reason: string) {

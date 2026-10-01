@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSession, validAdminCredentials } from "@/lib/auth";
+import { safeInternalPath } from "@/lib/safeRedirect";
 import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const form = await request.formData();
   const next = String(form.get("next") || "");
-  const safeNext = next.startsWith("/dashboard/") ? next : "";
+  const safeNext = safeInternalPath(next, "/dashboard/", "");
   const nextParam = safeNext ? `&next=${encodeURIComponent(safeNext)}` : "";
 
   const ip = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() || null;

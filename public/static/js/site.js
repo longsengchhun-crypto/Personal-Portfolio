@@ -4,8 +4,7 @@ const initializePortfolioSite = () => {
 
   const themeButtons = document.querySelectorAll(".theme-toggle");
   const savedTheme = localStorage.getItem("portfolio-theme");
-  const preferredLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-  const initialTheme = document.documentElement.dataset.theme || savedTheme || (preferredLight ? "light" : "dark");
+    const initialTheme = document.documentElement.dataset.theme || (savedTheme === "light" ? "light" : "dark");
 
   const applyTheme = (theme) => {
     document.documentElement.dataset.theme = theme;

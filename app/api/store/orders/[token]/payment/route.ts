@@ -8,11 +8,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { token } = await params;
   const form = await request.formData();
   const reference = String(form.get("payment_reference") || "").trim();
-  const screenshotPath = String(form.get("payment_screenshot") || "").trim();
+  const rawScreenshotPath = String(form.get("payment_screenshot") || "").trim();
 
   const supabase = getSupabase();
   const { data: order } = await supabase.rpc("get_order_by_token", { p_access_token: token });
   if (!order) return NextResponse.redirect(new URL("/3d-store/", request.url), 303);
+
+  // The path is client-supplied; only accept files inside this order's own upload folder.
+  const screenshotPath = rawScreenshotPath.startsWith(`payments/${order.id}/`) && !rawScreenshotPath.includes("..") ? rawScreenshotPath : "";
 
   // A screenshot is the only proof of payment the admin has to go on — without one, the order
   // would silently move to "payment_submitted" with nothing for the admin to actually review.

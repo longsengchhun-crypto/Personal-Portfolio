@@ -1,18 +1,13 @@
 import Link from "next/link";
-import HeroSlider from "@/components/HeroSlider";
 import { DEFAULT_OG_IMAGE, DISCIPLINES, OWNER, SITE_URL } from "@/lib/content";
-import { getFeaturedVideoProject, getServices, getSiteContext, getSoftwareTools } from "@/lib/data";
+import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext, getSoftwareTools } from "@/lib/data";
 import { getHeroSlides } from "@/lib/heroSlides";
 import { mediaUrl } from "@/lib/supabase";
 
 const HOME_TITLE = "LONG SENGCHHUN | Visual Creative & Media";
 const HOME_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
 
-// This page has no per-visitor data (the layout's own cookie reads were moved to a client-fetched
-// API route specifically so pages like this could be cached instead of re-rendered from scratch
-// on every request) — ISR here means most visits are served from cache, and admin edits still
-// show up within a minute even for a first-time visitor, on top of already being instant for
-// anyone with the page open via RealtimeSync.
+// No per-visitor data here, so the page can be cached; admin edits appear within a minute.
 export const revalidate = 60;
 
 export const metadata = {
@@ -25,15 +20,15 @@ export const metadata = {
   },
 };
 
-const PROJECT_STARTERS = [
-  { icon: "bi-vector-pen", title: "A poster or campaign", detail: "Product, food, event, or social artwork", service: "Poster Design" },
-  { icon: "bi-camera-reels", title: "A polished video", detail: "Editing, motion, pacing, color, and sound", service: "Video Editing" },
-  { icon: "bi-camera", title: "A photo or video shoot", detail: "Commercial, event, product, or story-led production", service: "Photo / Video Production" },
-  { icon: "bi-box", title: "A 3D visualization", detail: "Products, environments, animation, and rendering", service: "3D Design and Modeling" },
-] as const;
+const DISCIPLINE_LINE = ["VFX", "Film", "Photography", "Video", "Motion", "3D"];
 
 export default async function HomePage() {
-  const [{ site, social }, heroSlides, videoProject, services, software] = await Promise.all([getSiteContext(), getHeroSlides(), getFeaturedVideoProject(), getServices(), getSoftwareTools()]);
+  const [{ site, social }, heroSlides, videoProject, services, software, featured] = await Promise.all([
+    getSiteContext(), getHeroSlides(), getFeaturedVideoProject(), getServices(), getSoftwareTools(), getFeaturedProjects().catch(() => []),
+  ]);
+  const heroImage = heroSlides.slides[0] ? mediaUrl(heroSlides.slides[0].image, { width: 2000, quality: 80 }) : "/static/site-assets/hero/hero-vfx.jpg";
+  const email = site?.email || OWNER.email;
+  const work = featured.filter((project) => project.cover_image).slice(0, 5);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -41,25 +36,106 @@ export default async function HomePage() {
     jobTitle: site?.professional_title || OWNER.title,
     url: SITE_URL,
     image: `${SITE_URL}/static/site-assets/profile/profile-cutout-fade.png`,
-    email: site?.email || OWNER.email,
+    email,
     telephone: site?.phone || OWNER.phone,
     address: { "@type": "PostalAddress", addressLocality: "Phnom Penh", addressCountry: "KH" },
+    knowsAbout: ["Visual effects", "Filmmaking", "Photography", "Video editing", "Motion graphics", "3D modeling"],
     ...(social.length ? { sameAs: social.map((link) => link.url) } : {}),
   };
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    <section className="hero-section"><div className="container hero-grid">
-      <div className="hero-copy reveal"><p className="availability-pill"><i aria-hidden="true" />Available for freelance projects</p><p className="eyebrow">{OWNER.name}</p><h1>{site?.professional_title || OWNER.title}</h1><p className="role-line">{OWNER.roles}</p><p className="hero-description">{site?.hero_intro || "Creating visual experiences through production, post-production, and digital creativity."}</p><div className="button-row"><Link className="btn btn-accent" href="/showreel/"><i className="bi bi-play-fill" />Watch Showreel</Link><Link className="btn btn-outline-light" href="/portfolio/">View Selected Work</Link></div></div>
-      <div className="hero-visual reveal"><div className="profile-stage" aria-label="LONG SENGCHHUN profile portrait"><div className="profile-frame"><img className="profile-portrait" src="/static/site-assets/profile/profile-cutout-fade.png" alt="LONG SENGCHHUN profile portrait" decoding="async" fetchPriority="high" /><div className="profile-frame-copy"><span>Phnom Penh, Cambodia</span><strong>{OWNER.roles}</strong></div></div></div></div>
-    </div></section>
-    {heroSlides.slides.length > 0 && <HeroSlider slides={heroSlides.slides.map((slide) => ({ ...slide, image: mediaUrl(slide.image, { width: 2000, quality: 80 }) }))} variant="band"><p className="eyebrow">Featured Work</p><h2>Visual effects, 3D, and film — crafted with care.</h2><p className="hero-description">A rotating look at the disciplines behind the work.</p><div className="button-row"><Link className="btn btn-accent" href="/portfolio/">View Selected Work</Link></div></HeroSlider>}
-    {videoProject && <section className="section video-feature-section"><div className="container video-feature-grid"><div className="video-feature-copy reveal"><p className="eyebrow">Filmography</p><h2>{videoProject.title}</h2><p>{videoProject.short_description}</p><Link className="btn btn-accent" href={`/portfolio/${videoProject.slug}/`}>Watch the Film</Link></div><Link className="video-feature-player reveal" href={`/portfolio/${videoProject.slug}/`} aria-label={`View ${videoProject.title}`}>{videoProject.cover_image ? <img className="video-feature-fallback" src={mediaUrl(videoProject.cover_image)} alt="" loading="lazy" /> : <span className="video-feature-placeholder">Video Showcase</span>}<video data-preview-video muted loop playsInline autoPlay preload="metadata" poster={mediaUrl(videoProject.cover_image)}><source src={mediaUrl(videoProject.video_file)} type="video/mp4" /></video><span className="video-feature-badge"><i className="bi bi-play-fill" /> 1080p video preview</span></Link></div></section>}
-    <section className="section discipline-band"><div className="container"><p className="eyebrow">Disciplines</p><div className="discipline-index">{DISCIPLINES.map(([name, slug], index) => <Link href={`/portfolio/?category=${slug}`} className="discipline-index-item reveal" key={slug}><span>{String(index + 1).padStart(2, "0")}</span><strong>{name}</strong></Link>)}</div></div></section>
-    <section className="section project-starter-section"><div className="container"><div className="section-heading"><div><p className="eyebrow">Quick Project Start</p><h2>Choose what you need. The inquiry form will be prepared for you.</h2></div><p className="section-side-copy">A clearer starting point means a faster, more useful first reply.</p></div><div className="project-starter-grid">{PROJECT_STARTERS.map((item) => <Link className="project-starter-card reveal" href={`/contact/?service=${encodeURIComponent(item.service)}`} key={item.service}><span><i className={`bi ${item.icon}`} /></span><div><h3>{item.title}</h3><p>{item.detail}</p></div><i className="bi bi-arrow-up-right" aria-hidden="true" /></Link>)}</div><div className="process-line"><article><span>01</span><strong>Send the brief</strong><p>Share your goal, timeline, budget range, and any useful files.</p></article><article><span>02</span><strong>Receive a clear response</strong><p>You receive an email confirmation immediately and a decision or reply after review.</p></article><article><span>03</span><strong>Plan the delivery</strong><p>We confirm scope, schedule, revisions, and final formats before production begins.</p></article></div></div></section>
-    <section className="section"><div className="container split-section"><div className="reveal"><p className="eyebrow">About</p><h2>Visual work across VFX, film, and photography.</h2></div><div className="prose reveal"><p>I work across VFX, photography, videography, filmmaking, motion graphics, and 3D — from production through post, based in Cambodia.</p><p>Based in Phnom Penh, Cambodia. Available for freelance collaborations and for working with local and international clients when opportunities are available.</p><Link className="text-link" href="/about/">Learn more</Link></div></div></section>
-    <section className="software-strip" aria-label="Software"><div className="container software-list">{software.map((item) => <span key={item.id}>{item.name}</span>)}</div></section>
-    <section className="section"><div className="container"><div className="section-heading"><div><p className="eyebrow">Services</p><h2>Creative support from concept to delivery.</h2></div><Link className="text-link" href="/services/">View all services</Link></div><div className="service-grid">{services.slice(0, 6).map((service, index) => <article className="service-item reveal" key={service.id}><span>{String(index + 1).padStart(2, "0")}</span><h3>{service.title}</h3><p>{service.description}</p></article>)}</div></div></section>
-    <section className="section showreel-section"><div className="container showreel-panel reveal"><div><p className="eyebrow">Showreel</p><h2>{site?.showreel_title || "Current creative showcase"}</h2><p>Selected motion, design, and 3D work prepared for a smooth viewing experience.</p></div><Link className="play-button" href="/showreel/" aria-label="Watch the showreel"><i className="bi bi-play-fill" /></Link></div></section>
-    <section className="section cta-section"><div className="container"><p className="eyebrow">Start a Conversation</p><h2>Have a project in mind?</h2><p className="hero-description">Tell me what you&apos;re making and I&apos;ll reply with next steps.</p><div className="button-row"><Link className="btn btn-accent" href="/contact/">Discuss a Project</Link><a className="btn btn-outline-light" href={OWNER.telegramUrl} target="_blank" rel="noreferrer">Telegram Me</a><a className="btn btn-outline-light" href={`mailto:${site?.email || OWNER.email}`}>Email Me</a></div></div></section>
+
+    <section className="st-hero">
+      <img className="st-hero-media" src={heroImage} alt="" decoding="async" fetchPriority="high" />
+      <div className="st-hero-shade" aria-hidden="true" />
+      <div className="container st-hero-inner">
+        <p className="st-kicker">Visual Creative &amp; Media</p>
+        <h1 className="st-hero-title">LONG<br />SENGCHHUN</h1>
+        <ul className="st-discipline-line" aria-label="Disciplines">{DISCIPLINE_LINE.map((name) => <li key={name}>{name}</li>)}</ul>
+        <div className="st-actions">
+          <Link className="st-btn st-btn-solid" href="/showreel/">Watch the showreel</Link>
+          <Link className="st-btn st-btn-line" href="/portfolio/">Explore the work</Link>
+        </div>
+      </div>
+      <div className="container st-hero-foot">
+        <span>{OWNER.location}</span>
+        <span className="st-availability"><i aria-hidden="true" />Taking freelance projects</span>
+        <Link href="/contact/">Start a project &rarr;</Link>
+      </div>
+    </section>
+
+    <section className="st-section" aria-labelledby="disciplines-heading">
+      <div className="container">
+        <h2 id="disciplines-heading" className="st-label">Disciplines</h2>
+        <ul className="st-index">{DISCIPLINES.map(([name, slug], index) => <li key={slug}><Link href={`/portfolio/?category=${slug}`}><span className="st-index-num">{String(index + 1).padStart(2, "0")}</span><span className="st-index-name">{name}</span><span className="st-index-arrow" aria-hidden="true">&rarr;</span></Link></li>)}</ul>
+      </div>
+    </section>
+
+    {work.length > 0 && <section className="st-section st-work" aria-labelledby="work-heading">
+      <div className="container">
+        <div className="st-head"><h2 id="work-heading" className="st-title">Selected work</h2><Link className="st-more" href="/portfolio/">All work &rarr;</Link></div>
+        <div className="st-work-grid">{work.map((project, index) => <Link className={`st-tile st-tile-${index}`} href={`/portfolio/${project.slug}/`} key={project.id}>
+          <img src={mediaUrl(project.cover_image, { width: index === 0 ? 1400 : 800 })} alt={project.title} loading="lazy" decoding="async" />
+          <span className="st-tile-caption"><b>{project.title}</b><small>{project.category?.name}{project.year ? ` · ${project.year}` : ""}</small></span>
+        </Link>)}</div>
+      </div>
+    </section>}
+
+    {videoProject?.video_file && <section className="st-section st-film" aria-labelledby="film-heading">
+      <div className="container st-film-grid">
+        <div>
+          <h2 id="film-heading" className="st-label">Filmography</h2>
+          <p className="st-title st-title-sm">{videoProject.title}</p>
+          <p className="st-copy">{videoProject.short_description}</p>
+          <Link className="st-btn st-btn-line" href={`/portfolio/${videoProject.slug}/`}>Watch the film</Link>
+        </div>
+        <Link className="st-film-frame" href={`/portfolio/${videoProject.slug}/`} aria-label={`View ${videoProject.title}`}>
+          <video data-preview-video muted loop playsInline autoPlay preload="none" poster={mediaUrl(videoProject.cover_image, { width: 1400 })}><source src={mediaUrl(videoProject.video_file)} type="video/mp4" /></video>
+        </Link>
+      </div>
+    </section>}
+
+    <section className="st-section" aria-labelledby="services-heading">
+      <div className="container">
+        <div className="st-head"><h2 id="services-heading" className="st-title">Services</h2><Link className="st-more" href="/services/">Full details &rarr;</Link></div>
+        <ol className="st-rows">{services.slice(0, 6).map((service, index) => <li key={service.id}><span className="st-index-num">{String(index + 1).padStart(2, "0")}</span><h3>{service.title}</h3><p>{service.description}</p></li>)}</ol>
+      </div>
+    </section>
+
+    <section className="st-section st-process" aria-labelledby="process-heading">
+      <div className="container">
+        <h2 id="process-heading" className="st-label">How a project starts</h2>
+        <ol className="st-steps">
+          <li><b>01</b><strong>Send the brief</strong><p>Goal, timeline, budget range and any reference files.</p></li>
+          <li><b>02</b><strong>Get a clear reply</strong><p>You receive an email confirmation right away and a response after review.</p></li>
+          <li><b>03</b><strong>Plan the delivery</strong><p>Scope, schedule, revisions and final formats are agreed before production.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section className="st-section st-about" aria-labelledby="about-heading">
+      <div className="container st-about-grid">
+        <img src="/static/site-assets/profile/profile-cutout-fade.png" alt="Portrait of LONG SENGCHHUN" loading="lazy" decoding="async" />
+        <div>
+          <h2 id="about-heading" className="st-label">About</h2>
+          <p className="st-lede">I work across VFX, photography, videography, filmmaking, motion graphics and 3D, from production through post.</p>
+          <p className="st-copy">Based in Phnom Penh, Cambodia. Available for freelance work with local and international clients.</p>
+          <Link className="st-more" href="/about/">More about me &rarr;</Link>
+          {software.length > 0 && <ul className="st-tools" aria-label="Software">{software.map((item) => <li key={item.id}>{item.name}</li>)}</ul>}
+        </div>
+      </div>
+    </section>
+
+    <section className="st-section st-cta" aria-labelledby="cta-heading">
+      <div className="container">
+        <h2 id="cta-heading" className="st-cta-title">Have a project in mind?</h2>
+        <p className="st-copy">Tell me what you are making and I will reply with next steps.</p>
+        <div className="st-actions">
+          <Link className="st-btn st-btn-solid" href="/contact/">Start a project</Link>
+          <a className="st-btn st-btn-line" href={OWNER.telegramUrl} target="_blank" rel="noreferrer">Telegram</a>
+          <a className="st-btn st-btn-line" href={`mailto:${email}`}>Email</a>
+        </div>
+      </div>
+    </section>
   </>;
 }

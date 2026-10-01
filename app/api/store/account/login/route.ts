@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCustomerSession } from "@/lib/customerAuth";
+import { safeInternalPath } from "@/lib/safeRedirect";
 import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const form = await request.formData();
   const email = String(form.get("email") || "").trim();
   const password = String(form.get("password") || "");
-  const next = String(form.get("next") || "/3d-store/account/");
+  const next = safeInternalPath(form.get("next"), "/3d-store/", "/3d-store/account/");
   const ip = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() || null;
 
   const { data, error } = await getSupabase().rpc("verify_customer_login", { p_email: email, p_password: password, p_ip_address: ip });

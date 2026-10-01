@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `(function(){try{var saved=localStorage.getItem("portfolio-theme");var theme=saved||(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.theme=theme}catch(e){document.documentElement.dataset.theme="dark"}})();`;
+const themeScript = `(function(){try{var saved=localStorage.getItem("portfolio-theme");var theme=saved==="light"?"light":"dark";document.documentElement.dataset.theme=theme}catch(e){document.documentElement.dataset.theme="dark"}})();`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -35,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     {supabaseUrl && <link rel="preconnect" href={supabaseUrl} />}
     <link href="/static/css/site.css?v=20260925-profile-card2" rel="stylesheet" />
+    <link href="/static/css/studio.css?v=20261001-studio" rel="stylesheet" />
   </head><body data-track-url="/api/track-visit/">
     <a className="skip-link" href="#main">Skip to content</a><Nav /><main id="main">{children}</main><Footer /><RealtimeSync />
     <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />

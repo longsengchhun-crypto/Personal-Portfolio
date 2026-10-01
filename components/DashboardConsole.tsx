@@ -1,22 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { DashboardSnapshot, Visit } from "@/lib/types";
+import { INQUIRY_STATUS_LABELS } from "@/lib/content";
+import type { DashboardSnapshot, Inquiry, Visit } from "@/lib/types";
 
 const formatDate = (value: string) => new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Phnom_Penh" }).format(new Date(value));
 const locationLabel = (visit: Visit) => [visit.city, visit.region, visit.country].filter(Boolean).join(", ") || "Location unavailable";
 
-export default function DashboardConsole({ initialData, emailReady, emailReadinessMessage, emailReadinessMode, smsReady }: {
+const FILTERS = [
+  { id: "open", label: "Needs reply", match: (i: Inquiry) => i.status === "new" || i.status === "reviewing" },
+  { id: "active", label: "In progress", match: (i: Inquiry) => i.status === "replied" || i.status === "accepted" },
+  { id: "closed", label: "Closed", match: (i: Inquiry) => i.status === "declined" || i.status === "archived" },
+  { id: "all", label: "All", match: () => true },
+] as const;
+
+function DecisionForm({ id, action, label, confirmText, danger }: { id: number; action: "accept" | "reject"; label: string; confirmText: string; danger?: boolean }) {
+  return <form method="post" action={`/api/dashboard/inquiries/${id}/`} onSubmit={(event) => { if (!window.confirm(confirmText)) event.preventDefault(); }}>
+    <input type="hidden" name="action" value={action} /><input type="hidden" name="next" value="dashboard" />
+    <button className={`ad-btn${danger ? " ad-btn-danger" : ""}`} type="submit">{label}</button>
+  </form>;
+}
+
+export default function DashboardConsole({ initialData, emailReady, emailReadinessMessage, emailReadinessMode, smsReady, pendingOrders }: {
   initialData: DashboardSnapshot;
   emailReady: boolean;
   emailReadinessMessage: string;
   emailReadinessMode: string;
   smsReady: boolean;
+  pendingOrders: number;
 }) {
   const [data, setData] = useState(initialData);
   const [connected, setConnected] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("open");
 
   useEffect(() => {
     const source = new EventSource("/api/dashboard/stream/");
@@ -34,39 +51,59 @@ export default function DashboardConsole({ initialData, emailReady, emailReadine
     return () => source.close();
   }, []);
 
+  const counts = useMemo(() => Object.fromEntries(FILTERS.map((f) => [f.id, data.latest_inquiries.filter(f.match).length])), [data.latest_inquiries]);
+  const rows = useMemo(() => data.latest_inquiries.filter(FILTERS.find((f) => f.id === filter)!.match), [data.latest_inquiries, filter]);
+  const needsReply = counts.open;
+
   return <>
-    <div className="dashboard-operations">
-      <div className="live-refresh" role="status" aria-live="polite">
-        <span className="live-refresh-state"><span className={`status-dot${connected ? "" : " is-refreshing"}`} />{connected ? "Live" : "Connecting"}</span>
-        <small>{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : "Waiting for first update"}</small>
-      </div>
-      <div className="delivery-readiness" aria-label="Client notification readiness">
-        <span className={emailReady ? "is-ready" : "needs-setup"} title={emailReadinessMessage}><i className={`bi ${emailReady ? "bi-envelope-check" : "bi-envelope-exclamation"}`} />Client email: {emailReady ? "Ready" : emailReadinessMode === "testing" ? "Test mode" : "Sender invalid"}</span>
-        <span className={smsReady ? "is-ready" : "needs-setup"}><i className={`bi ${smsReady ? "bi-chat-square-check" : "bi-chat-dots"}`} />Optional SMS: {smsReady ? "Ready" : "Off"}</span>
-      </div>
-    </div>
+    <section className="ad-attention" aria-label="Needs attention">
+      <Link className={`ad-card${needsReply ? " is-hot" : ""}`} href="#inquiries" onClick={() => setFilter("open")}><strong>{needsReply}</strong><span>{needsReply === 1 ? "inquiry needs a reply" : "inquiries need a reply"}</span></Link>
+      <Link className={`ad-card${pendingOrders ? " is-hot" : ""}`} href="/dashboard/store/orders/"><strong>{pendingOrders}</strong><span>{pendingOrders === 1 ? "store order to review" : "store orders to review"}</span></Link>
+      <div className={`ad-card${emailReady ? "" : " is-warn"}`} title={emailReadinessMessage}><strong>{emailReady ? "OK" : "!"}</strong><span>{emailReady ? "Client email ready" : emailReadinessMode === "testing" ? "Client email in test mode" : "Client email sender invalid"}{smsReady ? "" : " · SMS off"}</span></div>
+    </section>
 
-    <div className="signal-strip" aria-label="Dashboard metrics"><article><span>Total visits</span><strong>{data.total_visits}</strong></article><article><span>Today</span><strong>{data.today_visits}</strong></article><article><span>Visitors</span><strong>{data.unique_visitors}</strong></article><article><span>New messages</span><strong>{data.new_inquiries}</strong></article><article><span>Accepted</span><strong>{data.accepted_projects}</strong></article></div>
+    <section className="ad-panel" id="inquiries" aria-labelledby="inq-heading">
+      <div className="ad-panel-head">
+        <h2 id="inq-heading">Inquiries</h2>
+        <div className="ad-tabs" role="tablist" aria-label="Filter inquiries">{FILTERS.map((f) => <button type="button" role="tab" aria-selected={filter === f.id} className={filter === f.id ? "is-active" : ""} onClick={() => setFilter(f.id)} key={f.id}>{f.label}<span>{counts[f.id]}</span></button>)}</div>
+      </div>
+      {rows.length ? <ul className="ad-list">{rows.map((inquiry) => <li key={inquiry.id} className={inquiry.status === "new" ? "is-new" : ""}>
+        <div className="ad-list-main">
+          <div className="ad-list-title"><strong>{inquiry.full_name}</strong>{inquiry.company && <small>{inquiry.company}</small>}<span className={`status-badge status-${inquiry.status}`}>{INQUIRY_STATUS_LABELS[inquiry.status] || inquiry.status}</span></div>
+          <p className="ad-list-service">{inquiry.service_needed}</p>
+          <p className="ad-list-snippet">{inquiry.project_description.split(/\s+/).slice(0, 24).join(" ")}</p>
+          <p className="ad-list-meta"><a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>{inquiry.phone_or_telegram && <> · {inquiry.phone_or_telegram}</>} · <time dateTime={inquiry.created_at}>{formatDate(inquiry.created_at)}</time></p>
+        </div>
+        <div className="ad-list-actions">
+          <Link className="ad-btn ad-btn-primary" href={`/dashboard/inquiries/${inquiry.id}/`}>Open &amp; reply</Link>
+          {(inquiry.status === "new" || inquiry.status === "reviewing") && <>
+            <DecisionForm id={inquiry.id} action="accept" label="Accept" confirmText={`Accept ${inquiry.full_name}'s request and email them now?`} />
+            <DecisionForm id={inquiry.id} action="reject" label="Decline" danger confirmText={`Decline ${inquiry.full_name}'s request and email them now?`} />
+          </>}
+        </div>
+      </li>)}</ul> : <p className="empty-state">{filter === "open" ? "Nothing waiting for a reply." : "No inquiries in this view."}</p>}
+    </section>
 
-    <div className="console-layout analytics-layout">
-      <section className="console-panel visitor-stream">
-        <div className="console-panel-head"><div><span className="status-dot" /><h2>Live Visitor Stream</h2></div><small>{data.total_visits} tracked visits · updates automatically</small></div>
+    <section className="ad-panel" aria-labelledby="traffic-heading">
+      <div className="ad-panel-head">
+        <h2 id="traffic-heading">Traffic</h2>
+        <span className="live-refresh-state" role="status"><span className={`status-dot${connected ? "" : " is-refreshing"}`} />{connected ? "Live" : "Connecting"}{lastUpdated ? ` · ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}</span>
+      </div>
+      <dl className="ad-stats"><div><dt>Today</dt><dd>{data.today_visits}</dd></div><div><dt>Visitors</dt><dd>{data.unique_visitors}</dd></div><div><dt>Total visits</dt><dd>{data.total_visits}</dd></div><div><dt>Accepted projects</dt><dd>{data.accepted_projects}</dd></div></dl>
+      <div className="ad-grid">
+        <div><h3>Top pages</h3><ul className="signal-list page-list">{data.top_pages.length ? data.top_pages.map((row) => <li key={row.path}><span>{row.path}</span><strong>{row.total}</strong></li>) : <li><span>No data yet</span><strong>0</strong></li>}</ul></div>
+        <div><h3>Top locations</h3><ul className="signal-list">{data.location_breakdown.length ? data.location_breakdown.map((row) => <li key={`${row.country}-${row.region}-${row.city}`}><span>{row.city}, {row.region}<small>{row.country}</small></span><strong>{row.total}</strong></li>) : <li><span>No data yet</span><strong>0</strong></li>}</ul></div>
+        <div><h3>Devices</h3><ul className="signal-list">{data.device_breakdown.length ? data.device_breakdown.map((row) => <li key={row.device_type}><span>{row.device_type || "Unknown"}</span><strong>{row.total}</strong></li>) : <li><span>No data yet</span><strong>0</strong></li>}</ul><p className="analytics-note">Totals include bots and crawlers.</p></div>
+      </div>
+      <details className="ad-details">
+        <summary>Latest visits ({data.latest_visits.length})</summary>
         <div className="visitor-list">{data.latest_visits.length ? data.latest_visits.map((visit) => <article className="visitor-row" key={visit.id}>
           <div className="visitor-time"><time>{formatDate(visit.created_at)}</time><strong>{visit.path}</strong></div>
-          <div><small>Device</small><strong>{visit.device_vendor && visit.device_vendor !== "Unknown" ? `${visit.device_vendor} ` : ""}{visit.device_model || visit.device_type || "Unknown"}</strong><span>{visit.device_type}{visit.screen_width ? ` · ${visit.screen_width}×${visit.screen_height}` : ""}{visit.touch_support ? " · Touch" : ""}</span></div>
-          <div><small>System</small><strong>{visit.browser || "Unknown browser"}{visit.browser_version ? ` ${visit.browser_version.split(".")[0]}` : ""}</strong><span>{visit.os || "Unknown OS"}{visit.os_version ? ` ${visit.os_version}` : ""}{visit.connection_type ? ` · ${visit.connection_type.toUpperCase()}` : ""}</span></div>
-          <div><small>Approx. location</small><strong>{locationLabel(visit)}</strong><span>{visit.timezone || "Timezone unavailable"}</span></div>
+          <div><small>Device</small><strong>{visit.device_vendor && visit.device_vendor !== "Unknown" ? `${visit.device_vendor} ` : ""}{visit.device_model || visit.device_type || "Unknown"}</strong><span>{visit.device_type}{visit.screen_width ? ` · ${visit.screen_width}×${visit.screen_height}` : ""}</span></div>
+          <div><small>System</small><strong>{visit.browser || "Unknown browser"}</strong><span>{visit.os || "Unknown OS"}{visit.connection_type ? ` · ${visit.connection_type.toUpperCase()}` : ""}</span></div>
+          <div><small>Approx. location</small><strong>{locationLabel(visit)}</strong></div>
         </article>) : <p className="empty-state">No visits tracked yet.</p>}</div>
-      </section>
-
-      <aside className="console-side analytics-side">
-        <section className="console-panel"><div className="console-panel-head"><div><span className="status-dot muted-dot" /><h2>Device Mix</h2></div></div><ul className="signal-list">{data.device_breakdown.length ? data.device_breakdown.map((row) => <li key={row.device_type}><span>{row.device_type || "Unknown"}</span><strong>{row.total}</strong></li>) : <li><span>No device data yet</span><strong>0</strong></li>}</ul></section>
-        <section className="console-panel"><div className="console-panel-head"><div><span className="status-dot model-dot" /><h2>Top Models</h2></div></div><ul className="signal-list">{data.model_breakdown.length ? data.model_breakdown.map((row) => <li key={`${row.device_vendor}-${row.device_model}`}><span>{row.device_vendor !== "Unknown" ? `${row.device_vendor} ` : ""}{row.device_model}</span><strong>{row.total}</strong></li>) : <li><span>No model data yet</span><strong>0</strong></li>}</ul><p className="analytics-note">Exact model availability depends on each browser&apos;s privacy settings.</p></section>
-        <section className="console-panel"><div className="console-panel-head"><div><span className="status-dot location-dot" /><h2>Top Locations</h2></div></div><ul className="signal-list">{data.location_breakdown.length ? data.location_breakdown.map((row) => <li key={`${row.country}-${row.region}-${row.city}`}><span>{row.city}, {row.region}<small>{row.country}</small></span><strong>{row.total}</strong></li>) : <li><span>No location data yet</span><strong>0</strong></li>}</ul><p className="analytics-note">City and province are approximate, based on the visitor&apos;s network.</p></section>
-        <section className="console-panel"><div className="console-panel-head"><div><span className="status-dot warm-dot" /><h2>Top Pages</h2></div></div><ul className="signal-list page-list">{data.top_pages.length ? data.top_pages.map((row) => <li key={row.path}><span>{row.path}</span><strong>{row.total}</strong></li>) : <li><span>No page data yet</span><strong>0</strong></li>}</ul></section>
-      </aside>
-    </div>
-
-    <section className="console-panel message-board"><div className="console-panel-head"><div><span className="status-dot message-dot" /><h2>Project Messages</h2></div><small>Open a request to accept, decline, send a reply, or keep a private note.</small></div><div className="request-table-wrap"><table className="request-table"><thead><tr><th>Status</th><th>Client</th><th>Request</th><th>Contact</th><th>Submitted</th><th>Action</th></tr></thead><tbody>{data.latest_inquiries.length ? data.latest_inquiries.map((inquiry) => <tr key={inquiry.id}><td><span className={`status-badge status-${inquiry.status}`}>{inquiry.status[0].toUpperCase() + inquiry.status.slice(1)}</span>{inquiry.last_notification_status === "sent" && <small className="delivery-stamp"><i className="bi bi-envelope-check" />Emailed</small>}</td><td><strong>{inquiry.full_name}</strong>{inquiry.company && <small>{inquiry.company}</small>}</td><td><strong>{inquiry.service_needed}</strong><small>{inquiry.project_description.split(/\s+/).slice(0, 18).join(" ")}</small></td><td><a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>{inquiry.phone_or_telegram && <small>{inquiry.phone_or_telegram}</small>}</td><td><time>{formatDate(inquiry.created_at)}</time></td><td><div className="request-actions"><Link className="btn btn-accent" href={`/dashboard/inquiries/${inquiry.id}/`}>Open & Reply</Link><form method="post" action={`/api/dashboard/inquiries/${inquiry.id}/`}><input type="hidden" name="action" value="accept" /><input type="hidden" name="next" value="dashboard" /><button className="btn btn-outline-light" type="submit">Accept & Email</button></form><form method="post" action={`/api/dashboard/inquiries/${inquiry.id}/`}><input type="hidden" name="action" value="reject" /><input type="hidden" name="next" value="dashboard" /><button className="btn btn-outline-danger" type="submit">Decline & Email</button></form></div></td></tr>) : <tr><td colSpan={6}><p className="empty-state">No project inquiries yet.</p></td></tr>}</tbody></table></div></section>
+      </details>
+    </section>
   </>;
 }
