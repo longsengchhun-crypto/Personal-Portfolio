@@ -4,6 +4,7 @@ import Script from "next/script";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import RealtimeSync from "@/components/RealtimeSync";
+import ScrollReveal from "@/components/ScrollReveal";
 import { SITE_URL } from "@/lib/content";
 
 const DEFAULT_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
@@ -37,7 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <link href="/static/css/site.css?v=20260925-profile-card2" rel="stylesheet" />
     <link href="/static/css/studio.css?v=20261001-studio" rel="stylesheet" />
   </head><body data-track-url="/api/track-visit/">
-    <a className="skip-link" href="#main">Skip to content</a><Nav /><main id="main">{children}</main><Footer /><RealtimeSync />
+    <a className="skip-link" href="#main">Skip to content</a><Nav /><main id="main">{children}</main><Footer /><RealtimeSync /><ScrollReveal />
     <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
     <Script src="/static/js/site.js?v=20260909-perf-video-lazy" strategy="afterInteractive" />
     <Analytics />
