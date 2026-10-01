@@ -11,6 +11,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
+  async redirects() {
+    return [
+      { source: "/3d-store/account/login", destination: "/account/login/", permanent: true },
+      { source: "/3d-store/account/register", destination: "/account/register/", permanent: true },
+      { source: "/3d-store/account", destination: "/account/", permanent: true },
+      { source: "/3d-store/:path*", destination: "/", permanent: true },
+      { source: "/dashboard/store/:path*", destination: "/dashboard/", permanent: false },
+    ];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

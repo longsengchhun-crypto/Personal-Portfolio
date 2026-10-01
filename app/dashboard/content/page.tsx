@@ -1,5 +1,4 @@
 import Link from "next/link";
-import PaymentSettingsForm from "@/components/PaymentSettingsForm";
 import ShowreelUploader from "@/components/ShowreelUploader";
 import { requireAdmin } from "@/lib/auth";
 import { getDashboardContent } from "@/lib/data";
@@ -11,7 +10,6 @@ const SAVED_LABELS: Record<string, string> = {
   services: "Services updated.",
   skills: "Skills updated.",
   software: "Software list updated.",
-  "payment-settings": "Payment settings saved.",
 };
 
 export default async function DashboardContentPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
@@ -52,11 +50,6 @@ export default async function DashboardContentPage({ searchParams }: { searchPar
     <section className="console-panel content-editor-panel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Showreel Video</h2></div><small>Drag and drop, or select a file</small></div>
       <ShowreelUploader currentVideoLabel={site?.local_video_url ? "a local video is set" : site?.youtube_url ? "YouTube link is set" : site?.vimeo_url ? "Vimeo link is set" : "none set — falls back to the featured video project"} />
-    </section>
-
-    <section className="console-panel content-editor-panel">
-      <div className="console-panel-head"><div><span className="status-dot" /><h2>Payment Settings</h2></div><small>ABA QR shown to 3D Store customers at checkout</small></div>
-      <PaymentSettingsForm currentQrImage={site?.aba_qr_image || ""} currentAccountInfo={site?.aba_account_info || ""} />
     </section>
 
     <section className="console-panel content-editor-panel">

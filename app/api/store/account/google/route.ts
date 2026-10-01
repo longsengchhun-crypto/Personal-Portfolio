@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 const STATE_COOKIE = "google_oauth_state";
 
 function safeNext(value: string | null) {
-  return value && value.startsWith("/3d-store/") ? value : "/3d-store/account/";
+  return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "/account/";
 }
 
 // Kicks off the standard OAuth 2.0 authorization-code flow directly against Google's
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const next = safeNext(new URL(request.url).searchParams.get("next"));
   if (!clientId) {
-    return NextResponse.redirect(new URL(`/3d-store/account/login/?error=google_unavailable&next=${encodeURIComponent(next)}`, request.url), 303);
+    return NextResponse.redirect(new URL(`/account/login/?error=google_unavailable&next=${encodeURIComponent(next)}`, request.url), 303);
   }
 
   const nonce = randomUUID();

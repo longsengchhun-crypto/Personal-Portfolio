@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import StoreUploader from "@/components/StoreUploader";
+import MediaUploader from "@/components/MediaUploader";
 import { mediaUrl } from "@/lib/supabase";
 import type { Category, DashboardPortfolioProject, GalleryItem } from "@/lib/types";
 
@@ -126,8 +126,8 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
     <section className="console-panel content-editor-panel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Cover Media</h2></div><small>Shown on the Work grid and at the top of the project page</small></div>
       <div className="inquiry-form"><div className="form-grid">
-        <div className="form-field"><label>Cover image</label>{form.cover_image && <img src={mediaUrl(form.cover_image, { width: 300 })} alt="" style={{ maxWidth: 160, marginBottom: 10, display: "block" }} />}<StoreUploader mode="media" kind="image" accept="image/jpeg,image/png,image/webp" label="Drop cover image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={(r) => setForm((p) => ({ ...p, cover_image: r.path }))} /></div>
-        <div className="form-field"><label>Cover video (optional)</label>{form.video_file && <small className="is-ready"><i className="bi bi-check2-circle" /> Uploaded</small>}<StoreUploader mode="media" kind="video" accept="video/mp4,video/webm" label="Drop cover video" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={(r) => setForm((p) => ({ ...p, video_file: r.path }))} /><small>If set, this plays instead of the cover image on the Work grid</small></div>
+        <div className="form-field"><label>Cover image</label>{form.cover_image && <img src={mediaUrl(form.cover_image, { width: 300 })} alt="" style={{ maxWidth: 160, marginBottom: 10, display: "block" }} />}<MediaUploader kind="image" accept="image/jpeg,image/png,image/webp" label="Drop cover image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={(r) => setForm((p) => ({ ...p, cover_image: r.path }))} /></div>
+        <div className="form-field"><label>Cover video (optional)</label>{form.video_file && <small className="is-ready"><i className="bi bi-check2-circle" /> Uploaded</small>}<MediaUploader kind="video" accept="video/mp4,video/webm" label="Drop cover video" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={(r) => setForm((p) => ({ ...p, video_file: r.path }))} /><small>If set, this plays instead of the cover image on the Work grid</small></div>
         <div className="form-field"><label>Embedded video URL (optional)</label><input className="form-control" {...field("embedded_video_url")} placeholder="YouTube or Vimeo link" /></div>
       </div></div>
     </section>
@@ -142,7 +142,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
             <div className="form-field"><label>Layout</label><select className="form-select" defaultValue={item.layout} onChange={(e) => updateGalleryItem(item.id, { layout: e.target.value as GalleryItem["layout"] })}><option value="landscape">Landscape</option><option value="portrait">Portrait</option><option value="full">Full width</option></select></div>
             <div className="content-item-actions"><button className="btn btn-outline-danger" type="button" onClick={() => removeGalleryItem(item.id)}>Remove</button></div>
           </div>)}</div>}
-          <StoreUploader mode="media" kind="image" accept="image/jpeg,image/png,image/webp" label="Add gallery image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={addGalleryImage} />
+          <MediaUploader kind="image" accept="image/jpeg,image/png,image/webp" label="Add gallery image" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={addGalleryImage} />
         </> : <p className="analytics-note">Save the project first to add gallery images.</p>}
       </div>
     </section>

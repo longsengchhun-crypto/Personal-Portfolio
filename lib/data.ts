@@ -1,5 +1,5 @@
-import { getSupabase } from "@/lib/supabase";
-import type { Category, CustomerInquiryView, CustomerOrderView, DashboardContent, DashboardPortfolioContent, DashboardPortfolioProject, DashboardSnapshot, DashboardStoreContent, DashboardStoreOrder, DashboardStoreProduct, Inquiry, Order, OrderStatusView, Product, ProductCategory, ProductMedia, Project, Service, SiteSetting, SkillGroup, SocialLink, WishlistProductView } from "@/lib/types";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
+import type { Category, CustomerInquiryView, DashboardContent, DashboardPortfolioContent, DashboardPortfolioProject, DashboardSnapshot, Inquiry, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
 // Card/list views only render these fields — the long-form case-study text (introduction,
@@ -120,64 +120,6 @@ export async function getDashboardContent() {
   return data as DashboardContent;
 }
 
-const productSelect = "*, category:product_categories(*)";
-// Store cards don't render license/requirements/notes/compatibility/polygon_count/etc. —
-// those only matter on the single-product detail page.
-const productCardSelect = "id, slug, title, short_description, price_usd, price_khr, cover_image, file_formats, is_featured, category:product_categories(*)";
-
-export async function getStoreCategories() {
-  const { data, error } = await getSupabase().from("product_categories").select("*").order("order");
-  if (error) throw error;
-  return (data ?? []) as ProductCategory[];
-}
-
-const productCardSelectFilteredByCategory = productCardSelect.replace("category:product_categories(*)", "category:product_categories!inner(*)");
-
-export async function getStoreProducts(filters: { category?: string; search?: string; sort?: string }) {
-  const supabase = getSupabase();
-  // A dot-path filter (`category.slug`) on a left-joined embed only filters which embedded row
-  // comes back, not whether the parent `products` row is included — it takes an `!inner` join to
-  // actually restrict the product list by category (PostgREST semantics).
-  let query = supabase.from("products").select(filters.category ? productCardSelectFilteredByCategory : productCardSelect).eq("status", "published");
-  if (filters.category) query = query.eq("category.slug", filters.category);
-  if (filters.search) {
-    const search = filters.search.replace(/[%(),]/g, "");
-    query = query.or(`title.ilike.%${search}%,short_description.ilike.%${search}%,tags.ilike.%${search}%`);
-  }
-  switch (filters.sort) {
-    case "oldest": query = query.order("created_at", { ascending: true }); break;
-    case "price-low": query = query.order("price_usd", { ascending: true }); break;
-    case "price-high": query = query.order("price_usd", { ascending: false }); break;
-    case "featured": query = query.order("is_featured", { ascending: false }).order("order"); break;
-    default: query = query.order("created_at", { ascending: false });
-  }
-  const [{ data, error }, categories] = await Promise.all([query, getStoreCategories()]);
-  if (error) throw error;
-  return { products: (data ?? []) as unknown as Product[], categories };
-}
-
-export async function getStoreProduct(slug: string) {
-  const supabase = getSupabase();
-  const { data, error } = await supabase.from("products").select(`${productSelect}, media:product_media(*)`).eq("slug", slug).eq("status", "published").order("order", { referencedTable: "product_media" }).maybeSingle();
-  if (error) throw error;
-  if (!data) return null;
-  const product = data as unknown as Product & { media: ProductMedia[] };
-  const { data: related } = await supabase.from("products").select(productCardSelect).eq("status", "published").eq("category_id", product.category_id).neq("id", product.id).limit(3);
-  return { product, related: (related ?? []) as unknown as Product[] };
-}
-
-export async function getFeaturedProducts() {
-  const { data, error } = await getSupabase().from("products").select(productSelect).eq("status", "published").eq("is_featured", true).order("order").limit(8);
-  if (error) throw error;
-  return data as unknown as Product[];
-}
-
-export async function getDashboardStoreContent() {
-  const { data, error } = await getSupabase().rpc("dashboard_store_content", { p_token: dashboardToken() });
-  if (error) throw error;
-  return data as DashboardStoreContent;
-}
-
 export async function getDashboardPortfolioContent() {
   const { data, error } = await getSupabase().rpc("dashboard_portfolio_content", { p_token: dashboardToken() });
   if (error) throw error;
@@ -190,52 +132,40 @@ export async function getDashboardPortfolioProject(id: number) {
   return data as DashboardPortfolioProject | null;
 }
 
-export async function getDashboardStoreProduct(id: number) {
-  const { data, error } = await getSupabase().rpc("dashboard_store_product", { p_token: dashboardToken(), p_id: id });
-  if (error) throw error;
-  return data as DashboardStoreProduct | null;
-}
-
-export async function getDashboardStoreOrders() {
-  const { data, error } = await getSupabase().rpc("dashboard_store_orders", { p_token: dashboardToken() });
-  if (error) throw error;
-  return data as Order[];
-}
-
-export async function getDashboardStoreOrder(id: number) {
-  const { data, error } = await getSupabase().rpc("dashboard_store_order", { p_token: dashboardToken(), p_id: id });
-  if (error) throw error;
-  return data as DashboardStoreOrder | null;
-}
-
-export async function getOrderByToken(accessToken: string) {
-  // p_access_token is a `uuid` column, so a malformed/garbled token in the URL (not just a
-  // valid-but-nonexistent one) fails at the Postgres cast boundary — that's a 404, not a 500.
-  const { data, error } = await getSupabase().rpc("get_order_by_token", { p_access_token: accessToken });
-  if (error) return null;
-  return data as OrderStatusView | null;
-}
-
-export async function getCustomerOrders(customerId: number) {
-  const { data, error } = await getSupabase().rpc("get_customer_orders", { p_customer_id: customerId });
-  if (error) throw error;
-  return (data ?? []) as CustomerOrderView[];
-}
-
+// Customer data is read with the service-role client on the server, keyed by the id from the
+// signed session cookie. The old public RPC took a bare customer id from anyone holding the
+// (public) anon key, which let any visitor enumerate other clients' inquiries.
 export async function getCustomerInquiries(customerId: number) {
-  const { data, error } = await getSupabase().rpc("get_customer_inquiries", { p_customer_id: customerId });
+  const { data, error } = await getSupabaseAdmin()
+    .from("project_inquiries")
+    .select("id, service_needed, project_description, estimated_budget, preferred_timeline, status, created_at, updated_at")
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as CustomerInquiryView[];
+  const rows = data ?? [];
+  if (!rows.length) return [] as CustomerInquiryView[];
+  const { data: messages, error: messageError } = await getSupabaseAdmin()
+    .from("inquiry_messages")
+    .select("inquiry_id, message_type, subject, body, created_at")
+    .in("inquiry_id", rows.map((row) => row.id))
+    .in("message_type", ["reply", "accepted", "declined"])
+    .order("created_at");
+  if (messageError) throw messageError;
+  return rows.map((row) => ({ ...row, messages: (messages ?? []).filter((message) => message.inquiry_id === row.id) })) as unknown as CustomerInquiryView[];
 }
 
-export async function getCustomerWishlistIds(customerId: number) {
-  const { data, error } = await getSupabase().rpc("get_customer_wishlist_ids", { p_customer_id: customerId });
-  if (error) throw error;
-  return new Set((data ?? []) as number[]);
-}
+export type DashboardClient = { id: number; email: string; full_name: string; created_at: string; inquiry_count: number; last_inquiry_at: string | null; last_status: string | null };
 
-export async function getCustomerWishlist(customerId: number) {
-  const { data, error } = await getSupabase().rpc("get_customer_wishlist", { p_customer_id: customerId });
+export async function getDashboardClients(): Promise<DashboardClient[]> {
+  const admin = getSupabaseAdmin();
+  const [{ data: customers, error }, { data: inquiries, error: inquiryError }] = await Promise.all([
+    admin.from("customers").select("id, email, full_name, created_at").order("created_at", { ascending: false }),
+    admin.from("project_inquiries").select("customer_id, status, created_at").not("customer_id", "is", null).order("created_at", { ascending: false }),
+  ]);
   if (error) throw error;
-  return (data ?? []) as WishlistProductView[];
+  if (inquiryError) throw inquiryError;
+  return (customers ?? []).map((customer) => {
+    const mine = (inquiries ?? []).filter((inquiry) => inquiry.customer_id === customer.id);
+    return { ...customer, inquiry_count: mine.length, last_inquiry_at: mine[0]?.created_at ?? null, last_status: mine[0]?.status ?? null };
+  });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import StoreUploader from "@/components/StoreUploader";
+import MediaUploader from "@/components/MediaUploader";
 import { mediaUrl } from "@/lib/supabase";
 import type { HeroSlide } from "@/lib/heroSlides";
 
@@ -46,7 +46,7 @@ export default function HeroSlidesManager({ initial, isDefault }: { initial: Her
 
     <section className="console-panel content-editor-panel">
       <div className="console-panel-head"><div><span className="status-dot" /><h2>Upload slides</h2></div><small>Best: wide images, 1920×1080 or larger (JPG, PNG, WebP)</small></div>
-      <div className="inquiry-form"><StoreUploader mode="media" kind="image" multiple accept="image/jpeg,image/png,image/webp" label="Drop hero images here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} /></div>
+      <div className="inquiry-form"><MediaUploader kind="image" multiple accept="image/jpeg,image/png,image/webp" label="Drop hero images here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} /></div>
     </section>
 
     <section className="console-panel content-editor-panel">

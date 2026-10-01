@@ -13,7 +13,7 @@ function toDate(value: string | null | undefined): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
-async function fetchPublished(table: "projects" | "products"): Promise<Row[]> {
+async function fetchPublished(table: "projects"): Promise<Row[]> {
   try {
     const { data, error } = await getSupabase().from(table).select("slug, updated_at").eq("status", "published");
     if (error || !data) return [];
@@ -25,9 +25,9 @@ async function fetchPublished(table: "projects" | "products"): Promise<Row[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [projects, products] = await Promise.all([fetchPublished("projects"), fetchPublished("products")]);
+  const projects = await fetchPublished("projects");
 
-  const staticRoutes: MetadataRoute.Sitemap = ["", "showreel", "portfolio", "3d-store", "services", "about", "contact", "privacy"].map((path) => ({
+  const staticRoutes: MetadataRoute.Sitemap = ["", "showreel", "portfolio", "services", "about", "contact", "privacy"].map((path) => ({
     url: `${SITE_URL}/${path ? `${path}/` : ""}`,
   }));
 
@@ -36,11 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: toDate(project.updated_at),
   }));
 
-  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${SITE_URL}/3d-store/${product.slug}/`,
-    lastModified: toDate(product.updated_at),
-  }));
-
   const seen = new Set<string>();
-  return [...staticRoutes, ...projectRoutes, ...productRoutes].filter((entry) => !seen.has(entry.url) && seen.add(entry.url));
+  return [...staticRoutes, ...projectRoutes].filter((entry) => !seen.has(entry.url) && seen.add(entry.url));
 }

@@ -7,11 +7,8 @@ import { getSupabase } from "@/lib/supabase";
 // Site-wide "no refresh needed" sync: silently re-fetches the current page's server data
 // whenever the admin adds/edits/removes a category, portfolio project, service, skill,
 // software entry, site setting, or social link, so an open tab picks it up on its own.
-// Deliberately excludes `products` — the 3D store grid already has its own realtime channel
-// (StoreLiveGrid) that updates rows in place instead of a full page refetch, which avoids the
-// flicker/scroll-jump a router.refresh() would cause on that specific, high-traffic list.
 const WATCHED_TABLES = [
-  "product_categories", "categories", "projects", "services",
+  "categories", "projects", "services",
   "skill_groups", "skills", "software_tools", "site_settings", "social_links",
 ] as const;
 

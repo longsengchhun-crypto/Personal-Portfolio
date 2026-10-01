@@ -258,69 +258,6 @@ export async function sendAdminInquiryNotification(input: {
   return { status, subject: copy.subject, body: copy.text };
 }
 
-function orderEmailShell(heading: string, bodyHtml: string) {
-  return `<div style="margin:0;background:#f4f6f8;padding:28px 14px;font-family:Arial,sans-serif;color:#111827"><div style="max-width:620px;margin:auto;background:#ffffff;border:1px solid #dce3e8;border-radius:14px;overflow:hidden"><div style="height:5px;background:#00b7e8"></div><div style="padding:30px"><p style="margin:0 0 8px;color:#537080;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">LONG SENGCHHUN Creative Studio</p><h1 style="margin:0 0 18px;font-size:23px;line-height:1.25">${escapeHtml(heading)}</h1>${bodyHtml}<p style="margin:26px 0 0"><strong>LONG SENGCHHUN</strong><br><span style="color:#537080">Film • Motion • Design • Visual Storytelling</span></p></div></div></div>`;
-}
-
-export function orderStatusEmailCopy(input: {
-  kind: "submitted" | "approved" | "rejected"; orderNumber: string; customerName: string;
-  productTitle: string; orderUrl: string; adminNotes?: string;
-}) {
-  const content = {
-    submitted: {
-      subject: `Payment received — ${input.orderNumber}`,
-      heading: "Your payment is under review",
-      body: "Thank you — I've received your payment details and will review them shortly. You'll get an email as soon as it's confirmed.",
-    },
-    approved: {
-      subject: `Payment approved — download ready — ${input.orderNumber}`,
-      heading: "Your model is ready to download",
-      body: "Your payment has been confirmed. You can now download your purchased files from your order page.",
-    },
-    rejected: {
-      subject: `Update on your order — ${input.orderNumber}`,
-      heading: "There was an issue with your payment",
-      body: (input.adminNotes ? `${input.adminNotes}\n\n` : "") + "Please review the details or reach out if you believe this is a mistake.",
-    },
-  }[input.kind];
-  const text = [`Hello ${input.customerName},`, "", content.body, "", `Order: ${input.orderNumber}`, `Product: ${input.productTitle}`, "", `View your order: ${input.orderUrl}`].join("\n");
-  const html = orderEmailShell(content.heading, `<p>Hello ${escapeHtml(input.customerName)},</p><p style="line-height:1.7;white-space:pre-line">${escapeHtml(content.body)}</p><table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:10px"><tr><td style="padding:6px 0;color:#537080;width:100px">Order</td><td style="padding:6px 0;font-weight:700">${escapeHtml(input.orderNumber)}</td></tr><tr><td style="padding:6px 0;color:#537080">Product</td><td style="padding:6px 0;font-weight:700">${escapeHtml(input.productTitle)}</td></tr></table><a href="${input.orderUrl}" style="display:inline-block;margin-top:22px;background:#00b7e8;color:#031014;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:4px">View Your Order</a>`);
-  return { subject: content.subject, text, html };
-}
-
-export async function sendOrderCustomerEmail(input: {
-  orderId: number; customerEmail: string; kind: "submitted" | "approved" | "rejected";
-  orderNumber: string; customerName: string; productTitle: string; orderUrl: string; adminNotes?: string;
-}): Promise<{ status: DeliveryStatus; subject: string; body: string }> {
-  const copy = orderStatusEmailCopy(input);
-  const status = await deliverEmail({
-    to: input.customerEmail, subject: copy.subject, html: copy.html, text: copy.text,
-    idempotencyKey: `order-${input.orderId}-${input.kind}`,
-    logContext: { orderId: input.orderId, kind: input.kind, channel: "client" },
-  });
-  return { status, subject: copy.subject, body: copy.text };
-}
-
-export async function sendOrderAdminNotification(input: {
-  orderId: number; orderNumber: string; customerName: string; customerEmail: string;
-  productTitle: string; priceUsd: number; dashboardUrl: string;
-}): Promise<{ status: DeliveryStatus; subject: string; body: string }> {
-  const recipient = serverEnv("ADMIN_NOTIFICATION_EMAIL") || "longsengchhun@gmail.com";
-  const subject = `New payment to review — ${input.orderNumber}`;
-  const rows: [string, string][] = [
-    ["Order", input.orderNumber], ["Customer", input.customerName], ["Email", input.customerEmail],
-    ["Product", input.productTitle], ["Amount", `$${input.priceUsd.toFixed(2)}`],
-  ];
-  const text = [subject, "", ...rows.map(([l, v]) => `${l}: ${v}`), "", `Review: ${input.dashboardUrl}`].join("\n");
-  const html = orderEmailShell("New payment to review", `<table style="width:100%;border-collapse:collapse;font-size:14px">${rows.map(([l, v]) => `<tr><td style="padding:8px 0;color:#537080;width:130px">${escapeHtml(l)}</td><td style="padding:8px 0;font-weight:700">${escapeHtml(v)}</td></tr>`).join("")}</table><a href="${input.dashboardUrl}" style="display:inline-block;margin-top:22px;background:#00b7e8;color:#031014;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:4px">Review Payment</a>`);
-  const status = await deliverEmail({
-    to: recipient, subject, html, text,
-    idempotencyKey: `order-admin-notify-${input.orderId}`,
-    logContext: { orderId: input.orderId, channel: "admin" },
-  });
-  return { status, subject, body: text };
-}
-
 async function sendDecisionSms(input: {
   phoneOrTelegram: string;
   service: string;

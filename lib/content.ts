@@ -3,14 +3,6 @@ import type { Metadata } from "next";
 export const SITE_URL = "https://sengchhun.site";
 export const DEFAULT_OG_IMAGE = "/static/site-assets/profile/profile-cutout-fade.png";
 
-export const ORDER_STATUS_LABELS: Record<string, string> = {
-  pending_payment: "Awaiting Payment",
-  payment_submitted: "Under Review",
-  under_review: "Under Review",
-  paid: "Paid — Ready to Download",
-  rejected: "Payment Issue",
-  completed: "Completed",
-};
 
 export const INQUIRY_STATUS_LABELS: Record<string, string> = {
   new: "Received",

@@ -22,13 +22,12 @@ function DecisionForm({ id, action, label, confirmText, danger }: { id: number; 
   </form>;
 }
 
-export default function DashboardConsole({ initialData, emailReady, emailReadinessMessage, emailReadinessMode, smsReady, pendingOrders }: {
+export default function DashboardConsole({ initialData, emailReady, emailReadinessMessage, emailReadinessMode, smsReady }: {
   initialData: DashboardSnapshot;
   emailReady: boolean;
   emailReadinessMessage: string;
   emailReadinessMode: string;
   smsReady: boolean;
-  pendingOrders: number;
 }) {
   const [data, setData] = useState(initialData);
   const [connected, setConnected] = useState(false);
@@ -58,7 +57,6 @@ export default function DashboardConsole({ initialData, emailReady, emailReadine
   return <>
     <section className="ad-attention" aria-label="Needs attention">
       <Link className={`ad-card${needsReply ? " is-hot" : ""}`} href="#inquiries" onClick={() => setFilter("open")}><strong>{needsReply}</strong><span>{needsReply === 1 ? "inquiry needs a reply" : "inquiries need a reply"}</span></Link>
-      <Link className={`ad-card${pendingOrders ? " is-hot" : ""}`} href="/dashboard/store/orders/"><strong>{pendingOrders}</strong><span>{pendingOrders === 1 ? "store order to review" : "store orders to review"}</span></Link>
       <div className={`ad-card${emailReady ? "" : " is-warn"}`} title={emailReadinessMessage}><strong>{emailReady ? "OK" : "!"}</strong><span>{emailReady ? "Client email ready" : emailReadinessMode === "testing" ? "Client email in test mode" : "Client email sender invalid"}{smsReady ? "" : " · SMS off"}</span></div>
     </section>
 

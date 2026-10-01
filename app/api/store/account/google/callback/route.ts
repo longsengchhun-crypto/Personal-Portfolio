@@ -7,11 +7,11 @@ import { getSupabase } from "@/lib/supabase";
 const STATE_COOKIE = "google_oauth_state";
 
 function safeNext(value: string) {
-  return safeInternalPath(value, "/3d-store/", "/3d-store/account/");
+  return safeInternalPath(value, "/", "/account/");
 }
 
 function fail(request: NextRequest, next: string, reason: string) {
-  return NextResponse.redirect(new URL(`/3d-store/account/login/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
+  return NextResponse.redirect(new URL(`/account/login/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
 }
 
 export async function GET(request: NextRequest) {

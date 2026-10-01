@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import StoreUploader from "@/components/StoreUploader";
+import MediaUploader from "@/components/MediaUploader";
 import type { Category } from "@/lib/types";
 
 const MEDIA_UPLOAD_URL = "/api/dashboard/portfolio/media-upload-url/";
@@ -70,7 +70,7 @@ export default function QuickProjectUpload({ categories }: { categories: Categor
           <label className="review-toggle"><input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} /> Mark as featured (shows on Showreel page)</label>
         </div>
       </div>
-      <StoreUploader mode="media" kind="image" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop posters (JPG, PNG, WebP) or reels (MP4, WebM) here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} />
+      <MediaUploader kind="image" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop posters (JPG, PNG, WebP) or reels (MP4, WebM) here" mediaUploadUrl={MEDIA_UPLOAD_URL} onUploaded={handleUploaded} />
     </div>
   </section>;
 }

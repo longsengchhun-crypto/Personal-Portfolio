@@ -8,16 +8,16 @@ export async function POST(request: NextRequest) {
   const email = String(form.get("email") || "").trim();
   const password = String(form.get("password") || "");
   const fullName = String(form.get("full_name") || "").trim();
-  const next = safeInternalPath(form.get("next"), "/3d-store/", "/3d-store/account/");
+  const next = safeInternalPath(form.get("next"), "/", "/account/");
 
   if (!email || !fullName || password.length < 8) {
-    return NextResponse.redirect(new URL(`/3d-store/account/register/?error=form&next=${encodeURIComponent(next)}`, request.url), 303);
+    return NextResponse.redirect(new URL(`/account/register/?error=form&next=${encodeURIComponent(next)}`, request.url), 303);
   }
 
   const { data, error } = await getSupabase().rpc("register_customer", { p_email: email, p_password: password, p_full_name: fullName });
   if (error) {
     const reason = error.message.includes("email_taken") ? "taken" : error.message.includes("weak_password") ? "weak" : "form";
-    return NextResponse.redirect(new URL(`/3d-store/account/register/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
+    return NextResponse.redirect(new URL(`/account/register/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
   }
 
   await createCustomerSession({ id: data.id, email: data.email, fullName: data.full_name });

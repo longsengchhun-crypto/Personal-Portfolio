@@ -7,16 +7,16 @@ export async function POST(request: NextRequest) {
   const form = await request.formData();
   const email = String(form.get("email") || "").trim();
   const password = String(form.get("password") || "");
-  const next = safeInternalPath(form.get("next"), "/3d-store/", "/3d-store/account/");
+  const next = safeInternalPath(form.get("next"), "/", "/account/");
   const ip = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() || null;
 
   const { data, error } = await getSupabase().rpc("verify_customer_login", { p_email: email, p_password: password, p_ip_address: ip });
   if (error) {
     const reason = error.message.includes("rate_limited") ? "rate" : "invalid";
-    return NextResponse.redirect(new URL(`/3d-store/account/login/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
+    return NextResponse.redirect(new URL(`/account/login/?error=${reason}&next=${encodeURIComponent(next)}`, request.url), 303);
   }
   if (!data) {
-    return NextResponse.redirect(new URL(`/3d-store/account/login/?error=invalid&next=${encodeURIComponent(next)}`, request.url), 303);
+    return NextResponse.redirect(new URL(`/account/login/?error=invalid&next=${encodeURIComponent(next)}`, request.url), 303);
   }
 
   await createCustomerSession({ id: data.id, email: data.email, fullName: data.full_name });
