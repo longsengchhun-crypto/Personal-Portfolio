@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
@@ -19,6 +20,7 @@ export default async function AboutPage() {
         <h1 className="title">Visual creative &amp; media, with practical production depth.</h1>
         <p className="lede">{lead || "I work across VFX, photography, videography, filmmaking, motion graphics and 3D, bringing one connected visual direction to every project, from production through post."}</p>
         {rest.map((part, index) => <p key={index} className="copy">{part}</p>)}
+        <div className="signoff"><Image className="signature" src="/static/site-assets/signature/signature.png" alt="Signature of Long Sengchhun" width={190} height={136} /></div>
         <dl className="facts facts--stack">
           <div><dt className="meta">Based in</dt><dd>{site?.location || OWNER.location}</dd></div>
           <div><dt className="meta">Disciplines</dt><dd>{OWNER.roles}</dd></div>

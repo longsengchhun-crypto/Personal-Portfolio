@@ -1,11 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import AutoVideo from "@/components/site/AutoVideo";
 import Hero from "@/components/site/Hero";
+import ToolMarquee from "@/components/site/ToolMarquee";
 import WorkGrid from "@/components/site/WorkGrid";
 import { ArrowRight, ArrowUpRight, Play } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
 import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, OWNER, SITE_URL } from "@/lib/content";
-import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext, getSoftwareTools } from "@/lib/data";
+import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext } from "@/lib/data";
 import { getHeroSlides } from "@/lib/heroSlides";
 import { mediaUrl } from "@/lib/supabase";
 
@@ -22,8 +24,8 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [{ site, social }, heroSlides, videoProject, services, software, featured] = await Promise.all([
-    getSiteContext(), getHeroSlides(), getFeaturedVideoProject(), getServices(), getSoftwareTools(), getFeaturedProjects().catch(() => []),
+  const [{ site, social }, heroSlides, videoProject, services, featured] = await Promise.all([
+    getSiteContext(), getHeroSlides(), getFeaturedVideoProject(), getServices(), getFeaturedProjects().catch(() => []),
   ]);
   const work = featured.filter((project) => project.cover_image).slice(0, 7);
   const email = site?.email || OWNER.email;
@@ -54,6 +56,8 @@ export default async function HomePage() {
         <Link href="/contact/" className="btn btn--glass btn--lg">Let&apos;s work together</Link>
       </div>
     </Hero>
+
+    <ToolMarquee />
 
     {work.length > 0 && <section className="section" aria-labelledby="work-heading">
       <div className="wrap">
@@ -100,7 +104,7 @@ export default async function HomePage() {
           <h2 id="about-heading" className="title">One connected visual direction, start to finish.</h2>
           <p className="lede">Based in Phnom Penh and working with clients locally and abroad across VFX, photography, videography, filmmaking, motion graphics and 3D.</p>
           <Link href="/about/" className="link-arrow">More about me <ArrowRight /></Link>
-          {software.length > 0 && <ul className="software" aria-label="Software I work with">{software.map((item) => <li key={item.id}>{item.name}</li>)}</ul>}
+          <Image className="signature" src="/static/site-assets/signature/signature.png" alt="Signature of Long Sengchhun" width={190} height={136} />
         </div>
       </div>
     </section>

@@ -324,3 +324,21 @@
 .cursor-label { position: fixed; z-index: var(--z-overlay); top: 0; left: 0; padding: 7px 14px; border-radius: var(--r-pill); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; pointer-events: none; opacity: 0; transition: opacity var(--dur-2) var(--ease); will-change: transform; }
 .cursor-label[data-show="true"] { opacity: 1; }
 @media (hover: none), (pointer: coarse) { .cursor-label { display: none; } }
+
+/* ---------- Tool marquee and signature ---------- */
+.marquee { padding-block: clamp(28px, 4vw, 48px); border-bottom: 1px solid var(--line); background: var(--bg-raised); }
+.marquee__label { text-align: center; margin-bottom: 20px; }
+.marquee__viewport { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+.marquee__track { display: flex; width: max-content; gap: clamp(36px, 5vw, 72px); padding-right: clamp(36px, 5vw, 72px); animation: marquee 48s linear infinite; }
+.marquee__viewport:hover .marquee__track, .marquee__viewport:focus-within .marquee__track { animation-play-state: paused; }
+.marquee__item { display: grid; justify-items: center; gap: 10px; flex: none; }
+.marquee__item img { width: 56px; height: 56px; border-radius: 14px; filter: saturate(0.9); transition: transform var(--dur-3) var(--ease), filter var(--dur-3) var(--ease); }
+.marquee__item span { font-size: var(--t-caption); color: var(--muted); white-space: nowrap; transition: color var(--dur-2) var(--ease); }
+@media (hover: hover) { .marquee__item:hover img { transform: translateY(-4px) scale(1.08); filter: none; } .marquee__item:hover span { color: var(--text); } }
+@keyframes marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee__track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } .marquee__item[aria-hidden] { display: none; } }
+@media (max-width: 560px) { .marquee__item img { width: 44px; height: 44px; border-radius: 11px; } }
+
+.signature { display: block; width: clamp(130px, 14vw, 190px); height: auto; opacity: 0.9; filter: invert(1); }
+html[data-theme="light"] .signature { filter: none; }
+.signoff { display: grid; gap: 6px; margin-top: 12px; }
