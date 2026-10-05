@@ -29,6 +29,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
+  devIndicators: false,
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [30, 75, 80, 85],
