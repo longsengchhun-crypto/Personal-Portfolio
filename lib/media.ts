@@ -1,7 +1,7 @@
 import { getHeroSlides } from "@/lib/heroSlides";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
-export const MEDIA_FOLDERS = ["projects/media", "projects/covers", "projects/gallery"] as const;
+const MEDIA_FOLDERS = ["projects/media", "projects/covers", "projects/gallery"] as const;
 export const isManagedMediaPath = (path: string) => !path.includes("..") && MEDIA_FOLDERS.some((folder) => path.startsWith(`${folder}/`));
 
 export type MediaUser = { label: string; href: string };

@@ -9,7 +9,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useToast } from "@/components/ui/Toast";
 import { adminJson } from "@/lib/adminApi";
 
-export type FieldDef =
+type FieldDef =
   | { key: string; label: string; type: "text" | "textarea" | "url"; required?: boolean; placeholder?: string; wide?: boolean }
   | { key: string; label: string; type: "switch"; text: string }
   | { key: string; label: string; type: "select"; options: { value: string | number; label: string }[] };

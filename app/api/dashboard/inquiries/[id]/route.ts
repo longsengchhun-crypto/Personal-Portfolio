@@ -5,7 +5,7 @@ import { isAdmin } from "@/lib/auth";
 import { INQUIRY_STATUSES } from "@/lib/content";
 import { getDashboardInquiry } from "@/lib/data";
 import { clientEmailCopy, notifyInquiryClient, sendInquiryEmail, type NotificationDelivery } from "@/lib/notifications";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
 
 type Body = { action?: string; status?: string; client_message?: string; admin_notes?: string; is_reviewed?: boolean; confirm_resend?: boolean };
 
@@ -19,6 +19,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!token || !Number.isInteger(id)) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   const existing = await getDashboardInquiry(id);
   if (!existing) return NextResponse.json({ error: "That message could not be found." }, { status: 404 });
+
+  // Permanent removal (for spam and test messages): the delivery history goes with it.
+  if (action === "delete") {
+    const admin = getSupabaseAdmin();
+    await admin.from("inquiry_messages").delete().eq("inquiry_id", id);
+    const { error } = await admin.from("project_inquiries").delete().eq("id", id);
+    if (error) return NextResponse.json({ error: friendlyDbError(error.message) }, { status: 500 });
+    revalidatePath("/dashboard/", "layout");
+    return NextResponse.json({ ok: true, deleted: true });
+  }
 
   // Opening a new message marks it as read; it never touches anything else.
   if (action === "read") {

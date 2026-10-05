@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCustomerSession } from "@/lib/customerAuth";
 import { safeInternalPath } from "@/lib/safeRedirect";
 import { getSupabase } from "@/lib/supabase";
+import { readForm } from "@/lib/readForm";
 
 export async function POST(request: NextRequest) {
-  const form = await request.formData();
+  const form = await readForm(request);
   const email = String(form.get("email") || "").trim();
   const password = String(form.get("password") || "");
   const fullName = String(form.get("full_name") || "").trim();

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import WorkGrid, { ReelGrid } from "@/components/site/WorkGrid";
 import { ArrowLeft, ArrowRight, Clapperboard, Play, Search } from "@/components/ui/Icon";
@@ -6,8 +7,30 @@ import { OWNER, pageMetadata, SITE_URL } from "@/lib/content";
 import { groupByTheme, sortThemes } from "@/lib/posterThemes";
 import type { Project } from "@/lib/types";
 import { getPortfolio } from "@/lib/data";
+import { toJsonLd } from "@/lib/jsonLd";
 
-export const metadata = pageMetadata("/portfolio/", "Work", "Selected film, VFX, photography, motion, 3D and graphic design projects by LONG SENGCHHUN.");
+const CATEGORY_COPY: Record<string, [string, string]> = {
+  poster: ["Poster design", "Poster design by LONG SENGCHHUN: food and beverage, beauty, technology, Khmer culture and festivals, national days and travel campaigns."],
+  "3d-modeling": ["3D modeling", "3D modeling and visualization projects by LONG SENGCHHUN."],
+  "3d-animation": ["3D animation", "3D animation and motion projects by LONG SENGCHHUN."],
+  "2d-animation": ["2D animation", "2D animation and motion graphics by LONG SENGCHHUN."],
+};
+
+// Category and theme pages are real, indexable pages with their own title, description and address;
+// search results and year filters are not.
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const params = await searchParams;
+  const category = text(params.category);
+  const type = text(params.type);
+  const base = pageMetadata("/portfolio/", "Work", "Selected film, VFX, photography, motion, 3D and graphic design projects by LONG SENGCHHUN.");
+  const copy = CATEGORY_COPY[category];
+  if (!copy) return text(params.search) || text(params.year) || type ? { ...base, robots: { index: false, follow: true } } : base;
+  const title = type ? `${type} ${copy[0].toLowerCase()}` : copy[0];
+  const description = type ? `${type} ${copy[0].toLowerCase()} by LONG SENGCHHUN.` : copy[1];
+  const path = `/portfolio/?${new URLSearchParams(type ? { category, type } : { category })}`;
+  const page = pageMetadata(path, title, description);
+  return text(params.search) || text(params.year) ? { ...page, robots: { index: false, follow: true } } : page;
+}
 
 const text = (value: string | string[] | undefined) => (typeof value === "string" ? value : "");
 
@@ -15,9 +38,10 @@ const text = (value: string | string[] | undefined) => (typeof value === "string
 const wallShape = (slug: string | undefined): "reel" | "wide" | null => (slug === "2d-animation" ? "reel" : slug === "3d-animation" ? "wide" : null);
 
 // Posters are one category, shown theme by theme.
-function ThemedPosters({ projects, priority }: { projects: Project[]; priority: boolean }) {
+function ThemedPosters({ projects, priority, level = 3 }: { projects: Project[]; priority: boolean; level?: 2 | 3 }) {
+  const Heading = `h${level}` as const;
   return <div className="themes">{groupByTheme(projects).map(({ theme, projects: group }, index) => <div key={theme} className="theme">
-    <h3 className="theme__title">{theme}<span className="cat-section__count tabular">{group.length}</span></h3>
+    <Heading className="theme__title">{theme}<span className="cat-section__count tabular">{group.length}</span></Heading>
     <WorkGrid projects={group} compact priorityCount={priority && index === 0 ? 2 : 0} />
   </div>)}</div>;
 }
@@ -40,13 +64,13 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Work", url: `${SITE_URL}/portfolio/`, description: metadata.description,
+    name: activeCategory ? CATEGORY_COPY[activeCategory.slug]?.[0] ?? activeCategory.name : "Work", url: `${SITE_URL}/portfolio/`, description: (activeCategory && CATEGORY_COPY[activeCategory.slug]?.[1]) || "Selected film, VFX, photography, motion, 3D and graphic design projects by LONG SENGCHHUN.",
     isPartOf: { "@id": `${SITE_URL}/#website` }, author: { "@id": `${SITE_URL}/#person` },
     mainEntity: { "@type": "ItemList", itemListElement: result.projects.slice(0, 30).map((project, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}/portfolio/${project.slug}/`, name: project.title })) },
   };
 
   return <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }} />
     <header className="page-head wrap">
       <p className="meta meta--accent">Selected work</p>
       <h1 className="display page-head__title">{activeCategory ? activeCategory.name : "Work"}</h1>
@@ -95,7 +119,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
             <header className="cat-section__head"><h2 id={`cat-${item.id}`}>{item.name}<span className="cat-section__count tabular">{projects.length}</span></h2><Link className="link-arrow" href={`/portfolio/?category=${item.slug}`}>View all <ArrowRight /></Link></header>
             {wallShape(item.slug) ? <ReelGrid projects={projects} shape={wallShape(item.slug)!} /> : item.slug === "poster" ? <ThemedPosters projects={projects} priority={index === 0} /> : <WorkGrid projects={projects} compact priorityCount={index === 0 ? 2 : 0} />}
           </section>)
-          : wallShape(activeCategory?.slug) ? <ReelGrid projects={result.projects} shape={wallShape(activeCategory?.slug)!} /> : activeCategory?.slug === "poster" && !type ? <ThemedPosters projects={result.projects} priority /> : <WorkGrid projects={result.projects} priorityCount={2} />}
+          : wallShape(activeCategory?.slug) ? <ReelGrid projects={result.projects} shape={wallShape(activeCategory?.slug)!} /> : activeCategory?.slug === "poster" && !type ? <ThemedPosters projects={result.projects} priority level={2} /> : <WorkGrid projects={result.projects} priorityCount={2} />}
       {result.pages > 1 && <nav className="pager" aria-label="Pagination">
         {result.page > 1 ? <Link className="btn btn--glass" href={pageQuery(result.page - 1)}><ArrowLeft /> Previous</Link> : <span />}
         <span className="caption tabular">Page {result.page} of {result.pages}</span>

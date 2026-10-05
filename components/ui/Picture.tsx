@@ -10,7 +10,7 @@ function storageLoader({ src, width, quality }: ImageLoaderProps) {
   if (/^https?:\/\//i.test(src)) return src;
   const path = src.replace(/^\//, "");
   if (!SUPABASE_URL) return `/media/${path}`;
-  const params = new URLSearchParams({ width: String(width), quality: String(quality ?? 78), resize: "contain" });
+  const params = new URLSearchParams({ width: String(width), quality: String(quality ?? 72), resize: "contain" });
   return `${SUPABASE_URL}/storage/v1/render/image/public/portfolio-media/${path}?${params}`;
 }
 

@@ -11,6 +11,7 @@ import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteConte
 import { getHeroSlides } from "@/lib/heroSlides";
 import { getSiteFlags, seoDescription } from "@/lib/siteFlags";
 import { mediaUrl } from "@/lib/supabase";
+import { toJsonLd } from "@/lib/jsonLd";
 
 const TITLE = `${OWNER.name} | Visual Creative & Media`;
 
@@ -49,7 +50,7 @@ export default async function HomePage() {
   };
 
   return <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }} />
 
     <Hero slides={heroSlides.slides}>
       <p className="meta hero__kicker">{OWNER.title} · Phnom Penh</p>
@@ -101,7 +102,7 @@ export default async function HomePage() {
     <section className="section section--flush-top" aria-labelledby="about-heading">
       <div className="wrap about-teaser">
         <div className="about-teaser__portrait" data-r>
-          <Picture src="/static/site-assets/profile/profile-cutout-fade.png" alt="Portrait of Long Sengchhun" fill sizes="(min-width: 900px) 40vw, 90vw" />
+          <Picture src="/static/site-assets/profile/profile-cutout.webp" alt="Portrait of Long Sengchhun" fill sizes="(min-width: 900px) 40vw, 90vw" />
         </div>
         <div data-r="1">
           <p className="meta meta--accent">About</p>

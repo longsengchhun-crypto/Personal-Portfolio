@@ -9,9 +9,21 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/ui/Icon";
 import { DEFAULT_OG_IMAGE, OWNER, SITE_URL } from "@/lib/content";
 import { getProject } from "@/lib/data";
 import { parseVideoLink } from "@/lib/embed";
-import { mediaUrl } from "@/lib/supabase";
+import { getSupabase, mediaUrl } from "@/lib/supabase";
+import { toJsonLd } from "@/lib/jsonLd";
 
 export const revalidate = 60;
+
+// Published projects are built ahead of time and refreshed every minute, so pages are served from the
+// edge instead of being rendered per visit. A project published later is built the first time it is opened.
+export async function generateStaticParams() {
+  try {
+    const { data } = await getSupabase().from("projects").select("slug").eq("status", "published");
+    return (data ?? []).map((row) => ({ slug: row.slug as string }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const result = await getProject((await params).slug);
@@ -77,7 +89,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   };
 
   return <article>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }} />
     <ProjectHero title={project.title} cover={project.cover_image} videoSrc={project.video_file ? mediaUrl(project.video_file) : undefined} embedSrc={!project.video_file && embed ? embed : undefined} vertical={!project.video_file && Boolean(mainLink?.vertical)} sourceUrl={!project.video_file && /^https:\/\//.test(project.embedded_video_url) ? project.embedded_video_url : undefined} sourceLabel={mainLink?.provider === "tiktok" ? "TikTok" : mainLink?.provider === "youtube" ? "YouTube" : mainLink?.provider === "vimeo" ? "Vimeo" : undefined} />
 
     <header className="wrap pdetail">

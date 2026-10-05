@@ -388,3 +388,10 @@ html[data-theme="light"] .signature { filter: none; }
 @keyframes fade-out { to { opacity: 0; visibility: hidden; } }
 .phero__help { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; }
 .phero__video { z-index: 0; }
+
+/* Audit fixes: comfortable touch targets for links in the navigation and footer */
+.nav__brand { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 860px) {
+  .footer__grid a, .footer__bottom a { display: inline-flex; align-items: center; min-height: 40px; }
+  .footer__grid ul { gap: 0; }
+}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@/components/ui/Icon";
 import { pageMetadata, SERVICE_CHOICES, SITE_URL } from "@/lib/content";
 import { getServices } from "@/lib/data";
+import { toJsonLd } from "@/lib/jsonLd";
 
 export const revalidate = 60;
 export const metadata = pageMetadata("/services/", "Services", "Filmmaking, VFX, photography, video editing, motion graphics, 3D and graphic design services by LONG SENGCHHUN.");
@@ -28,7 +29,7 @@ export default async function ServicesPage() {
   };
 
   return <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }} />
     <header className="page-head wrap">
       <p className="meta meta--accent">Services</p>
       <h1 className="display page-head__title">Capabilities</h1>

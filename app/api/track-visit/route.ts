@@ -11,7 +11,20 @@ const decodedHeader = (value: string | null) => {
   try { return decodeURIComponent(value).slice(0, 120); } catch { return value.slice(0, 120); }
 };
 
+// Best-effort flood guard: one browser reports a page view or two, so a single address sending dozens
+// per minute is a script. The limit is per server instance, which is enough to blunt casual abuse.
+const hits = new Map<string, { count: number; resetAt: number }>();
+function tooMany(ip: string) {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || entry.resetAt < now) { hits.set(ip, { count: 1, resetAt: now + 60_000 }); if (hits.size > 5000) hits.clear(); return false; }
+  entry.count += 1;
+  return entry.count > 40;
+}
+
 export async function POST(request: NextRequest) {
+  const caller = (request.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+  if (tooMany(caller)) return NextResponse.json({ ok: true, tracked: false }, { status: 202 });
   const payload = await request.json().catch(() => ({})) as Record<string, unknown>;
   const sessionKey = request.cookies.get("portfolio-session")?.value || randomUUID();
   const userAgent = request.headers.get("user-agent") || "";

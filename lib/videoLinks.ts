@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { parseVideoLink, type VideoLink } from "@/lib/embed";
+import { tidyTitle } from "@/lib/titles";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 // Server-only. Turns a pasted video link (TikTok, YouTube, Vimeo) into everything a project needs:
@@ -38,7 +39,7 @@ async function oembed(provider: VideoLink["provider"], url: string): Promise<OEm
   }
 }
 
-const cleanTitle = (raw: string) => raw.replace(/#[^\s#]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
+const cleanTitle = (raw: string) => tidyTitle(raw);
 
 async function storeThumbnail(provider: string, id: string, thumbnailUrl: string) {
   if (!/^https:\/\//i.test(thumbnailUrl)) return "";

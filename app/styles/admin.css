@@ -428,3 +428,20 @@
 .gm__video-add { display: grid; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .gm__play { position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 40px; height: 40px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(8, 9, 11, 0.6); color: var(--on-media); }
 .gm__play svg { width: 16px; height: 16px; }
+
+/* Audit fixes: let grid and flex children shrink instead of stretching the page, and keep touch targets comfortable */
+.adm-page, .adm-split > *, .adm-card, .adm-row, .adm-activity a, .ed-main { min-width: 0; }
+.adm-row__main, .adm-activity a span { min-width: 0; }
+.ed-bar__title { min-width: 0; }
+.ed-bar__title h1 { min-width: 0; flex: 0 1 auto; }
+.ed-bar__title .badge { flex: none; }
+.pcard__title { display: block; padding-block: 5px; }
+@media (max-width: 1180px) { .ed-bar { flex-wrap: wrap; } .ed-bar__title { flex: 1 1 220px; } }
+@media (max-width: 900px) {
+  .thread a:not(.btn), .adm-table a:not(.btn), .inbox__foot { display: inline-flex; align-items: center; min-height: 40px; }
+  .thread__who a { min-height: 32px; }
+}
+
+/* Implicit grid columns size to their widest content; pin them to the container so long titles ellipsise instead of widening the page */
+.adm-rows, .adm-activity, .ed, .adm-stack { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 900px) { .ed-grid { grid-template-columns: minmax(0, 1fr); } }

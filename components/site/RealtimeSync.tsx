@@ -27,15 +27,31 @@ export default function RealtimeSync() {
       debounceTimer = setTimeout(() => router.refresh(), 400);
     }
 
-    const channel = supabase.channel("site-content-sync");
-    for (const table of WATCHED_TABLES) {
-      channel.on("postgres_changes", { event: "*", schema: "public", table }, scheduleRefresh);
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    function connect() {
+      if (channel) return;
+      channel = supabase.channel("site-content-sync");
+      for (const table of WATCHED_TABLES) {
+        channel.on("postgres_changes", { event: "*", schema: "public", table }, scheduleRefresh);
+      }
+      channel.subscribe();
     }
-    channel.subscribe();
+    function disconnect() {
+      if (channel) supabase.removeChannel(channel);
+      channel = null;
+    }
+    // An open WebSocket keeps a page out of the browser's back/forward cache, so it is closed when the
+    // page is put away and reopened (with a refresh, in case something changed) when it comes back.
+    const onPageShow = (event: PageTransitionEvent) => { connect(); if (event.persisted) router.refresh(); };
+    connect();
+    window.addEventListener("pagehide", disconnect);
+    window.addEventListener("pageshow", onPageShow);
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
-      supabase.removeChannel(channel);
+      window.removeEventListener("pagehide", disconnect);
+      window.removeEventListener("pageshow", onPageShow);
+      disconnect();
     };
   }, [router]);
 

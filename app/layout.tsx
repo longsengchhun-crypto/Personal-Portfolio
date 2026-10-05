@@ -8,6 +8,7 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/ui.css";
 import "./styles/site.css";
+import { toJsonLd } from "@/lib/jsonLd";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const kantumruy = Kantumruy_Pro({ subsets: ["khmer", "latin"], variable: "--font-kantumruy", display: "swap", weight: ["400", "500", "600", "700"] });
@@ -58,7 +59,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <head>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       {supabaseUrl && <link rel="preconnect" href={supabaseUrl} crossOrigin="anonymous" />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd(description)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(siteJsonLd(description)) }} />
     </head>
     <body>
       <a className="skip-link" href="#main">Skip to content</a>

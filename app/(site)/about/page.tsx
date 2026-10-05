@@ -27,7 +27,7 @@ export default async function AboutPage() {
         </dl>
       </div>
       <div className="about-hero__portrait">
-        <Picture src="/static/site-assets/profile/profile-cutout-fade.png" alt="Portrait of Long Sengchhun" fill priority sizes="(min-width: 900px) 40vw, 90vw" />
+        <Picture src="/static/site-assets/profile/profile-cutout.webp" alt="Portrait of Long Sengchhun" fill priority sizes="(min-width: 900px) 40vw, 90vw" />
       </div>
     </header>
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Archive, ChevronDown, Mail, MailCheck, Paperclip, Phone, Send, Undo2 } from "@/components/ui/Icon";
+import { ArrowLeft, Archive, ChevronDown, Mail, MailCheck, Paperclip, Phone, Send, Trash2, Undo2 } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
 import { adminJson } from "@/lib/adminApi";
@@ -43,6 +43,7 @@ export default function MessageThread({ inquiry, attachmentUrl, emailReady, emai
   const [status, setStatus] = useState(inquiry.status);
   const [busy, setBusy] = useState<string | null>(null);
   const [decision, setDecision] = useState<Decision>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [draft, setDraft] = useState("");
   const history = [...(inquiry.messages ?? [])].filter((message) => message.message_type !== "status" && (message.message_type as string) !== "admin_notify").sort((a, b) => a.created_at.localeCompare(b.created_at));
 
@@ -68,6 +69,17 @@ export default function MessageThread({ inquiry, attachmentUrl, emailReady, emai
     router.refresh();
   }
 
+  async function remove() {
+    setBusy("delete");
+    const res = await adminJson(`/api/dashboard/inquiries/${inquiry.id}/`, { action: "delete" });
+    setBusy(null);
+    setConfirmDelete(false);
+    if (!res.ok) { toast({ tone: "error", title: "Could not delete the message", message: res.error }); return; }
+    toast({ title: "Message deleted" });
+    router.push("/dashboard/messages/");
+    router.refresh();
+  }
+
   const askDecision = (action: "accept" | "reject") => {
     const target = action === "accept" ? "accepted" : "declined";
     setDecision({ action, resend: inquiry.status === target && inquiry.last_notification_status === "sent" });
@@ -87,6 +99,7 @@ export default function MessageThread({ inquiry, attachmentUrl, emailReady, emai
         {status !== "archived"
           ? <Button size="sm" variant="ghost" icon aria-label="Archive" title="Archive" disabled={busy !== null} onClick={() => send("save", { status: "archived" })}><Archive /></Button>
           : <Button size="sm" variant="ghost" icon aria-label="Move back to inbox" title="Move back to inbox" disabled={busy !== null} onClick={() => send("save", { status: "reviewing" })}><Undo2 /></Button>}
+        <Button size="sm" variant="ghost" icon aria-label="Delete message" title="Delete message" disabled={busy !== null} onClick={() => setConfirmDelete(true)}><Trash2 /></Button>
       </div>
     </header>
 
@@ -140,6 +153,10 @@ export default function MessageThread({ inquiry, attachmentUrl, emailReady, emai
     </details>
     {phone && <p className="caption thread__alt"><Phone aria-hidden="true" /> Prefer to reply elsewhere? <a href={phone.href} target={phone.external ? "_blank" : undefined} rel={phone.external ? "noreferrer" : undefined}>{phone.label} {inquiry.phone_or_telegram}</a></p>}
 
+    <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} title={`Delete the message from ${inquiry.full_name}?`} role="alertdialog"
+      actions={<><Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancel</Button><Button variant="danger" state={busy === "delete" ? "loading" : undefined} onClick={remove}>Delete message</Button></>}>
+      <p>This permanently removes the message and its history. Use it for spam or tests. To keep a record, archive it instead.</p>
+    </Dialog>
     <Dialog open={decision !== null} onClose={() => setDecision(null)} title={decision?.action === "accept" ? "Accept this request?" : "Decline this request?"} role="alertdialog"
       actions={<><Button variant="ghost" onClick={() => setDecision(null)}>Cancel</Button><Button variant={decision?.action === "accept" ? "primary" : "danger"} state={busy === decision?.action ? "loading" : undefined} onClick={() => decision && send(decision.action, { resend: decision.resend })}>{decision?.action === "accept" ? "Accept and email client" : "Decline and email client"}</Button></>}>
       <p><strong>{inquiry.full_name}</strong> · {inquiry.service_needed}</p>

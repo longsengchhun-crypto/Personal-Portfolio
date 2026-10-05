@@ -34,7 +34,7 @@ export type Inquiry = {
   messages?: InquiryMessage[];
 };
 
-export type InquiryMessage = {
+type InquiryMessage = {
   id: number; inquiry_id: number; message_type: "receipt" | "accepted" | "declined" | "reply" | "status";
   subject: string; body: string; delivery_status: string; created_at: string;
 };
@@ -55,8 +55,8 @@ export type Service = {
 };
 
 export type SkillGroup = { id: number; name: string; order: number };
-export type Skill = { id: number; group_id: number; name: string; order: number };
-export type SoftwareTool = { id: number; name: string; order: number };
+type Skill = { id: number; group_id: number; name: string; order: number };
+type SoftwareTool = { id: number; name: string; order: number };
 
 export type DashboardContent = {
   site_settings: SiteSetting | null;
@@ -69,9 +69,9 @@ export type DashboardContent = {
 export type DashboardPortfolioContent = { categories: Category[]; projects: Project[] };
 export type DashboardPortfolioProject = Project & { gallery_items: GalleryItem[] };
 
-export type InquiryStatus = "new" | "reviewing" | "replied" | "accepted" | "declined" | "archived";
+type InquiryStatus = "new" | "reviewing" | "replied" | "accepted" | "declined" | "archived";
 
-export type CustomerInquiryMessage = { message_type: "reply" | "accepted" | "declined"; subject: string; body: string; created_at: string };
+type CustomerInquiryMessage = { message_type: "reply" | "accepted" | "declined"; subject: string; body: string; created_at: string };
 
 export type CustomerInquiryView = {
   id: number; service_needed: string; project_description: string; estimated_budget: string;

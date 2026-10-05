@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 type Variant = "primary" | "accent" | "glass" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
-export function buttonClass({ variant = "primary", size = "md", block, icon, className = "" }: { variant?: Variant; size?: Size; block?: boolean; icon?: boolean; className?: string }) {
+function buttonClass({ variant = "primary", size = "md", block, icon, className = "" }: { variant?: Variant; size?: Size; block?: boolean; icon?: boolean; className?: string }) {
   return ["btn", `btn--${variant}`, size !== "md" && `btn--${size}`, block && "btn--block", icon && "btn--icon", className].filter(Boolean).join(" ");
 }
 

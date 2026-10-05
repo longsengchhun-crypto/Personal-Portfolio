@@ -6,7 +6,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 export type SiteFlags = { available: boolean; availabilityNote: string; seoDescription: string };
 
 export const FLAGS_PATH = "site/flags.json";
-export const DEFAULT_FLAGS: SiteFlags = { available: true, availabilityNote: "", seoDescription: "" };
+const DEFAULT_FLAGS: SiteFlags = { available: true, availabilityNote: "", seoDescription: "" };
 
 export function normalizeFlags(raw: unknown): SiteFlags {
   const value = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;

@@ -5,6 +5,7 @@ import { getCustomer } from "@/lib/customerAuth";
 import { getSupabase } from "@/lib/supabase";
 import { inquirySchema } from "@/lib/validation";
 import { clientEmailCopy, sendAdminInquiryNotification, sendInquiryEmail } from "@/lib/notifications";
+import { readForm } from "@/lib/readForm";
 
 const allowedTypes = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp", "application/zip", "application/x-zip-compressed"]);
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     ? NextResponse.json({ ok: true, email: emailStatus })
     : NextResponse.redirect(new URL(`/contact/?sent=1&email=${emailStatus}`, request.url), 303);
 
-  const form = await request.formData();
+  const form = await readForm(request);
   const parsed = inquirySchema.safeParse(Object.fromEntries([...form.entries()].filter(([, value]) => typeof value === "string")));
   if (!parsed.success) return fail("form");
   const attachment = form.get("attachment");

@@ -8,7 +8,7 @@ import Picture from "@/components/ui/Picture";
 export type GalleryEntry = { id: number; kind: "image" | "video" | "embed"; src: string; alt: string; caption: string; layout: "landscape" | "portrait" | "full"; vertical?: boolean };
 
 // Rows: a "full" frame is alone; other frames pair up so every row is balanced.
-export function galleryRows(entries: GalleryEntry[]) {
+function galleryRows(entries: GalleryEntry[]) {
   const rows: GalleryEntry[][] = [];
   let pending: GalleryEntry[] = [];
   const flush = () => { if (pending.length) rows.push(pending); pending = []; };

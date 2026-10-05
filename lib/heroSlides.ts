@@ -7,7 +7,7 @@ export type HeroSlide = { id: string; image: string; label: string };
 export const HERO_MANIFEST_PATH = "site/hero-slides.json";
 
 // Shown until the first slides are saved from the dashboard.
-export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
+const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   { id: "default-vfx", image: "/static/site-assets/hero/hero-vfx.jpg", label: "Visual Effects" },
   { id: "default-3d", image: "/static/site-assets/hero/hero-3d.jpg", label: "3D Design & Modeling" },
   { id: "default-production", image: "/static/site-assets/hero/hero-production.jpg", label: "Film & Media Production" },

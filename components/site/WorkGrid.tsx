@@ -19,7 +19,7 @@ const SIZES: Record<TileRole, string> = {
 export function ProjectTile({ project, role, index = 0, priority = false }: { project: Project; role: TileRole; index?: number; priority?: boolean }) {
   const href = `/portfolio/${project.slug}/`;
   const category = project.category?.name || "Creative work";
-  return <Link href={href} className={`tile tile--${role}`} data-tile data-cursor="View" data-r={index % 3} aria-label={`${project.title} — ${category}${project.year ? `, ${project.year}` : ""}`}>
+  return <Link href={href} className={`tile tile--${role}`} data-tile data-cursor="View" data-r={index % 3}>
     <span className="tile__media">
       {project.cover_image
         ? <Picture src={project.cover_image} alt="" fill sizes={SIZES[role]} priority={priority} className="tile__img" />
