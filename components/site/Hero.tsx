@@ -12,6 +12,9 @@ const INTERVAL_MS = 7000;
 export default function Hero({ slides, children }: { slides: HeroSlide[]; children: ReactNode }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  // The slide that just faded out keeps its zoom running until it is fully hidden, so it never snaps back.
+  const [leaving, setLeaving] = useState<number | null>(null);
+  const shown = useRef(0);
   const stage = useRef<HTMLDivElement>(null);
   const count = slides.length;
 
@@ -20,6 +23,14 @@ export default function Hero({ slides, children }: { slides: HeroSlide[]; childr
     const timer = window.setTimeout(() => setIndex((current) => (current + 1) % count), INTERVAL_MS);
     return () => window.clearTimeout(timer);
   }, [index, count, paused]);
+
+  useEffect(() => {
+    if (shown.current === index) return;
+    setLeaving(shown.current);
+    shown.current = index;
+    const timer = window.setTimeout(() => setLeaving(null), 2200);
+    return () => window.clearTimeout(timer);
+  }, [index]);
 
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden);
@@ -39,7 +50,7 @@ export default function Hero({ slides, children }: { slides: HeroSlide[]; childr
 
   return <section className="hero" aria-label="Introduction">
     <div className="hero__stage" ref={stage} aria-hidden="true">
-      {slides.map((slide, i) => <div key={slide.id} className={`hero__slide${i === index ? " is-active" : ""}`}>
+      {slides.map((slide, i) => <div key={slide.id} className={`hero__slide${i === index ? " is-active" : i === leaving ? " is-leaving" : ""}`}>
         <Picture src={slide.image} alt="" fill priority={i === 0} sizes="100vw" quality={80} className="hero__img" />
       </div>)}
     </div>
