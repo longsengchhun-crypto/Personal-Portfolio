@@ -10,6 +10,7 @@ import Picture from "@/components/ui/Picture";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
 import { adminJson } from "@/lib/adminApi";
+import { POSTER_THEMES } from "@/lib/posterThemes";
 import { mediaUrl } from "@/lib/supabase";
 import type { Category, DashboardPortfolioProject, GalleryItem } from "@/lib/types";
 import GalleryManager from "./GalleryManager";
@@ -240,7 +241,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
             <div className="field"><label htmlFor="role">Role</label><input id="role" className="input" {...bind("role")} placeholder="Director, Editor, VFX" /></div>
             <div className="field"><label htmlFor="duration">Duration</label><input id="duration" className="input" value={form.project_duration} onChange={(event) => set("project_duration", event.target.value)} placeholder="e.g. 2 weeks" /></div>
             <div className="field"><label htmlFor="software">Software</label><input id="software" className="input" value={form.software_used} onChange={(event) => set("software_used", event.target.value)} placeholder="After Effects, Blender" /></div>
-            <div className="field"><label htmlFor="type">Project type</label><input id="type" className="input" value={form.project_type} onChange={(event) => set("project_type", event.target.value)} placeholder="Poster design, Showreel…" /></div>
+            <div className="field"><label htmlFor="type">Project type</label><input id="type" className="input" list="type-options" value={form.project_type} onChange={(event) => set("project_type", event.target.value)} placeholder="For posters, pick a theme" /><datalist id="type-options">{POSTER_THEMES.map((theme) => <option key={theme} value={theme} />)}</datalist><span className="field__hint">Posters are grouped by this theme on the Work page.</span></div>
             <div className="field"><label htmlFor="year">Year</label><input id="year" className="input" type="number" {...bind("year")} /></div>
           </div>
         </section>

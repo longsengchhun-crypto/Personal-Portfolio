@@ -51,20 +51,18 @@ export async function getPortfolio(filters: { category?: string; type?: string; 
     const search = filters.search.replace(/[%(),]/g, "");
     query = query.or(`title.ilike.%${search}%,short_description.ilike.%${search}%,project_type.ilike.%${search}%`);
   }
-  const [{ data, count, error }, { data: categories }, { data: years }, { data: types }, { data: usedCategories }] = await Promise.all([
+  const [{ data, count, error }, { data: categories }, { data: years }, { data: types }] = await Promise.all([
     query.range(from, from + pageSize - 1),
     supabase.from("categories").select("*").order("order").order("name"),
     supabase.from("projects").select("year").eq("status", "published").order("year", { ascending: false }),
-    supabase.from("projects").select("project_type").eq("status", "published").neq("project_type", "").order("project_type"),
-    supabase.from("projects").select("category_id").eq("status", "published"),
+    supabase.from("projects").select("project_type, category_id").eq("status", "published").neq("project_type", "").order("project_type"),
   ]);
-  // Only categories that actually have published work are offered as filters.
-  const used = new Set((usedCategories ?? []).map((row) => row.category_id));
   if (error) throw error;
   return {
-    projects: data as unknown as Project[], categories: ((categories ?? []) as Category[]).filter((category) => used.has(category.id)),
+    projects: data as unknown as Project[], categories: (categories ?? []) as Category[],
     years: [...new Set((years ?? []).map((row) => row.year))], page,
     types: [...new Set((types ?? []).map((row) => row.project_type))],
+    typesByCategory: (types ?? []).reduce<Record<number, string[]>>((map, row) => ({ ...map, [row.category_id]: [...new Set([...(map[row.category_id] ?? []), row.project_type])] }), {}),
     pages: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
   };
 }

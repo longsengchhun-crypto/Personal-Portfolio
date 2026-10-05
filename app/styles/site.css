@@ -373,3 +373,12 @@ html[data-theme="light"] .signature { filter: none; }
 .phero__frame--vertical { aspect-ratio: 9 / 16; width: auto; height: min(82vh, 900px); max-height: none; max-width: calc(100% - 2 * var(--gutter)); }
 .gallery__embed--vertical { aspect-ratio: 9 / 16; max-width: 360px; margin-inline: auto; }
 .gallery__row--single:has(.gallery__embed--vertical) { width: 100%; }
+
+/* Poster themes: groups inside the Poster category */
+.themebar { padding-bottom: 20px; }
+.themebar__chips { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.themebar__chips::-webkit-scrollbar { display: none; }
+.themebar .chip { border-color: var(--line); }
+.themebar .chip[aria-current="true"] { border-color: transparent; }
+.themes { display: grid; gap: clamp(36px, 5vw, 64px); }
+.theme__title { display: flex; align-items: baseline; margin-bottom: 16px; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-2); }
