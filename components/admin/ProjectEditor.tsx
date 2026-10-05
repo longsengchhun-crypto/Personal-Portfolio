@@ -53,6 +53,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [fetchingLink, setFetchingLink] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("basics");
   const snapshot = useRef(JSON.stringify(form));
   const [version, setVersion] = useState(0);
@@ -120,6 +121,15 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
     targets.forEach((target) => observer.observe(target));
     return () => observer.disconnect();
   }, []);
+
+  async function fetchLink() {
+    setFetchingLink(true);
+    const res = await adminJson<{ canonicalUrl: string; title: string; thumbnailPath: string }>("/api/dashboard/video-link/", { url: form.embedded_video_url });
+    setFetchingLink(false);
+    if (!res.ok) { toast({ tone: "error", title: "That link can't be used", message: res.error }); return; }
+    setForm((prev) => ({ ...prev, embedded_video_url: res.data.canonicalUrl, cover_image: prev.cover_image || res.data.thumbnailPath, title: prev.title.trim() ? prev.title : res.data.title }));
+    toast({ title: "Video link ready", message: res.data.thumbnailPath ? "Thumbnail and title were filled in where empty." : "Add a cover image, since no thumbnail could be fetched." });
+  }
 
   async function remove() {
     if (!projectId) return;
@@ -203,6 +213,11 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
               <span className="field__hint">Plays on the project page, and as a hover preview on the Work grid.</span>
             </div>
           </div>
+          <div className="ed-videolink">
+            <div className="field"><label htmlFor="videolink">Video link</label>
+              <div className="ed-videolink__row"><input id="videolink" className="input" value={form.embedded_video_url} onChange={(event) => set("embedded_video_url", event.target.value)} placeholder="Paste a TikTok, YouTube or Vimeo link" /><Button variant="glass" disabled={!form.embedded_video_url.trim() || fetchingLink} state={fetchingLink ? "loading" : undefined} onClick={fetchLink}>Fetch</Button></div>
+              <span className="field__hint">Plays on the project page in full quality, straight from the source. Fetch fills in the thumbnail and title if they are empty.</span></div>
+          </div>
           <div className="ed-gallery">
             <h3>Gallery</h3>
             <p className="field__hint">Stills and supporting frames on the project page. Drag to reorder.</p>
@@ -237,7 +252,6 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
               <div className="adm-form">
                 <div className="field"><label htmlFor="slug">Web address</label><div className="ed-slug"><span className="caption">/portfolio/</span><input id="slug" className="input" {...bind("slug")} placeholder="made-from-the-title" /></div><span className="field__hint">Changing this breaks links people already have to a published project.</span></div>
                 <div className="field"><label htmlFor="order">Position on the site</label><input id="order" className="input" type="number" min={0} value={form.order} onChange={(event) => set("order", Number(event.target.value) || 0)} /><span className="field__hint">Lower numbers come first.</span></div>
-                <div className="field adm-form__wide"><label htmlFor="embed">Embedded video link</label><input id="embed" className="input" {...bind("embedded_video_url")} placeholder="Paste a YouTube or Vimeo link" /></div>
                 <div className="field"><span className="field__label">Before image</span>{form.before_image && <div className="ed-thumb"><Picture src={form.before_image} alt="Before" fill sizes="240px" /><button type="button" className="btn btn--glass btn--icon btn--sm ed-cover__remove" aria-label="Remove before image" onClick={() => set("before_image", "")}><X /></button></div>}<MediaUploader kind="image" compact accept="image/jpeg,image/png,image/webp" label={form.before_image ? "Replace" : "Upload before image"} uploadUrl={UPLOAD_URL} onUploaded={(result) => set("before_image", result.path)} /></div>
                 <div className="field"><span className="field__label">After image</span>{form.after_image && <div className="ed-thumb"><Picture src={form.after_image} alt="After" fill sizes="240px" /><button type="button" className="btn btn--glass btn--icon btn--sm ed-cover__remove" aria-label="Remove after image" onClick={() => set("after_image", "")}><X /></button></div>}<MediaUploader kind="image" compact accept="image/jpeg,image/png,image/webp" label={form.after_image ? "Replace" : "Upload after image"} uploadUrl={UPLOAD_URL} onUploaded={(result) => set("after_image", result.path)} /></div>
               </div>

@@ -3,12 +3,12 @@ import test from "node:test";
 import { layoutRoles, type TileRole } from "../lib/workLayout";
 
 // Each role's width in a 12-column grid; a full layout must fill every row exactly.
-const WIDTH: Record<TileRole, number> = { feature: 8, stack: 4, third: 4, half: 6, full: 12 };
+const WIDTH: Record<Exclude<TileRole, "reel" | "wide">, number> = { feature: 8, stack: 4, third: 4, half: 6, full: 12 };
 
 function rowsFill(roles: TileRole[]) {
   let i = 0;
   while (i < roles.length) {
-    const role = roles[i];
+    const role = roles[i] as Exclude<TileRole, "reel" | "wide">;
     if (role === "feature" || (role === "stack" && roles[i + 1] === "feature")) { i += 3; continue; }
     if (role === "third") { i += 3; continue; }
     if (role === "half") { i += 2; continue; }

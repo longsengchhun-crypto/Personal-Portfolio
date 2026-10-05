@@ -14,6 +14,7 @@ import { adminJson } from "@/lib/adminApi";
 import type { Category, Project } from "@/lib/types";
 import CategoryManager from "./CategoryManager";
 import QuickUpload from "./QuickUpload";
+import VideoImport from "./VideoImport";
 
 type StatusFilter = "all" | "published" | "draft" | "featured";
 type Sort = "manual" | "updated" | "year" | "title";
@@ -33,6 +34,7 @@ export default function ProjectsBrowser({ projects, categories }: { projects: Pr
   const [pendingDelete, setPendingDelete] = useState<Project | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
   const [quick, setQuick] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +100,7 @@ export default function ProjectsBrowser({ projects, categories }: { projects: Pr
 
   if (projects.length === 0) {
     return <>
-      <EmptyState icon={<FolderKanban />} title="No projects yet" action={<div className="adm-inline"><LinkButton href="/dashboard/projects/new/" variant="primary"><Plus /> Create project</LinkButton><Button variant="glass" onClick={() => setQuick(true)}><ImagePlus /> Quick add from files</Button></div>}>
+      <EmptyState icon={<FolderKanban />} title="No projects yet" action={<div className="adm-inline"><LinkButton href="/dashboard/projects/new/" variant="primary"><Plus /> Create project</LinkButton><Button variant="glass" onClick={() => setQuick(true)}><ImagePlus /> Quick add from files</Button><Button variant="glass" onClick={() => setImporting(true)}><Film /> Import videos</Button></div>}>
         Create your first project to begin building your portfolio, or drop a batch of posters and reels to start fast.
       </EmptyState>
       <QuickUpload open={quick} onClose={() => setQuick(false)} categories={categories} />
@@ -119,7 +121,7 @@ export default function ProjectsBrowser({ projects, categories }: { projects: Pr
 
     <div className="adm-subbar">
       <p className="caption" role="status">{visible.length} of {projects.length} project{projects.length === 1 ? "" : "s"}</p>
-      <div className="adm-inline"><Button size="sm" variant="ghost" onClick={() => setCategoriesOpen(true)}>Categories</Button><Button size="sm" variant="ghost" onClick={() => setQuick(true)}><ImagePlus /> Quick add</Button></div>
+      <div className="adm-inline"><Button size="sm" variant="ghost" onClick={() => setCategoriesOpen(true)}>Categories</Button><Button size="sm" variant="ghost" onClick={() => setImporting(true)}><Film /> Import videos</Button><Button size="sm" variant="ghost" onClick={() => setQuick(true)}><ImagePlus /> Quick add</Button></div>
     </div>
 
     {visible.length === 0
@@ -159,5 +161,6 @@ export default function ProjectsBrowser({ projects, categories }: { projects: Pr
     </Dialog>
     <CategoryManager open={categoriesOpen} onClose={() => setCategoriesOpen(false)} categories={categories} counts={perCategory} />
     <QuickUpload open={quick} onClose={() => setQuick(false)} categories={categories} />
+    <VideoImport open={importing} onClose={() => setImporting(false)} categories={categories} />
   </>;
 }

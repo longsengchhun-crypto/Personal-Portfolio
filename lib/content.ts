@@ -41,13 +41,6 @@ export const OWNER = {
   telegramUrl: "https://t.me/SENGCHHUN11",
 };
 
-export const DISCIPLINES = [
-  ["Graphic Design", "graphic-design"],
-  ["Video and Film", "video-editing"],
-  ["Photography", "photography"],
-  ["3D Design and Modeling", "video-and-3d-modeling"],
-] as const;
-
 export const SERVICE_CHOICES = ["Graphic Design", "Poster Design", "Video Editing", "Photo / Video Production", "Photography", "Videography", "Filmmaking", "3D Design and Modeling", "3D Modeling", "3D Animation", "Product Visualization", "Motion Graphics", "Social Media Content", "Other"] as const;
 export const BUDGET_CHOICES = ["Not decided yet", "Under $100", "$100-$300", "$300-$700", "$700-$1,500", "Above $1,500", "Prefer to discuss privately"] as const;
 export const INQUIRY_STATUSES = ["new", "reviewing", "replied", "accepted", "declined", "archived"] as const;

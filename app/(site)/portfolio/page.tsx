@@ -1,5 +1,5 @@
 import Link from "next/link";
-import WorkGrid from "@/components/site/WorkGrid";
+import WorkGrid, { ReelGrid } from "@/components/site/WorkGrid";
 import { ArrowLeft, ArrowRight, Clapperboard, Play, Search } from "@/components/ui/Icon";
 import EmptyState from "@/components/ui/EmptyState";
 import { OWNER, pageMetadata, SITE_URL } from "@/lib/content";
@@ -9,6 +9,9 @@ export const metadata = pageMetadata("/portfolio/", "Work", "Selected film, VFX,
 
 const text = (value: string | string[] | undefined) => (typeof value === "string" ? value : "");
 
+// Animation work is shown as a video wall in the video's own shape; everything else uses the editorial grid.
+const wallShape = (slug: string | undefined): "reel" | "wide" | null => (slug === "2d-animation" ? "reel" : slug === "3d-animation" ? "wide" : null);
+
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const [category, type, year, search] = [text(params.category), text(params.type), text(params.year), text(params.search)];
@@ -17,6 +20,10 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   const filtered = [category, type, year, search].filter(Boolean).length > 0;
   const activeCategory = result.categories.find((item) => item.slug === category);
   const pageQuery = (nextPage: number) => `/portfolio/?${new URLSearchParams(Object.entries({ category, type, year, search, page: String(nextPage) }).filter(([, value]) => value)).toString()}`;
+
+  // With no filter the work is laid out category by category, in the order set in the admin.
+  const sections = result.categories.map((item) => ({ category: item, projects: result.projects.filter((project) => project.category_id === item.id) })).filter((section) => section.projects.length > 0);
+  const grouped = !filtered && sections.length > 0;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -62,11 +69,16 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
     </div>
 
     <section className="wrap work-section" aria-label="Projects">
-      {result.projects.length > 0
-        ? <WorkGrid projects={result.projects} priorityCount={2} />
-        : <EmptyState icon={<Clapperboard />} title={filtered ? "No projects match those filters" : "New work is on its way"} action={filtered ? <Link className="btn btn--primary" href="/portfolio/">Show all work</Link> : <Link className="btn btn--primary" href="/contact/">Start a project</Link>}>
+      {result.projects.length === 0
+        ? <EmptyState icon={<Clapperboard />} title={filtered ? "No projects match those filters" : "New work is on its way"} action={filtered ? <Link className="btn btn--primary" href="/portfolio/">Show all work</Link> : <Link className="btn btn--primary" href="/contact/">Start a project</Link>}>
           {filtered ? "Try a different discipline, year or keyword." : "Projects will appear here as soon as they are published."}
-        </EmptyState>}
+        </EmptyState>
+        : grouped
+          ? sections.map(({ category: item, projects }, index) => <section key={item.id} className="cat-section" aria-labelledby={`cat-${item.id}`}>
+            <header className="cat-section__head"><h2 id={`cat-${item.id}`}>{item.name}<span className="cat-section__count tabular">{projects.length}</span></h2><Link className="link-arrow" href={`/portfolio/?category=${item.slug}`}>View all <ArrowRight /></Link></header>
+            {wallShape(item.slug) ? <ReelGrid projects={projects} shape={wallShape(item.slug)!} /> : <WorkGrid projects={projects} compact priorityCount={index === 0 ? 2 : 0} />}
+          </section>)
+          : wallShape(activeCategory?.slug) ? <ReelGrid projects={result.projects} shape={wallShape(activeCategory?.slug)!} /> : <WorkGrid projects={result.projects} priorityCount={2} />}
       {result.pages > 1 && <nav className="pager" aria-label="Pagination">
         {result.page > 1 ? <Link className="btn btn--glass" href={pageQuery(result.page - 1)}><ArrowLeft /> Previous</Link> : <span />}
         <span className="caption tabular">Page {result.page} of {result.pages}</span>

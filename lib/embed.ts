@@ -1,10 +1,22 @@
-// Turns a pasted YouTube / Vimeo page link into its embeddable player URL; anything else is
-// returned unchanged. Only https URLs are ever embedded.
-export function toEmbedUrl(url: string) {
+// Turns a pasted video page link into the player that can be embedded. Only https links are ever
+// embedded. Vertical formats (TikTok, YouTube Shorts) are flagged so the page can give them a
+// portrait player instead of a letterboxed one.
+export type VideoLink = { provider: "youtube" | "vimeo" | "tiktok" | "other"; embedUrl: string; vertical: boolean };
+
+export function parseVideoLink(url: string): VideoLink | null {
   const value = url.trim();
-  const youtube = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  if (youtube) return `https://www.youtube-nocookie.com/embed/${youtube[1]}`;
-  const vimeo = value.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
-  return /^https:\/\//i.test(value) ? value : "";
+  if (!/^https:\/\//i.test(value)) return null;
+  const tiktok = value.match(/tiktok\.com\/(?:@[\w.-]+\/video|embed(?:\/v2)?)\/(\d{8,})/i);
+  if (tiktok) return { provider: "tiktok", embedUrl: `https://www.tiktok.com/embed/v2/${tiktok[1]}`, vertical: true };
+  const short = value.match(/youtube\.com\/shorts\/([\w-]{6,})/i);
+  if (short) return { provider: "youtube", embedUrl: `https://www.youtube-nocookie.com/embed/${short[1]}`, vertical: true };
+  const youtube = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/)|youtube-nocookie\.com\/embed\/)([\w-]{6,})/i);
+  if (youtube) return { provider: "youtube", embedUrl: `https://www.youtube-nocookie.com/embed/${youtube[1]}`, vertical: false };
+  const vimeo = value.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  if (vimeo) return { provider: "vimeo", embedUrl: `https://player.vimeo.com/video/${vimeo[1]}`, vertical: false };
+  return { provider: "other", embedUrl: value, vertical: false };
+}
+
+export function toEmbedUrl(url: string) {
+  return parseVideoLink(url)?.embedUrl ?? "";
 }

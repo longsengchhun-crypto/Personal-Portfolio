@@ -1,6 +1,6 @@
 // Editorial rhythm for the work grid: large / small / full-width, repeated, with no holes at the
 // end. Roles map to grid spans in site.css (.tile--feature, --stack, --third, --half, --full).
-export type TileRole = "feature" | "stack" | "third" | "half" | "full";
+export type TileRole = "feature" | "stack" | "third" | "half" | "full" | "reel" | "wide";
 
 type Block = { roles: TileRole[]; mirrored?: boolean };
 

@@ -8,7 +8,7 @@ import { ProjectTile } from "@/components/site/WorkGrid";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/ui/Icon";
 import { DEFAULT_OG_IMAGE, OWNER, SITE_URL } from "@/lib/content";
 import { getProject } from "@/lib/data";
-import { toEmbedUrl } from "@/lib/embed";
+import { parseVideoLink } from "@/lib/embed";
 import { mediaUrl } from "@/lib/supabase";
 
 export const revalidate = 60;
@@ -38,13 +38,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const story = ([["Introduction", project.introduction], ["Objective", project.objective], ["Creative approach", project.creative_approach], ["Process", project.process], ["Final result", project.final_result]] as const).filter(([, value]) => value);
   const facts = ([["Client", project.client], ["Role", project.role], ["Duration", project.project_duration], ["Software", project.software_used], ["Type", project.project_type]] as const).filter(([, value]) => value);
-  const embed = toEmbedUrl(project.embedded_video_url || project.cover_video_url || "");
+  const mainLink = parseVideoLink(project.embedded_video_url || project.cover_video_url || "");
+  const embed = mainLink?.embedUrl ?? "";
   const gallery: GalleryEntry[] = (project.gallery_items ?? []).flatMap((item): GalleryEntry[] => {
     const alt = item.alt_text || item.caption || `${project.title} still ${item.order + 1}`;
     if (item.item_type === "video") {
       if (item.video_file) return [{ id: item.id, kind: "video", src: mediaUrl(item.video_file), alt, caption: item.caption, layout: "full" }];
-      const url = toEmbedUrl(item.video_url);
-      return url ? [{ id: item.id, kind: "embed", src: url, alt, caption: item.caption, layout: "full" }] : [];
+      const itemLink = parseVideoLink(item.video_url);
+      return itemLink ? [{ id: item.id, kind: "embed", src: itemLink.embedUrl, alt, caption: item.caption, layout: "full", vertical: itemLink.vertical }] : [];
     }
     return item.image ? [{ id: item.id, kind: "image", src: item.image, alt, caption: item.caption, layout: item.layout }] : [];
   });
@@ -77,10 +78,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return <article>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    <ProjectHero title={project.title} cover={project.cover_image} videoSrc={project.video_file ? mediaUrl(project.video_file) : undefined} embedSrc={!project.video_file && embed ? embed : undefined} />
+    <ProjectHero title={project.title} cover={project.cover_image} videoSrc={project.video_file ? mediaUrl(project.video_file) : undefined} embedSrc={!project.video_file && embed ? embed : undefined} vertical={!project.video_file && Boolean(mainLink?.vertical)} />
 
     <header className="wrap pdetail">
-      <nav aria-label="Breadcrumb" className="pdetail__crumbs"><Link href="/portfolio/" className="link-arrow"><ArrowLeft /> All work</Link></nav>
+      <nav aria-label="Breadcrumb" className="pdetail__crumbs"><Link href="/portfolio/" className="link-arrow"><ArrowLeft /> All work</Link>
+        {!project.video_file && mainLink && /^https:\/\//.test(project.embedded_video_url) && <a className="btn btn--glass btn--sm" href={project.embedded_video_url} target="_blank" rel="noopener noreferrer">Watch on {mainLink.provider === "tiktok" ? "TikTok" : mainLink.provider === "youtube" ? "YouTube" : mainLink.provider === "vimeo" ? "Vimeo" : "the original site"} <ArrowUpRight /></a>}</nav>
       <p className="meta meta--accent">{[project.category?.name, project.year].filter(Boolean).join(" · ")}</p>
       <div className="pdetail__top">
         <h1 className="title pdetail__title">{project.title}</h1>

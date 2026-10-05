@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Film, GripVertical, Pencil, Trash2 } from "@/components/ui/Icon";
+import { ArrowLeft, ArrowRight, Film, GripVertical, Pencil, Play, Trash2 } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
@@ -22,6 +22,8 @@ export default function GalleryManager({ projectId, items, onChange, disabledMes
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const pending = useRef(new Map<number, number>());
+  const [link, setLink] = useState("");
+  const [linking, setLinking] = useState(false);
 
   // If the tab is closed during an undo window, the removal the admin already confirmed still happens.
   useEffect(() => {
@@ -54,6 +56,26 @@ export default function GalleryManager({ projectId, items, onChange, disabledMes
     if (!res.ok) { toast({ tone: "error", title: "The image uploaded but could not be added to the gallery", message: res.error }); return; }
     const entry: GalleryItem = { id: res.data.id, project_id: projectId, item_type: "image", image: result.path, video_url: "", video_file: "", caption: "", alt_text: "", layout: "landscape", order: itemsRef.current.length };
     onChange([...itemsRef.current, entry]);
+  }
+
+  async function addVideoFile(result: { path: string }) {
+    if (!projectId) return;
+    const res = await adminJson<{ id: number }>(GALLERY_API, { project_id: projectId, item_type: "video", video_file: result.path, layout: "full", order: itemsRef.current.length });
+    if (!res.ok) { toast({ tone: "error", title: "The video uploaded but could not be added to the gallery", message: res.error }); return; }
+    onChange([...itemsRef.current, { id: res.data.id, project_id: projectId, item_type: "video", image: "", video_url: "", video_file: result.path, caption: "", alt_text: "", layout: "full", order: itemsRef.current.length }]);
+  }
+
+  async function addVideoLink() {
+    if (!projectId || !link.trim()) return;
+    setLinking(true);
+    const resolved = await adminJson<{ canonicalUrl: string; thumbnailPath: string; vertical: boolean }>("/api/dashboard/video-link/", { url: link });
+    if (!resolved.ok) { setLinking(false); toast({ tone: "error", title: "That link can't be added", message: resolved.error }); return; }
+    const res = await adminJson<{ id: number }>(GALLERY_API, { project_id: projectId, item_type: "video", video_url: resolved.data.canonicalUrl, image: resolved.data.thumbnailPath, layout: resolved.data.vertical ? "portrait" : "full", order: itemsRef.current.length });
+    setLinking(false);
+    if (!res.ok) { toast({ tone: "error", title: "Could not add the video", message: res.error }); return; }
+    onChange([...itemsRef.current, { id: res.data.id, project_id: projectId, item_type: "video", image: resolved.data.thumbnailPath, video_url: resolved.data.canonicalUrl, video_file: "", caption: "", alt_text: "", layout: resolved.data.vertical ? "portrait" : "full", order: itemsRef.current.length }]);
+    setLink("");
+    toast({ title: "Video added to the gallery" });
   }
 
   async function patchItem(id: number, patch: Partial<GalleryItem>) {
@@ -94,7 +116,7 @@ export default function GalleryManager({ projectId, items, onChange, disabledMes
         onDrop={(event) => { event.preventDefault(); if (dragIndex !== null) move(dragIndex, index); setDragIndex(null); setOverIndex(null); }}>
         <div className="gm__thumb">
           {item.image ? <Picture src={item.image} alt={item.alt_text || item.caption || `Gallery image ${index + 1}`} fill sizes="200px" quality={75} /> : <span className="gm__video"><Film aria-hidden="true" /></span>}
-          <span className="gm__index tabular">{index + 1}</span>
+          <span className="gm__index tabular">{index + 1}</span>{item.item_type === "video" && <span className="gm__play" aria-label="Video"><Play aria-hidden="true" /></span>}
           <span className="gm__grip" aria-hidden="true"><GripVertical /></span>
         </div>
         <div className="gm__bar">
@@ -114,6 +136,12 @@ export default function GalleryManager({ projectId, items, onChange, disabledMes
         </div>}
       </li>)}
     </ul>}
+    <div className="gm__video-add">
+      <div className="field"><label htmlFor="gm-link">Add a video by link</label>
+        <div className="gm__link"><input id="gm-link" className="input input--sm" value={link} disabled={!projectId} onChange={(event) => setLink(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addVideoLink(); } }} placeholder="Paste a TikTok, YouTube or Vimeo link" /><Button size="sm" variant="glass" disabled={!projectId || !link.trim()} state={linking ? "loading" : undefined} onClick={addVideoLink}>Add video</Button></div>
+      </div>
+      <MediaUploader kind="video" compact disabled={!projectId} disabledMessage={disabledMessage} accept="video/mp4" label="Or upload a video file (MP4)" uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={addVideoFile} />
+    </div>
     <MediaUploader kind="image" multiple disabled={!projectId} disabledMessage={disabledMessage} accept="image/jpeg,image/png,image/webp" label={items.length ? "Add more images" : "Add gallery images"} uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={addImage} compact={items.length > 0} />
   </div>;
 }

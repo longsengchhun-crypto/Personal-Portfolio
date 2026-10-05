@@ -5,7 +5,7 @@ import Dialog from "@/components/ui/Dialog";
 import { ChevronLeft, ChevronRight } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
 
-export type GalleryEntry = { id: number; kind: "image" | "video" | "embed"; src: string; alt: string; caption: string; layout: "landscape" | "portrait" | "full" };
+export type GalleryEntry = { id: number; kind: "image" | "video" | "embed"; src: string; alt: string; caption: string; layout: "landscape" | "portrait" | "full"; vertical?: boolean };
 
 // Rows: a "full" frame is alone; other frames pair up so every row is balanced.
 export function galleryRows(entries: GalleryEntry[]) {
@@ -42,7 +42,7 @@ export default function Gallery({ entries, title }: { entries: GalleryEntry[]; t
             <Picture src={entry.src} alt={entry.alt} fill sizes={entry.layout === "full" ? "100vw" : "(min-width: 900px) 50vw, 100vw"} className="gallery__img" />
           </button>}
           {entry.kind === "video" && <video className="gallery__video" src={entry.src} controls playsInline preload="metadata" />}
-          {entry.kind === "embed" && <div className="gallery__embed"><iframe src={entry.src} title={entry.alt} loading="lazy" allowFullScreen /></div>}
+          {entry.kind === "embed" && <div className={`gallery__embed${entry.vertical ? " gallery__embed--vertical" : ""}`}><iframe src={entry.src} title={entry.alt} loading="lazy" allowFullScreen /></div>}
           {entry.caption && <figcaption className="caption">{entry.caption}</figcaption>}
         </figure>)}
       </div>)}

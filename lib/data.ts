@@ -5,7 +5,7 @@ const projectSelect = "*, category:categories(*)";
 // Card/list views only render these fields — the long-form case-study text (introduction,
 // objective, creative_approach, process, final_result, credits, etc.) only matters on the
 // single-project detail page, so list queries skip it to avoid shipping unused payload.
-const projectCardSelect = "id, slug, title, year, short_description, project_type, cover_image, video_file, is_featured, category:categories(*)";
+const projectCardSelect = "id, slug, title, year, short_description, project_type, cover_image, video_file, embedded_video_url, is_featured, category_id, order, category:categories(*)";
 
 function dashboardToken() {
   const token = process.env.SUPABASE_DASHBOARD_TOKEN;
@@ -28,8 +28,9 @@ export async function getFeaturedProjects() {
   return data as unknown as Project[];
 }
 
+// The reel on the homepage and Showreel page: the first published project with an uploaded video file.
 export async function getFeaturedVideoProject() {
-  const { data } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").eq("categories.slug", "video-and-3d-modeling").neq("video_file", "").order("order").limit(1).maybeSingle();
+  const { data } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").neq("video_file", "").order("order").limit(1).maybeSingle();
   return data as unknown as Project | null;
 }
 
@@ -39,22 +40,29 @@ export async function getPortfolio(filters: { category?: string; type?: string; 
   const pageSize = 60;
   const from = (page - 1) * pageSize;
   let query = supabase.from("projects").select(projectCardSelect, { count: "exact" }).eq("status", "published").order("order").order("year", { ascending: false });
-  if (filters.category) query = query.eq("categories.slug", filters.category);
+  if (filters.category) {
+    // Filter on the foreign key: a filter on the embedded category would not remove the parent rows.
+    const { data: match } = await supabase.from("categories").select("id").eq("slug", filters.category).maybeSingle();
+    query = query.eq("category_id", match?.id ?? -1);
+  }
   if (filters.type) query = query.eq("project_type", filters.type);
   if (filters.year && /^\d{4}$/.test(filters.year)) query = query.eq("year", Number(filters.year));
   if (filters.search) {
     const search = filters.search.replace(/[%(),]/g, "");
     query = query.or(`title.ilike.%${search}%,short_description.ilike.%${search}%,project_type.ilike.%${search}%`);
   }
-  const [{ data, count, error }, { data: categories }, { data: years }, { data: types }] = await Promise.all([
+  const [{ data, count, error }, { data: categories }, { data: years }, { data: types }, { data: usedCategories }] = await Promise.all([
     query.range(from, from + pageSize - 1),
     supabase.from("categories").select("*").order("order").order("name"),
     supabase.from("projects").select("year").eq("status", "published").order("year", { ascending: false }),
     supabase.from("projects").select("project_type").eq("status", "published").neq("project_type", "").order("project_type"),
+    supabase.from("projects").select("category_id").eq("status", "published"),
   ]);
+  // Only categories that actually have published work are offered as filters.
+  const used = new Set((usedCategories ?? []).map((row) => row.category_id));
   if (error) throw error;
   return {
-    projects: data as unknown as Project[], categories: (categories ?? []) as Category[],
+    projects: data as unknown as Project[], categories: ((categories ?? []) as Category[]).filter((category) => used.has(category.id)),
     years: [...new Set((years ?? []).map((row) => row.year))], page,
     types: [...new Set((types ?? []).map((row) => row.project_type))],
     pages: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
