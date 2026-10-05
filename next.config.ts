@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
       { source: "/3d-store/account", destination: "/account/", permanent: true },
       { source: "/3d-store/:path*", destination: "/", permanent: true },
       { source: "/dashboard/store/:path*", destination: "/dashboard/", permanent: false },
+      { source: "/portfolio/khmer-new-year-2026", destination: "/portfolio/khmer-new-year-2023/", permanent: true },
       // Admin sections were renamed; old bookmarks and emailed links keep working.
       { source: "/dashboard/portfolio", destination: "/dashboard/projects/", permanent: true },
       { source: "/dashboard/portfolio/:path*", destination: "/dashboard/projects/:path*", permanent: true },

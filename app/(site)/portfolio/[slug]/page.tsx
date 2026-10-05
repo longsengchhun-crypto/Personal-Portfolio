@@ -58,10 +58,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         "@type": project.video_file || embed ? "VideoObject" : "CreativeWork", "@id": `${url}#work`,
         name: project.title, description: project.short_description || project.title, url,
         author: { "@id": `${SITE_URL}/#person` }, creator: { "@id": `${SITE_URL}/#person` },
-        dateCreated: String(project.year), datePublished: project.created_at, dateModified: project.updated_at,
+        dateCreated: String(project.year), datePublished: `${project.year}-01-01`,
         genre: project.category?.name, keywords: [project.project_type, project.category?.name, ...splitList(project.software_used)].filter(Boolean).join(", "),
         ...(cover ? { image: cover, thumbnailUrl: cover } : {}),
-        ...(project.video_file ? { contentUrl: mediaUrl(project.video_file), uploadDate: project.created_at } : embed ? { embedUrl: embed, uploadDate: project.created_at } : {}),
+        ...(project.video_file ? { contentUrl: mediaUrl(project.video_file), uploadDate: `${project.year}-01-01` } : embed ? { embedUrl: embed, uploadDate: `${project.year}-01-01` } : {}),
         isPartOf: { "@id": `${SITE_URL}/#website` },
       },
       {
