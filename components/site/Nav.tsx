@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Clapperboard, Home, LayoutDashboard, Mail, Sparkles, User, UserRound } from "@/components/ui/Icon";
+import { ArrowUpRight, Clapperboard, Home, LayoutDashboard, Mail, Sparkles, User, UserRound } from "@/components/ui/Icon";
 import ThemeToggle from "./ThemeToggle";
 
 const LINKS = [
@@ -12,6 +12,8 @@ const LINKS = [
   { label: "About", href: "/about/", icon: User },
   { label: "Contact", href: "/contact/", icon: Mail },
 ] as const;
+
+const PLUGINS_URL = "https://lastfxstudio.com";
 
 const TABS = [{ label: "Home", href: "/", icon: Home }, ...LINKS] as const;
 
@@ -59,9 +61,13 @@ export default function Nav() {
       <nav className="nav__bar" aria-label="Primary">
         <Link href="/" className="nav__brand" aria-label="LONG SENGCHHUN — home"><span>LONG SENGCHHUN</span></Link>
         <ul className="nav__links">
-          {LINKS.filter((link) => link.href !== "/contact/").map((link) => <li key={link.href}><Link href={link.href} className="nav__link" aria-current={isActive(link.href, path) ? "page" : undefined}>{link.label}</Link></li>)}
+          {LINKS.filter((link) => link.href !== "/contact/").map((link) => <Fragment key={link.href}>
+            <li><Link href={link.href} className="nav__link" aria-current={isActive(link.href, path) ? "page" : undefined}>{link.label}</Link></li>
+            {link.href === "/portfolio/" && <li><a href={PLUGINS_URL} target="_blank" rel="noopener noreferrer" className="nav__link">Plugins <ArrowUpRight className="nav__ext" aria-hidden="true" /><span className="sr-only">(opens lastfxstudio.com in a new tab)</span></a></li>}
+          </Fragment>)}
         </ul>
         <div className="nav__tools">
+          <a href={PLUGINS_URL} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--sm nav__plugins-mobile">Plugins <ArrowUpRight aria-hidden="true" /><span className="sr-only">(opens lastfxstudio.com in a new tab)</span></a>
           <Link href="/contact/" className="btn btn--glass btn--sm nav__cta" aria-current={isActive("/contact/", path) ? "page" : undefined}>Start a project</Link>
           <AccountLink session={session} />
           <ThemeToggle />

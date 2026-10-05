@@ -11,6 +11,8 @@
 .nav__link:hover { color: var(--text); background: var(--fill); }
 .nav__link[aria-current="page"] { color: var(--text); background: var(--fill-hover); }
 .nav__tools { display: flex; align-items: center; gap: 4px; }
+.nav__ext { display: inline; width: 13px; height: 13px; margin-left: 2px; vertical-align: -1px; opacity: 0.7; }
+.nav__plugins-mobile { display: none; }
 .nav__cta[aria-current="page"] { border-color: var(--accent); }
 .nav--over-media:not([data-scrolled]) { color: var(--on-media); }
 .nav--over-media:not([data-scrolled]) .nav__link, .nav--over-media:not([data-scrolled]) .btn--ghost { color: rgba(246, 244, 240, 0.82); }
@@ -21,6 +23,8 @@
 .tabbar { display: none; }
 @media (max-width: 860px) {
   .nav__links, .nav__cta { display: none; }
+  .nav__plugins-mobile { display: inline-flex; }
+  .nav__plugins-mobile svg { width: 13px; height: 13px; }
   .nav__bar { min-height: 52px; padding-left: 4px; }
   .nav__tools { margin-left: auto; }
   .nav__brand { padding-left: 14px; }
