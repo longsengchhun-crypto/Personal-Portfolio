@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FlagsForm from "@/components/admin/FlagsForm";
 import HeroSlides from "@/components/admin/HeroSlides";
 import PageHeader from "@/components/admin/PageHeader";
 import RowsEditor, { type Row } from "@/components/admin/RowsEditor";
@@ -7,11 +8,12 @@ import SiteSettingsForm from "@/components/admin/SiteSettingsForm";
 import { requireAdmin } from "@/lib/auth";
 import { getDashboardContent, getSocialLinksAdmin } from "@/lib/data";
 import { getHeroSlides } from "@/lib/heroSlides";
+import { getSiteFlags } from "@/lib/siteFlags";
 
 export const metadata = { title: "Settings" };
 export const dynamic = "force-dynamic";
 
-const TABS = [["general", "General"], ["homepage", "Homepage"], ["about", "About page"], ["social", "Social links"]] as const;
+const TABS = [["general", "General"], ["homepage", "Homepage"], ["about", "About page"], ["social", "Social links"], ["seo", "Search & status"]] as const;
 type Tab = (typeof TABS)[number][0];
 
 const SOCIAL_ICONS = ["instagram", "facebook", "youtube", "tiktok", "telegram", "linkedin", "behance", "vimeo", "github", "twitter"].map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }));
@@ -51,6 +53,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <section className="adm-card"><h2>Software</h2><p className="adm-hint">The tools listed on the homepage and About page.</p>
         <RowsEditor endpoint="/api/dashboard/content/software/" noun="tool" rows={content.software_tools as unknown as Row[]} fields={[{ key: "name", label: "Tool", type: "text", required: true, placeholder: "e.g. DaVinci Resolve" }]} blank={{ name: "" }} emptyTitle="No software listed" emptyText="Add the tools you work with." /></section>
     </div>}
+
+    {tab === "seo" && await (async () => {
+      const flags = await getSiteFlags();
+      return <FlagsForm initial={flags} />;
+    })()}
 
     {tab === "social" && await (async () => {
       const links = await getSocialLinksAdmin().catch(() => []);

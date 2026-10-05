@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
 
+// Content Security Policy. Inline scripts/styles stay allowed because Next injects its own
+// hydration and theme scripts; everything else is limited to this site, Supabase and https media.
+const csp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.supabase.co https://*.storage.supabase.co wss://*.supabase.co",
+  "frame-src https:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join("; ");
+
 const securityHeaders = [
+  ...(process.env.NODE_ENV === "production" ? [{ key: "Content-Security-Policy", value: csp }] : []),
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

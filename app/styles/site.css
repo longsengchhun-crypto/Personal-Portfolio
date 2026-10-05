@@ -342,3 +342,7 @@
 .signature { display: block; width: clamp(130px, 14vw, 190px); height: auto; opacity: 0.9; filter: invert(1); }
 html[data-theme="light"] .signature { filter: none; }
 .signoff { display: grid; gap: 6px; margin-top: 12px; }
+
+.footer__status, .status-line { display: inline-flex; align-items: center; gap: 10px; }
+.footer__status i, .status-line i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.footer__status i.is-open, .status-line i.is-open { background: var(--success); box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 20%, transparent); }

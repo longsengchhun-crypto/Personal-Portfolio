@@ -79,7 +79,7 @@ export default function MessageThread({ inquiry, attachmentUrl, emailReady, emai
     <header className="thread__head">
       <Link href="/dashboard/messages/" className="btn btn--ghost btn--icon btn--sm thread__back" aria-label="Back to messages"><ArrowLeft /></Link>
       <div className="thread__who">
-        <h1>{inquiry.full_name}</h1>
+        <h2>{inquiry.full_name}</h2>
         <p className="caption"><a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>{inquiry.company ? ` · ${inquiry.company}` : ""}</p>
       </div>
       <div className="thread__tools">

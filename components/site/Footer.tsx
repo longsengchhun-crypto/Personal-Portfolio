@@ -2,18 +2,19 @@ import Link from "next/link";
 import { ArrowUpRight } from "@/components/ui/Icon";
 import { OWNER } from "@/lib/content";
 import { getSiteContext } from "@/lib/data";
+import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
 const SOCIAL_ICON_NAMES: Record<string, string> = { instagram: "Instagram", facebook: "Facebook", youtube: "YouTube", tiktok: "TikTok", telegram: "Telegram", linkedin: "LinkedIn", behance: "Behance", vimeo: "Vimeo", github: "GitHub", twitter: "X", "twitter-x": "X" };
 
 export default async function Footer() {
-  const { site, social } = await getSiteContext().catch(() => ({ site: null, social: [] }));
+  const [{ site, social }, flags] = await Promise.all([getSiteContext().catch(() => ({ site: null, social: [] })), getSiteFlags()]);
   const email = site?.email || OWNER.email;
   const phone = site?.phone || OWNER.phone;
   return <footer className="footer">
     <div className="wrap">
       <div className="footer__top">
         <div>
-          <p className="meta meta--accent">Available for selected collaborations</p>
+          <p className="meta meta--accent footer__status"><i className={flags.available ? "is-open" : ""} aria-hidden="true" />{availabilityLabel(flags)}</p>
           <p className="title footer__title">Let&apos;s make something worth watching.</p>
         </div>
         <Link href="/contact/" className="btn btn--primary btn--lg">Start a project <ArrowUpRight className="btn__arrow" /></Link>

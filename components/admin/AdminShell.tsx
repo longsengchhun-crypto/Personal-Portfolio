@@ -58,7 +58,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     <aside className="adm-side" aria-label="Admin">
       <Link href="/dashboard/" className="adm-brand"><span className="adm-brand__mark" aria-hidden="true">LS</span><span><strong>Studio</strong><small>Admin</small></span></Link>
       <button type="button" className="adm-search" onClick={() => setCommand(true)}><Search aria-hidden="true" /><span>Quick search</span><span className="adm-search__keys"><span className="kbd">Ctrl</span><span className="kbd">K</span></span></button>
-      <nav className="adm-nav" aria-label="Sections">
+      <nav className="adm-nav" aria-label="Admin sections">
         {ADMIN_NAV.map(({ label, href, icon: Icon }) => <Link key={href} href={href} className="adm-nav__link" aria-current={isNavActive(href, path) ? "page" : undefined}>
           <Icon aria-hidden="true" /><span>{label}</span>
           {badge(href) > 0 && <span className="adm-nav__badge" aria-label={`${badge(href)} ${badgeLabel(href)}`}>{badge(href)}</span>}
@@ -82,7 +82,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
     <div className="adm-main">{children}</div>
 
-    <nav className="adm-tabbar glass glass--strong" aria-label="Sections">
+    <nav className="adm-tabbar glass glass--strong" aria-label="Admin sections, mobile">
       {primary.map(({ label, href, icon: Icon }) => <Link key={href} href={href} className="adm-tabbar__item" aria-current={isNavActive(href, path) ? "page" : undefined}>
         <Icon aria-hidden="true" />{badge(href) > 0 && <i className="adm-tabbar__dot" aria-hidden="true" />}<span>{label}</span>
       </Link>)}

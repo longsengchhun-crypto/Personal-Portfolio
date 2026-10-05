@@ -2,6 +2,7 @@ import ContactForm from "@/components/site/ContactForm";
 import { CheckCircle2 } from "@/components/ui/Icon";
 import { OWNER, pageMetadata, SERVICE_CHOICES } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
+import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
 export const metadata = pageMetadata("/contact/", "Contact", "Start a film, VFX, photography, motion or design project with LONG SENGCHHUN. Tell me what you are making and get a clear reply.");
 
@@ -13,7 +14,7 @@ const NEXT_STEPS = [
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const customer = await getCustomer();
+  const [customer, flags] = await Promise.all([getCustomer(), getSiteFlags()]);
   const requested = typeof params.service === "string" && SERVICE_CHOICES.includes(params.service as never) ? params.service : "";
   const error = typeof params.error === "string" ? params.error : "";
   const sentWithoutScript = params.sent === "1";
@@ -32,6 +33,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
           <li><span className="meta">Telegram</span><a href={OWNER.telegramUrl} target="_blank" rel="noreferrer">{OWNER.telegram}</a></li>
           <li><span className="meta">Phone</span><a href={`tel:${OWNER.phone.replace(/\s/g, "")}`}>{OWNER.phone}</a></li>
           <li><span className="meta">Based in</span><span>{OWNER.location}</span></li>
+          <li><span className="meta">Status</span><span className="status-line"><i className={flags.available ? "is-open" : ""} aria-hidden="true" />{availabilityLabel(flags)}</span></li>
         </ul>
         <div className="contact__next">
           <h2 className="meta">What happens next</h2>

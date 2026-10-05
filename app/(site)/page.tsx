@@ -6,9 +6,10 @@ import ToolMarquee from "@/components/site/ToolMarquee";
 import WorkGrid from "@/components/site/WorkGrid";
 import { ArrowRight, ArrowUpRight, Play } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
-import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, OWNER, SITE_URL } from "@/lib/content";
+import { DEFAULT_OG_IMAGE, OWNER, SITE_URL } from "@/lib/content";
 import { getFeaturedProjects, getFeaturedVideoProject, getServices, getSiteContext } from "@/lib/data";
 import { getHeroSlides } from "@/lib/heroSlides";
+import { getSiteFlags, seoDescription } from "@/lib/siteFlags";
 import { mediaUrl } from "@/lib/supabase";
 
 const TITLE = `${OWNER.name} | Visual Creative & Media`;
@@ -16,12 +17,15 @@ const TITLE = `${OWNER.name} | Visual Creative & Media`;
 // No per-visitor data here, so the page can be cached; admin edits appear within a minute.
 export const revalidate = 60;
 
-export const metadata = {
-  title: { absolute: TITLE },
-  description: DEFAULT_DESCRIPTION,
-  alternates: { canonical: "/" },
-  openGraph: { title: TITLE, description: DEFAULT_DESCRIPTION, url: "/", siteName: OWNER.name, type: "website", images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }] },
-};
+export async function generateMetadata() {
+  const description = seoDescription(await getSiteFlags());
+  return {
+    title: { absolute: TITLE },
+    description,
+    alternates: { canonical: "/" },
+    openGraph: { title: TITLE, description, url: "/", siteName: OWNER.name, type: "website" as const, images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }] },
+  };
+}
 
 export default async function HomePage() {
   const [{ site, social }, heroSlides, videoProject, services, featured] = await Promise.all([

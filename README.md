@@ -40,7 +40,3 @@ Old admin URLs (`/dashboard/portfolio/…`, `/dashboard/content/`, `/dashboard/h
 ## Environment
 
 See `.env.example`. Required: Supabase URL and keys, `SUPABASE_DASHBOARD_TOKEN`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`. Optional: Resend or SMTP for client email, Twilio for SMS, Google OAuth for client sign-in.
-
-## Legacy
-
-The `portfolio/`, `config/`, `templates/`, `manage.py` and `staticfiles/` folders are the original Django version of the site. They are not used by the Next.js app or by Vercel.

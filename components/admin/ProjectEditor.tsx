@@ -144,7 +144,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
   return <div className="ed">
     <header className="ed-bar glass">
       <Link href="/dashboard/projects/" className="btn btn--ghost btn--icon btn--sm" aria-label="Back to projects"><ArrowLeft /></Link>
-      <div className="ed-bar__title"><strong>{form.title.trim() || "Untitled project"}</strong><StatusBadge kind="project" status={form.status} /></div>
+      <div className="ed-bar__title"><h1>{form.title.trim() || "Untitled project"}</h1><StatusBadge kind="project" status={form.status} /></div>
       <span className={`ed-state ed-state--${stateTone}`} role="status" aria-live="polite"><i aria-hidden="true" />{stateLabel}</span>
       <div className="ed-bar__actions">
         {isNew

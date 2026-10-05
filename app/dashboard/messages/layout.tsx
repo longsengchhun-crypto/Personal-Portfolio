@@ -10,6 +10,7 @@ export default async function MessagesLayout({ children }: { children: React.Rea
   await requireAdmin("/dashboard/messages/");
   const rows = await getInquiryList().catch(() => []);
   return <div className="inbox">
+    <h1 className="sr-only">Messages</h1>
     <Inbox rows={rows} />
     <section className="inbox__pane">{children}</section>
   </div>;
