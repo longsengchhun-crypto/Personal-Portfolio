@@ -45,9 +45,10 @@
 .hero__stage { position: absolute; inset: -2% 0 0 0; z-index: -2; will-change: transform; }
 .hero__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1800ms var(--ease-in-out); }
 .hero__slide.is-active { opacity: 1; }
-.hero__slide.is-active .hero__img { animation: push-in 16s linear both; }
-.hero__img { object-fit: cover; }
-@keyframes push-in { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+/* The push-in is a transition, not an animation: a slide that is fading out keeps its zoom until it is
+   fully hidden, then resets, so there is no visible snap during the cross-fade. */
+.hero__img { object-fit: cover; transform: scale(1.02); transition: transform 0s linear 1.9s; }
+.hero__slide.is-active .hero__img { transform: scale(1.1); transition: transform 16s linear 0s; }
 .hero__shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(4, 5, 7, 0.5) 0%, rgba(4, 5, 7, 0.08) 30%, rgba(4, 5, 7, 0.35) 62%, rgba(4, 5, 7, 0.9) 100%), linear-gradient(90deg, rgba(4, 5, 7, 0.55) 0%, transparent 62%); }
 .hero__inner { padding-top: 140px; padding-bottom: clamp(88px, 11vh, 120px); display: grid; gap: 22px; justify-items: start; }
 .hero__kicker { color: rgba(246, 244, 240, 0.78); animation: rise 1100ms 150ms var(--ease) both; }
