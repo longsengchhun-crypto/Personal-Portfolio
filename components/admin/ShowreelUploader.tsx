@@ -16,5 +16,5 @@ export default function ShowreelUploader() {
     router.refresh();
   }
 
-  return <MediaUploader kind="video" accept="video/mp4,video/webm,video/quicktime" label="Drop a showreel video" uploadUrl="/api/dashboard/content/showreel-upload-url/" cacheControl="31536000" onUploaded={finalize} />;
+  return <MediaUploader kind="video" accept="video/mp4" label="Drop a showreel video" uploadUrl="/api/dashboard/content/showreel-upload-url/" cacheControl="31536000" onUploaded={finalize} />;
 }

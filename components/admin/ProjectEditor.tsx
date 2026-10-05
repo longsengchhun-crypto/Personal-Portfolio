@@ -198,7 +198,7 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
                 {form.video_file
                   ? <div className="ed-cover__preview"><video src={mediaUrl(form.video_file)} poster={form.cover_image ? mediaUrl(form.cover_image, { width: 480 }) : undefined} controls preload="none" /><button type="button" className="btn btn--glass btn--icon btn--sm ed-cover__remove" aria-label="Remove cover video" onClick={() => set("video_file", "")}><X /></button></div>
                   : <div className="ed-cover__preview ed-cover__preview--empty"><Film aria-hidden="true" /><span>No video</span></div>}
-                <MediaUploader kind="video" compact accept="video/mp4,video/webm" label={form.video_file ? "Replace video" : "Upload video"} uploadUrl={UPLOAD_URL} onUploaded={(result) => set("video_file", result.path)} />
+                <MediaUploader kind="video" compact accept="video/mp4" label={form.video_file ? "Replace video" : "Upload video"} uploadUrl={UPLOAD_URL} onUploaded={(result) => set("video_file", result.path)} />
               </div>
               <span className="field__hint">Plays on the project page, and as a hover preview on the Work grid.</span>
             </div>

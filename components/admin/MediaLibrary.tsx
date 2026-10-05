@@ -49,7 +49,7 @@ export default function MediaLibrary({ files }: { files: MediaFile[] }) {
   return <>
     <section className="adm-card" aria-labelledby="upload-heading">
       <h2 id="upload-heading" className="sr-only">Upload media</h2>
-      <MediaUploader kind="image" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop images or videos to upload" uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={() => router.refresh()} />
+      <MediaUploader kind="image" multiple accept="image/jpeg,image/png,image/webp,video/mp4" label="Drop images or videos to upload" uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={() => router.refresh()} />
     </section>
 
     {files.length === 0

@@ -4,8 +4,6 @@ import { getSupabase, getSupabaseAdmin, mediaUrl } from "@/lib/supabase";
 
 const ALLOWED_TYPES: Record<string, string> = {
   "video/mp4": "mp4",
-  "video/webm": "webm",
-  "video/quicktime": "mov",
 };
 
 export async function POST(request: NextRequest) {
@@ -13,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({})) as { contentType?: string };
   const extension = ALLOWED_TYPES[body.contentType || ""];
-  if (!extension) return NextResponse.json({ error: "Unsupported video type. Use MP4, WebM, or MOV." }, { status: 400 });
+  if (!extension) return NextResponse.json({ error: "Unsupported video type. Use an MP4 video." }, { status: 400 });
 
   const path = `site/showreel-${Date.now()}.${extension}`;
   const { data, error } = await getSupabaseAdmin().storage.from("portfolio-media").createSignedUploadUrl(path);

@@ -23,7 +23,8 @@ export async function getHeroSlides(): Promise<{ slides: HeroSlide[]; isDefault:
     const slides = parsed
       .filter((s): s is HeroSlide => s && typeof s.image === "string" && s.image.length > 0)
       .map((s) => ({ id: String(s.id || s.image), image: s.image, label: String(s.label || "") }));
-    return { slides, isDefault: false };
+    // A saved-but-empty list would leave the hero blank, so it falls back to the built-in slides.
+    return slides.length ? { slides, isDefault: false } : { slides: DEFAULT_HERO_SLIDES, isDefault: true };
   } catch {
     return { slides: DEFAULT_HERO_SLIDES, isDefault: true };
   }

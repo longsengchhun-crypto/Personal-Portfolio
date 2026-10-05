@@ -9,7 +9,7 @@ import { adminJson } from "@/lib/adminApi";
 import type { Category } from "@/lib/types";
 import MediaUploader from "./MediaUploader";
 
-const VIDEO_EXTENSIONS = new Set(["mp4", "webm"]);
+const VIDEO_EXTENSIONS = new Set(["mp4"]);
 const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function titleFromFile(fileName: string) {
@@ -56,7 +56,7 @@ export default function QuickUpload({ open, onClose, categories }: { open: boole
       </div>
       <label className="switch"><input type="checkbox" checked={publish} onChange={(event) => setPublish(event.target.checked)} /> Publish immediately</label>
     </div>
-    <MediaUploader kind="image" multiple disabled={!categoryId} disabledMessage="Add a category first, then upload." accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" label="Drop posters or reels here" uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={handleUploaded} />
+    <MediaUploader kind="image" multiple disabled={!categoryId} disabledMessage="Add a category first, then upload." accept="image/jpeg,image/png,image/webp,video/mp4" label="Drop posters or reels here" uploadUrl="/api/dashboard/portfolio/media-upload-url/" onUploaded={handleUploaded} />
     {created > 0 && <p className="notice notice--success" role="status">{created} project{created === 1 ? "" : "s"} added{publish ? " and live" : " as draft"}.</p>}
   </Dialog>;
 }
