@@ -78,7 +78,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return <article>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-    <ProjectHero title={project.title} cover={project.cover_image} videoSrc={project.video_file ? mediaUrl(project.video_file) : undefined} embedSrc={!project.video_file && embed ? embed : undefined} vertical={!project.video_file && Boolean(mainLink?.vertical)} />
+    <ProjectHero title={project.title} cover={project.cover_image} videoSrc={project.video_file ? mediaUrl(project.video_file) : undefined} embedSrc={!project.video_file && embed ? embed : undefined} vertical={!project.video_file && Boolean(mainLink?.vertical)} sourceUrl={!project.video_file && /^https:\/\//.test(project.embedded_video_url) ? project.embedded_video_url : undefined} sourceLabel={mainLink?.provider === "tiktok" ? "TikTok" : mainLink?.provider === "youtube" ? "YouTube" : mainLink?.provider === "vimeo" ? "Vimeo" : undefined} />
 
     <header className="wrap pdetail">
       <nav aria-label="Breadcrumb" className="pdetail__crumbs"><Link href="/portfolio/" className="link-arrow"><ArrowLeft /> All work</Link>

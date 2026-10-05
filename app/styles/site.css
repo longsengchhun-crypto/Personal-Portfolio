@@ -382,3 +382,9 @@ html[data-theme="light"] .signature { filter: none; }
 .themebar .chip[aria-current="true"] { border-color: transparent; }
 .themes { display: grid; gap: clamp(36px, 5vw, 64px); }
 .theme__title { display: flex; align-items: baseline; margin-bottom: 16px; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-2); }
+
+.phero__loading { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; background: #000; color: var(--on-media); font-size: var(--t-small); pointer-events: none; z-index: 1; animation: fade-out 400ms 6s forwards; }
+.phero__loading svg { width: 22px; height: 22px; }
+@keyframes fade-out { to { opacity: 0; visibility: hidden; } }
+.phero__help { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; }
+.phero__video { z-index: 0; }

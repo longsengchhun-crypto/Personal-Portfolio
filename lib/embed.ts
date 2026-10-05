@@ -7,7 +7,7 @@ export function parseVideoLink(url: string): VideoLink | null {
   const value = url.trim();
   if (!/^https:\/\//i.test(value)) return null;
   const tiktok = value.match(/tiktok\.com\/(?:@[\w.-]+\/video|embed(?:\/v2)?)\/(\d{8,})/i);
-  if (tiktok) return { provider: "tiktok", embedUrl: `https://www.tiktok.com/embed/v2/${tiktok[1]}`, vertical: true };
+  if (tiktok) return { provider: "tiktok", embedUrl: `https://www.tiktok.com/player/v1/${tiktok[1]}?controls=1&progress_bar=1&play_button=1&volume_control=1&fullscreen_button=1&timestamp=0&loop=1&music_info=0&description=0&rel=0&native_context_menu=0&closed_caption=0`, vertical: true };
   const short = value.match(/youtube\.com\/shorts\/([\w-]{6,})/i);
   if (short) return { provider: "youtube", embedUrl: `https://www.youtube-nocookie.com/embed/${short[1]}`, vertical: true };
   const youtube = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/)|youtube-nocookie\.com\/embed\/)([\w-]{6,})/i);

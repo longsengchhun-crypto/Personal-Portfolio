@@ -10,7 +10,7 @@ test("YouTube and Vimeo links become player URLs", () => {
 
 test("TikTok video links become the official embed player and are vertical", () => {
   const link = parseVideoLink("https://www.tiktok.com/@sengchhun230122/video/7123456789012345678");
-  assert.deepEqual(link, { provider: "tiktok", embedUrl: "https://www.tiktok.com/embed/v2/7123456789012345678", vertical: true });
+  assert.deepEqual(link, { provider: "tiktok", embedUrl: "https://www.tiktok.com/player/v1/7123456789012345678?controls=1&progress_bar=1&play_button=1&volume_control=1&fullscreen_button=1&timestamp=0&loop=1&music_info=0&description=0&rel=0&native_context_menu=0&closed_caption=0", vertical: true });
   assert.equal(parseVideoLink("https://www.tiktok.com/embed/v2/7123456789012345678?lang=en")?.provider, "tiktok");
 });
 

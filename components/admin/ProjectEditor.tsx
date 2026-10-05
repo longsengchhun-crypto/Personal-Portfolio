@@ -211,13 +211,13 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
                   : <div className="ed-cover__preview ed-cover__preview--empty"><Film aria-hidden="true" /><span>No video</span></div>}
                 <MediaUploader kind="video" compact accept="video/mp4" label={form.video_file ? "Replace video" : "Upload video"} uploadUrl={UPLOAD_URL} onUploaded={(result) => set("video_file", result.path)} />
               </div>
-              <span className="field__hint">Plays on the project page, and as a hover preview on the Work grid.</span>
+              <span className="field__hint">Best quality and smoothest playback: plays instantly at full resolution, and as a hover preview on the Work grid. Portrait videos get a portrait player automatically.</span>
             </div>
           </div>
           <div className="ed-videolink">
             <div className="field"><label htmlFor="videolink">Video link</label>
               <div className="ed-videolink__row"><input id="videolink" className="input" value={form.embedded_video_url} onChange={(event) => set("embedded_video_url", event.target.value)} placeholder="Paste a TikTok, YouTube or Vimeo link" /><Button variant="glass" disabled={!form.embedded_video_url.trim() || fetchingLink} state={fetchingLink ? "loading" : undefined} onClick={fetchLink}>Fetch</Button></div>
-              <span className="field__hint">Plays on the project page in full quality, straight from the source. Fetch fills in the thumbnail and title if they are empty.</span></div>
+              <span className="field__hint">Fetch fills in the thumbnail and title if they are empty. The video then plays in the source's own player, so its speed and quality are controlled by that service. <strong>For the smoothest full-HD playback, upload the MP4 as the Cover video above instead.</strong> It takes priority over the link.</span></div>
           </div>
           <div className="ed-gallery">
             <h3>Gallery</h3>
