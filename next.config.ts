@@ -11,6 +11,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    qualities: [30, 75, 80, 85],
+    deviceSizes: [420, 640, 828, 1080, 1280, 1600, 1920, 2560],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   async redirects() {
     return [
       { source: "/3d-store/account/login", destination: "/account/login/", permanent: true },
@@ -18,6 +24,12 @@ const nextConfig: NextConfig = {
       { source: "/3d-store/account", destination: "/account/", permanent: true },
       { source: "/3d-store/:path*", destination: "/", permanent: true },
       { source: "/dashboard/store/:path*", destination: "/dashboard/", permanent: false },
+      // Admin sections were renamed; old bookmarks and emailed links keep working.
+      { source: "/dashboard/portfolio", destination: "/dashboard/projects/", permanent: true },
+      { source: "/dashboard/portfolio/:path*", destination: "/dashboard/projects/:path*", permanent: true },
+      { source: "/dashboard/content", destination: "/dashboard/settings/", permanent: true },
+      { source: "/dashboard/hero", destination: "/dashboard/settings/?tab=homepage", permanent: true },
+      { source: "/dashboard/inquiries/:id", destination: "/dashboard/messages/:id/", permanent: true },
     ];
   },
   async headers() {

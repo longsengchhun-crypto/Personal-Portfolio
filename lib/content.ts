@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 export const SITE_URL = "https://sengchhun.site";
-export const DEFAULT_OG_IMAGE = "/static/site-assets/profile/profile-cutout-fade.png";
+export const DEFAULT_OG_IMAGE = "/opengraph-image";
+export const DEFAULT_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
 
 
 export const INQUIRY_STATUS_LABELS: Record<string, string> = {
-  new: "Received",
-  reviewing: "Under Review",
+  new: "New",
+  reviewing: "Read",
   replied: "Replied",
   accepted: "Accepted",
   declined: "Declined",

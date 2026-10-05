@@ -14,6 +14,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (body.action === "reorder") {
+    const ids: unknown[] = Array.isArray(body.ids) ? body.ids : [];
+    if (!ids.length || ids.some((id) => !Number.isInteger(id))) return NextResponse.json({ error: "Nothing to reorder." }, { status: 400 });
+    const admin = getSupabaseAdmin();
+    const results = await Promise.all(ids.map((id, index) => admin.from("project_gallery_items").update({ order: index }).eq("id", id as number)));
+    const failed = results.find((result) => result.error);
+    if (failed?.error) return NextResponse.json({ error: failed.error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
   if (body.action === "update") {
     const id = Number(body.id);
     if (!Number.isInteger(id)) return NextResponse.json({ error: "Missing gallery item." }, { status: 400 });

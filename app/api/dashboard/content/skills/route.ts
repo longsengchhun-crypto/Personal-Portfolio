@@ -1,28 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
+import { crudHandler, order, text } from "@/lib/adminCrud";
 
-export async function POST(request: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.redirect(new URL("/dashboard/login/", request.url), 303);
-  const token = process.env.SUPABASE_DASHBOARD_TOKEN;
-  const form = await request.formData();
-  const action = String(form.get("action") || "");
-  const id = form.get("id") ? Number(form.get("id")) : null;
-  const supabase = getSupabase();
-
-  let error = null;
-  if (action === "delete" && id) {
-    ({ error } = await supabase.rpc("dashboard_delete_skill", { p_token: token, p_id: id }));
-  } else if (action === "save") {
-    const name = String(form.get("name") || "").trim();
-    const groupId = Number(form.get("group_id") || 0);
-    if (!name || !groupId) return NextResponse.redirect(new URL("/dashboard/content/?saved=error", request.url), 303);
-    ({ error } = await supabase.rpc("dashboard_upsert_skill", {
-      p_token: token, p_id: id, p_group_id: groupId, p_name: name, p_order: Number(form.get("order") || 0),
-    }));
-  }
-
-  const redirectUrl = new URL("/dashboard/content/", request.url);
-  redirectUrl.searchParams.set("saved", error ? "error" : "skills");
-  return NextResponse.redirect(redirectUrl, 303);
-}
+export const POST = crudHandler({
+  upsert: "dashboard_upsert_skill",
+  remove: "dashboard_delete_skill",
+  build: (body) => {
+    const name = text(body.name, 120);
+    const groupId = Number(body.group_id) || 0;
+    if (!name) return "Give the skill a name.";
+    if (!groupId) return "Choose a group for this skill.";
+    return { p_group_id: groupId, p_name: name, p_order: order(body.order) };
+  },
+});

@@ -1,33 +1,46 @@
-# LONG SENGCHHUN Portfolio
+# LONG SENGCHHUN — sengchhun.site
 
-A monolithic Django portfolio website for a Cambodian multidisciplinary creative designer. It uses Django templates, Django Admin, ModelForms, Bootstrap 5, Bootstrap Icons, Swiper, light GSAP scroll reveals, Pillow image handling, and MySQL-ready environment configuration.
+Portfolio site and admin for a Cambodian visual creative (VFX, film, photography, motion, 3D). Next.js 16 (App Router) on Vercel, Supabase for data and media storage.
 
-## Quick Start
+## Run it
 
-1. Create and activate a virtual environment.
-2. Install dependencies with `pip install -r requirements.txt`.
-3. Copy `.env.example` to `.env` and fill in production values.
-4. Run `python manage.py migrate`.
-5. Run `python manage.py createsuperuser`.
-6. Optional development placeholders: `python manage.py seed_demo_content`.
-7. Import the real poster showcase: `python manage.py import_poster_artwork`.
+```bash
+npm install
+cp .env.example .env.local   # fill in the Supabase keys and admin credentials
+npm run dev                  # http://localhost:3000
+npm run typecheck
+npm test
+npm run build
+```
 
-The seed command creates clearly labeled sample projects only. Delete them in Django Admin before publishing real work.
+## Structure
 
-## Admin Editing
+| Path | What lives there |
+| --- | --- |
+| `app/(site)/` | Public pages: home, work, project detail, services, about, contact, showreel, privacy, client accounts |
+| `app/dashboard/` | Admin: overview, projects, media, services, messages, settings, client accounts |
+| `app/api/` | Route handlers (inquiries, admin actions, uploads, visit tracking) |
+| `app/styles/` | `tokens.css` (design tokens), `base.css`, `ui.css` (shared components), `site.css`, `admin.css` |
+| `components/ui/` | Shared primitives: Button, Dialog, Toast, StatusBadge, EmptyState, Skeleton, Picture, Icon |
+| `components/site/` | Public-site components (nav, hero, work grid, gallery, contact form…) |
+| `components/admin/` | Admin components (shell, command menu, project editor, media library, inbox…) |
+| `lib/` | Data access (`data.ts`), auth, notifications, validation, media helpers |
+| `supabase/migrations/` | Database schema and RPCs |
 
-- Site Settings: portrait, professional copy, showreel links, and contact details.
-- Social Links: public social profiles and optional Bootstrap Icon names.
-- Categories: portfolio organization and URL filtering.
-- Projects: publish, feature, and edit project case studies.
-- Gallery Items: ordered images or video links for each project.
-- Project Inquiries: review contact form submissions.
-- Dashboard: accept or reject inquiries and send the client notification email when SMTP is configured.
+## Design system
 
-## Database
+One set of tokens (`app/styles/tokens.css`) drives both the public site and the admin: near-black cinematic neutrals, warm whites, a single champagne accent, and a glass material used only for floating layers (navigation, toolbars, dialogs). Dark is the default; a light theme is available from the toggle. Motion follows `prefers-reduced-motion`.
 
-When `DATABASE_NAME` is set, Django uses MySQL with `mysqlclient`. Without database environment variables, it falls back to SQLite for beginner-friendly local setup and checks.
+## Admin
 
-## Email Notifications
+Sign in at `/dashboard/login/`. Press `Ctrl/Cmd + K` anywhere in the admin to jump to a page or start a task. Projects autosave while they are drafts; published projects save only when you press **Save changes**.
 
-Set `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` in production. Without SMTP settings, Django uses the console email backend so dashboard decisions do not crash during local development.
+Old admin URLs (`/dashboard/portfolio/…`, `/dashboard/content/`, `/dashboard/hero/`, `/dashboard/inquiries/…`) redirect to their new locations.
+
+## Environment
+
+See `.env.example`. Required: Supabase URL and keys, `SUPABASE_DASHBOARD_TOKEN`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`. Optional: Resend or SMTP for client email, Twilio for SMS, Google OAuth for client sign-in.
+
+## Legacy
+
+The `portfolio/`, `config/`, `templates/`, `manage.py` and `staticfiles/` folders are the original Django version of the site. They are not used by the Next.js app or by Vercel.

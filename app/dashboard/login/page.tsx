@@ -1,16 +1,22 @@
 import { redirect } from "next/navigation";
+import AuthShell from "@/components/site/AuthShell";
 import { isAdmin } from "@/lib/auth";
+import { safeInternalPath } from "@/lib/safeRedirect";
 
-export const metadata = { title: "Dashboard Login" };
-
-function safeNext(value: string | string[] | undefined) {
-  const next = typeof value === "string" ? value : "";
-  return next.startsWith("/dashboard/") ? next : "";
-}
+export const metadata = { title: "Sign in" };
 
 export default async function DashboardLoginPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const next = safeNext(params.next);
+  const next = safeInternalPath(typeof params.next === "string" ? params.next : "", "/dashboard/", "");
   if (await isAdmin()) redirect(next || "/dashboard/");
-  return <><section className="page-hero compact dashboard-auth"><div className="container narrow"><p className="eyebrow">Private Dashboard</p><h1>Admin access only.</h1></div></section><section className="section pt-0"><div className="container narrow"><form className="inquiry-form login-form" method="post" action="/api/dashboard/login/">{params.error === "rate" && <div className="alert alert-danger">Too many login attempts. Please wait about 15 minutes and try again.</div>}{params.error === "1" && <div className="alert alert-danger">Username or password is not correct. Please check both fields and try again.</div>}{next && <input type="hidden" name="next" value={next} />}<div className="form-field"><label htmlFor="username">Username</label><input className="form-control" id="username" name="username" autoComplete="username" required /></div><div className="form-field"><label htmlFor="password">Password</label><input className="form-control" id="password" name="password" type="password" autoComplete="current-password" required /></div><button className="btn btn-accent" type="submit">Open Dashboard</button></form></div></section></>;
+  const error = params.error === "rate" ? "Too many sign-in attempts. Please wait about 15 minutes and try again." : params.error === "1" ? "That username and password don't match. Check both and try again." : "";
+
+  return <AuthShell kicker="Private studio" title="Admin sign in" intro="Manage projects, media, services and messages." error={error}>
+    <form className="auth__form" method="post" action="/api/dashboard/login/">
+      {next && <input type="hidden" name="next" value={next} />}
+      <div className="field"><label htmlFor="username">Username</label><input className="input" id="username" name="username" autoComplete="username" required autoFocus /></div>
+      <div className="field"><label htmlFor="password">Password</label><input className="input" id="password" name="password" type="password" autoComplete="current-password" required /></div>
+      <button className="btn btn--primary btn--block btn--lg" type="submit">Sign in</button>
+    </form>
+  </AuthShell>;
 }

@@ -169,3 +169,22 @@ export async function getDashboardClients(): Promise<DashboardClient[]> {
     return { ...customer, inquiry_count: mine.length, last_inquiry_at: mine[0]?.created_at ?? null, last_status: mine[0]?.status ?? null };
   });
 }
+
+export type InquiryRow = Pick<Inquiry, "id" | "full_name" | "email" | "company" | "service_needed" | "status" | "is_reviewed" | "created_at" | "project_description" | "estimated_budget">;
+
+// The dashboard snapshot only carries the latest 20; the inbox reads the full list directly.
+export async function getInquiryList(): Promise<InquiryRow[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("project_inquiries")
+    .select("id, full_name, email, company, service_needed, status, is_reviewed, created_at, project_description, estimated_budget")
+    .order("created_at", { ascending: false })
+    .limit(300);
+  if (error) throw error;
+  return (data ?? []) as InquiryRow[];
+}
+
+export async function getSocialLinksAdmin() {
+  const { data, error } = await getSupabaseAdmin().from("social_links").select("*").order("order").order("label");
+  if (error) throw error;
+  return (data ?? []) as SocialLink[];
+}
