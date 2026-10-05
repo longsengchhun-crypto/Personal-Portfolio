@@ -99,13 +99,13 @@ html[data-theme="light"] {
   --muted: #5a574f;
   --line: rgba(20, 18, 14, 0.11);
   --line-strong: rgba(20, 18, 14, 0.22);
-  --accent: #86600f;
-  --accent-hover: #6f500c;
+  --accent: #755208;
+  --accent-hover: #5f4306;
   --accent-ink: #fffaf0;
   --accent-soft: rgba(168, 122, 29, 0.12);
-  --success: #2f7d32;
-  --warning: #9a6b00;
-  --danger: #c0392b;
+  --success: #23652a;
+  --warning: #7a5500;
+  --danger: #a52d20;
   --scrim: rgba(245, 243, 239, 0.7);
   --glass-bg: rgba(255, 255, 255, 0.62);
   --glass-bg-strong: rgba(255, 255, 255, 0.93);
