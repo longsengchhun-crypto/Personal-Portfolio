@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Play } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
+import { TITLE_OVERRIDES } from "@/lib/curation";
 import { layoutRoles, type TileRole } from "@/lib/workLayout";
 import { mediaUrl } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
@@ -28,7 +29,7 @@ export function ProjectTile({ project, role, index = 0, priority = false }: { pr
       {project.video_file && <HoverVideo src={mediaUrl(project.video_file)} poster={project.cover_image ? mediaUrl(project.cover_image, { width: 800 }) : undefined} />}
     </span>
     <span className="tile__caption">
-      <span className="tile__title">{project.title}</span>
+      <span className="tile__title">{TITLE_OVERRIDES[project.slug] ?? project.title}</span>
       <span className="tile__meta">{category}{project.year ? ` · ${project.year}` : ""}</span>
     </span>
   </Link>;

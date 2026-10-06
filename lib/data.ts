@@ -1,4 +1,5 @@
 import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
+import { HIDDEN_SLUGS, SELECTED_SLUGS } from "@/lib/curation";
 import type { Category, CustomerInquiryView, DashboardContent, DashboardPortfolioContent, DashboardPortfolioProject, DashboardSnapshot, Inquiry, Project, Service, SiteSetting, SkillGroup, SocialLink } from "@/lib/types";
 
 const projectSelect = "*, category:categories(*)";
@@ -22,6 +23,14 @@ export async function getSiteContext() {
   return { site: site as SiteSetting | null, social: (social ?? []) as SocialLink[] };
 }
 
+// The curated homepage set, in editorial order. Unpublished or missing slugs are skipped.
+export async function getSelectedProjects() {
+  const { data, error } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").in("slug", [...SELECTED_SLUGS]);
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as Project[];
+  return SELECTED_SLUGS.map((slug) => rows.find((row) => row.slug === slug)).filter((row): row is Project => Boolean(row));
+}
+
 export async function getFeaturedProjects() {
   const { data, error } = await getSupabase().from("projects").select(projectCardSelect).eq("status", "published").eq("is_featured", true).order("order").order("year", { ascending: false }).limit(8);
   if (error) throw error;
@@ -39,7 +48,7 @@ export async function getPortfolio(filters: { category?: string; type?: string; 
   const page = Math.max(1, filters.page || 1);
   const pageSize = 60;
   const from = (page - 1) * pageSize;
-  let query = supabase.from("projects").select(projectCardSelect, { count: "exact" }).eq("status", "published").order("order").order("year", { ascending: false });
+  let query = supabase.from("projects").select(projectCardSelect, { count: "exact" }).eq("status", "published").not("slug", "in", `(${HIDDEN_SLUGS.join(",")})`).order("order").order("year", { ascending: false });
   if (filters.category) {
     // Filter on the foreign key: a filter on the embedded category would not remove the parent rows.
     const { data: match } = await supabase.from("categories").select("id").eq("slug", filters.category).maybeSingle();
