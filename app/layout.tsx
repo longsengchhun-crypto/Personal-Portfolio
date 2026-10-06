@@ -8,13 +8,12 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/ui.css";
 import "./styles/site.css";
-import "./styles/refined.css";
 import { toJsonLd } from "@/lib/jsonLd";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const kantumruy = Kantumruy_Pro({ subsets: ["khmer", "latin"], variable: "--font-kantumruy", display: "swap", weight: ["400", "500", "600", "700"] });
 
-const TITLE = `${OWNER.name} — Visual Creative, Filmmaker & VFX Artist`;
+const TITLE = `${OWNER.name} | Visual Creative & Media`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const description = seoDescription(await getSiteFlags());
