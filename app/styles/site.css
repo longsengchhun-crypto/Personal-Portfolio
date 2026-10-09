@@ -86,8 +86,9 @@ html[data-theme="dark"] .site {
 
 /* ---------- About / profile ---------- */
 .bio { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: clamp(32px, 6vw, 96px); align-items: start; padding-bottom: clamp(32px, 5vw, 64px); }
-.bio__portrait { position: relative; aspect-ratio: 4 / 5; max-width: 340px; width: 100%; justify-self: end; background: var(--bg-raised); overflow: hidden; }
-@media (max-width: 760px) { .bio { grid-template-columns: 1fr; } .bio__portrait { justify-self: start; max-width: 240px; order: -1; } }
+.bio__portrait { position: relative; aspect-ratio: 1355 / 2490; max-width: 300px; width: 100%; justify-self: end; }
+.bio__portrait img { object-fit: contain; object-position: bottom; }
+@media (max-width: 760px) { .bio { grid-template-columns: 1fr; } .bio__portrait { justify-self: start; max-width: 220px; order: -1; } }
 .facts { display: grid; width: 100%; }
 .facts > div { display: grid; grid-template-columns: minmax(110px, 2fr) minmax(0, 7fr); gap: 8px 24px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .facts > div:first-child { padding-top: 0; }
