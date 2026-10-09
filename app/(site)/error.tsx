@@ -9,7 +9,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
     <p className="lede">This page failed to load. That is on my side, not yours. Try again, or head back to the home page.</p>
     <div className="fault__actions">
       <button type="button" className="btn btn--primary btn--lg" onClick={reset}>Try again</button>
-      <Link href="/" className="btn btn--glass btn--lg">Back to home</Link>
+      <Link href="/" className="btn btn--outline">Back to home</Link>
     </div>
   </section>;
 }

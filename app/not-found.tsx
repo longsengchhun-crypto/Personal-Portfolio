@@ -8,10 +8,10 @@ export default function NotFound() {
     <section className="wrap fault">
       <p className="meta meta--accent">404</p>
       <h1 className="display">Out of frame.</h1>
-      <p className="lede">That page does not exist, or it has moved. The work is still right where you left it.</p>
+      <p className="lede">That page does not exist, or it has moved. Try the home page or get in touch.</p>
       <div className="fault__actions">
-        <Link href="/" className="btn btn--primary btn--lg">Back to home</Link>
-        <Link href="/portfolio/" className="btn btn--glass btn--lg">View work</Link>
+        <Link href="/" className="btn btn--primary">Back to home</Link>
+        <Link href="/contact/" className="btn btn--outline">Contact</Link>
       </div>
     </section>
   </SiteChrome>;

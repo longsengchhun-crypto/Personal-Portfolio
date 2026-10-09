@@ -2,7 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Inter, Kantumruy_Pro } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
-import { OWNER, SITE_URL } from "@/lib/content";
+import { OWNER, SITE_TITLE, SITE_URL } from "@/lib/content";
 import { getSiteFlags, seoDescription } from "@/lib/siteFlags";
 import "./styles/tokens.css";
 import "./styles/base.css";
@@ -13,7 +13,7 @@ import { toJsonLd } from "@/lib/jsonLd";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const kantumruy = Kantumruy_Pro({ subsets: ["khmer", "latin"], variable: "--font-kantumruy", display: "swap", weight: ["400", "500", "600", "700"] });
 
-const TITLE = `${OWNER.name} | Visual Creative & Media`;
+const TITLE = SITE_TITLE;
 
 export async function generateMetadata(): Promise<Metadata> {
   const description = seoDescription(await getSiteFlags());
@@ -32,12 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#07080a" }, { media: "(prefers-color-scheme: light)", color: "#f5f3ef" }],
-  colorScheme: "dark light",
+  themeColor: "#f4f1ea",
 };
 
-// Runs before first paint so the saved theme never flashes. Dark is the default.
-const themeScript = `(function(){try{var t=localStorage.getItem("portfolio-theme");document.documentElement.dataset.theme=t==="light"?"light":"dark"}catch(e){document.documentElement.dataset.theme="dark"}})();`;
+// Runs before first paint so the saved theme never flashes. The public site is light by default; the admin is always dark.
+const themeScript = `(function(){try{var d=location.pathname.indexOf("/dashboard")===0;var t=d?"dark":localStorage.getItem("portfolio-theme");document.documentElement.dataset.theme=t==="dark"?"dark":d?"dark":"light"}catch(e){}})();`;
 
 const siteJsonLd = (description: string) => ({
   "@context": "https://schema.org",
@@ -45,7 +44,7 @@ const siteJsonLd = (description: string) => ({
     { "@type": "WebSite", "@id": `${SITE_URL}/#website`, url: SITE_URL, name: OWNER.name, description, inLanguage: "en", publisher: { "@id": `${SITE_URL}/#studio` } },
     {
       "@type": "ProfessionalService", "@id": `${SITE_URL}/#studio`, name: OWNER.name, url: SITE_URL, description,
-      image: `${SITE_URL}/opengraph-image`, email: OWNER.email, telephone: OWNER.phone, priceRange: "$$",
+      image: `${SITE_URL}/opengraph-image`, email: OWNER.email, telephone: OWNER.phone,
       address: { "@type": "PostalAddress", addressLocality: "Phnom Penh", addressCountry: "KH" },
       areaServed: "Worldwide", founder: { "@id": `${SITE_URL}/#person` },
     },
@@ -55,7 +54,7 @@ const siteJsonLd = (description: string) => ({
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const description = seoDescription(await getSiteFlags());
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return <html lang="en" data-theme="dark" suppressHydrationWarning className={`${inter.variable} ${kantumruy.variable}`}>
+  return <html lang="en" data-theme="light" suppressHydrationWarning className={`${inter.variable} ${kantumruy.variable}`}>
     <head>
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       {supabaseUrl && <link rel="preconnect" href={supabaseUrl} crossOrigin="anonymous" />}

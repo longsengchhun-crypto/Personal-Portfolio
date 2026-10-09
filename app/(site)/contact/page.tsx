@@ -4,7 +4,7 @@ import { OWNER, pageMetadata, SERVICE_CHOICES } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
 import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
-export const metadata = pageMetadata("/contact/", "Contact", "Start a film, VFX, photography, motion or design project with LONG SENGCHHUN. Tell me what you are making and get a clear reply.");
+export const metadata = pageMetadata("/contact/", "Contact", "Start a filmmaking, video, VFX, motion or photography project with LONG SENGCHHUN in Phnom Penh, Cambodia.");
 
 const NEXT_STEPS = [
   ["You send the brief", "A few lines are enough. Add budget, timeline and references if you have them."],
@@ -21,8 +21,8 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
 
   return <>
     <header className="page-head wrap">
-      <p className="meta meta--accent">Contact</p>
-      <h1 className="display page-head__title">Have a project in mind?</h1>
+      <p className="meta">Contact</p>
+      <h1 className="page-head__title">Have a project in mind?</h1>
       <p className="lede">Tell me what you are making. I will reply with clear next steps.</p>
     </header>
 

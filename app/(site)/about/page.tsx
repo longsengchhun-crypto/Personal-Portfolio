@@ -1,58 +1,58 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
-import { DEFAULT_DESCRIPTION, OWNER, pageMetadata } from "@/lib/content";
-import { getSiteContext, getSkillGroups, getSoftwareTools } from "@/lib/data";
+import { OWNER, pageMetadata } from "@/lib/content";
+import { getSiteContext } from "@/lib/data";
+import { BIO, LASTFX, PRACTICE, PROFILE_SUMMARY, TOOLS } from "@/lib/profile";
+import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
 export const revalidate = 60;
-export const metadata = pageMetadata("/about/", "About", DEFAULT_DESCRIPTION);
+export const metadata = pageMetadata("/about/", "About & Profile", "Long Sengchhun is a filmmaker and visual creative in Phnom Penh, Cambodia, working across filmmaking, editing, visual effects, motion graphics, photography and 3D.");
 
 export default async function AboutPage() {
-  const [{ site }, skillGroups, software] = await Promise.all([getSiteContext(), getSkillGroups(), getSoftwareTools()]);
-  const paragraphs = (site?.professional_intro || "").split(/\n{2,}|\r\n{2,}/).map((part) => part.trim()).filter(Boolean);
-  const [lead, ...rest] = paragraphs;
+  const [{ site }, flags] = await Promise.all([getSiteContext().catch(() => ({ site: null })), getSiteFlags()]);
+  const email = site?.email || OWNER.email;
+  const phone = site?.phone || OWNER.phone;
 
   return <>
-    <header className="wrap about-hero">
-      <div className="about-hero__text">
-        <p className="meta meta--accent">About</p>
-        <h1 className="title">Visual creative &amp; media, with practical production depth.</h1>
-        <p className="lede">{lead || "I work across VFX, photography, videography, filmmaking, motion graphics and 3D, bringing one connected visual direction to every project, from production through post."}</p>
-        {rest.map((part, index) => <p key={index} className="copy">{part}</p>)}
-        <div className="signoff"><Image className="signature" src="/static/site-assets/signature/signature.png" alt="Signature of Long Sengchhun" width={190} height={136} /></div>
-        <dl className="facts facts--stack">
-          <div><dt className="meta">Based in</dt><dd>{site?.location || OWNER.location}</dd></div>
-          <div><dt className="meta">Disciplines</dt><dd>{OWNER.roles}</dd></div>
-        </dl>
-      </div>
-      <div className="about-hero__portrait">
-        <Picture src="/static/site-assets/profile/profile-cutout.webp" alt="Portrait of Long Sengchhun" fill priority sizes="(min-width: 900px) 40vw, 90vw" />
-      </div>
+    <header className="page-head wrap">
+      <p className="meta">About</p>
+      <h1 className="page-head__title">Filmmaker and visual creative, working from capture to finish.</h1>
     </header>
 
-    {skillGroups.length > 0 && <section className="section" aria-labelledby="skills-heading">
-      <div className="wrap">
-        <header className="section-head"><div><p className="meta meta--accent">Capabilities</p><h2 id="skills-heading" className="title">What I bring to a project.</h2></div></header>
-        <div className="skills">{skillGroups.map((group, index) => <section key={group.id} className="skills__group" data-r={index % 3}>
-          <h3 className="heading">{group.name}</h3>
-          <ul>{group.skills.map((skill) => <li key={skill.id}>{skill.name}</li>)}</ul>
-        </section>)}</div>
+    <section className="wrap bio" aria-label="Biography">
+      <div className="bio__text prose-flow">
+        {BIO.map((paragraph, i) => <p key={i} className={i === 0 ? "lede" : undefined}>{paragraph}</p>)}
       </div>
-    </section>}
+      <div className="bio__portrait"><Picture src="/static/site-assets/profile/profile-cutout.webp" alt="Portrait of Long Sengchhun" fill priority sizes="(min-width: 900px) 30vw, 70vw" /></div>
+    </section>
 
-    {software.length > 0 && <section className="section section--flush-top" aria-labelledby="software-heading">
-      <div className="wrap">
-        <h2 id="software-heading" className="meta">Tools of the trade</h2>
-        <ul className="software software--large">{software.map((item) => <li key={item.id}>{item.name}</li>)}</ul>
+    <section className="block wrap" aria-labelledby="profile-title">
+      <div className="split">
+        <div className="split__head"><p className="meta">Profile</p><h2 id="profile-title" className="heading">At a glance</h2></div>
+        <dl className="facts split__main">
+          <div><dt>Name</dt><dd>{OWNER.name}</dd></div>
+          <div><dt>Titles</dt><dd>Filmmaker · Visual creative</dd></div>
+          <div><dt>Location</dt><dd>{site?.location || OWNER.location}</dd></div>
+          <div><dt>Practice</dt><dd>{PRACTICE}</dd></div>
+          {TOOLS.map(([group, list]) => <div key={group}><dt>{group}</dt><dd>{list}</dd></div>)}
+          <div><dt>Availability</dt><dd>{availabilityLabel(flags)}</dd></div>
+          <div><dt>Contact</dt><dd><a href={`mailto:${email}`}>{email}</a><br /><a href={OWNER.telegramUrl} target="_blank" rel="noopener noreferrer">Telegram {OWNER.telegram}</a><br /><a href={`tel:${phone.replace(/\s/g, "")}`}>{phone}</a></dd></div>
+          <div><dt>Software</dt><dd><a href={LASTFX.url} target="_blank" rel="noopener noreferrer">{LASTFX.name}<span className="sr-only"> (opens in a new tab)</span></a>: {LASTFX.products.map(([name]) => name).join(", ")}</dd></div>
+        </dl>
       </div>
-    </section>}
+    </section>
 
-    <section className="cta cta--compact" aria-labelledby="about-cta">
-      <div className="wrap cta__inner">
-        <h2 id="about-cta" className="title cta__title">Let&apos;s talk about your project.</h2>
-        <Link href="/contact/" className="btn btn--primary btn--lg">Get in touch <ArrowUpRight className="btn__arrow" /></Link>
+    <section className="block wrap" aria-labelledby="summary-title">
+      <div className="split">
+        <div className="split__head"><p className="meta">Summary</p><h2 id="summary-title" className="heading">Short version</h2></div>
+        <div className="split__main prose-flow"><p>{PROFILE_SUMMARY}</p></div>
       </div>
+    </section>
+
+    <section className="closing wrap" aria-labelledby="about-cta">
+      <h2 id="about-cta" className="closing__title">Let&apos;s talk about your project.</h2>
+      <div className="closing__actions"><Link href="/contact/" className="btn btn--primary">Get in touch <ArrowUpRight className="btn__arrow" /></Link></div>
     </section>
   </>;
 }

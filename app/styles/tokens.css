@@ -88,21 +88,21 @@
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #f5f3ef;
-  --bg-raised: #ece9e3;
+  --bg: #f4f1ea;
+  --bg-raised: #ebe7dd;
   --surface: #ffffff;
-  --surface-2: #f0ede7;
+  --surface-2: #eeeadf;
   --fill: rgba(20, 18, 14, 0.05);
   --fill-hover: rgba(20, 18, 14, 0.09);
-  --text: #15130f;
-  --text-2: #3d3a34;
-  --muted: #5a574f;
+  --text: #16140f;
+  --text-2: #3b3830;
+  --muted: #5c5850;
   --line: rgba(20, 18, 14, 0.11);
   --line-strong: rgba(20, 18, 14, 0.22);
-  --accent: #755208;
-  --accent-hover: #5f4306;
-  --accent-ink: #fffaf0;
-  --accent-soft: rgba(168, 122, 29, 0.12);
+  --accent: #8f3a1d;
+  --accent-hover: #6f2c14;
+  --accent-ink: #fff8f2;
+  --accent-soft: rgba(143, 58, 29, 0.1);
   --success: #23652a;
   --warning: #7a5500;
   --danger: #a52d20;

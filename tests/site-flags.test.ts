@@ -16,7 +16,7 @@ test("labels and descriptions prefer the custom text", () => {
   assert.equal(availabilityLabel(normalizeFlags({ availabilityNote: "Booking from November" })), "Booking from November");
   assert.match(availabilityLabel(normalizeFlags({ available: false })), /booked/i);
   assert.equal(seoDescription(normalizeFlags({ seoDescription: "Hello" })), "Hello");
-  assert.match(seoDescription(normalizeFlags({})), /Visual creative/);
+  assert.match(seoDescription(normalizeFlags({})), /Filmmaker and visual creative/);
 });
 
 test("overlong text is trimmed", () => {

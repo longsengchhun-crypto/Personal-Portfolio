@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Check, ChevronDown, Circle, ExternalLink, Film, ImagePlus, Trash2, X } from "@/components/ui/Icon";
+import { ArrowLeft, Check, ChevronDown, Circle, Film, ImagePlus, Trash2, X } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui/Toast";
@@ -266,7 +266,6 @@ export default function ProjectEditor({ project, categories }: { project: Dashbo
           <h2 className="meta">{published ? "Page checklist" : "Ready to publish?"}</h2>
           <ul className="ed-check">{checklist.map((item) => <li key={item.label} className={item.ok ? "is-ok" : ""}>{item.ok ? <Check aria-hidden="true" /> : <Circle aria-hidden="true" />}{item.label}</li>)}</ul>
           {!isNew && !published && !ready && <p className="caption">You can still publish, but the page will look thin until these are filled in.</p>}
-          {published && form.slug && <a className="btn btn--glass btn--sm btn--block" href={`/portfolio/${form.slug}/`} target="_blank" rel="noreferrer"><ExternalLink /> View live page</a>}
         </div>
         {!isNew && <div className="adm-card">
           <h2 className="meta">Visibility</h2>

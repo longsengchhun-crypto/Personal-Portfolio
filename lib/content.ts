@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const SITE_URL = "https://sengchhun.site";
 export const DEFAULT_OG_IMAGE = "/opengraph-image";
-export const DEFAULT_DESCRIPTION = "Visual creative specializing in VFX, photography, videography, filmmaking, motion, and digital design in Cambodia.";
+export const SITE_TITLE = "LONG SENGCHHUN — Filmmaker & Visual Creative";
+export const DEFAULT_DESCRIPTION = "Filmmaker and visual creative in Phnom Penh, Cambodia, working across filmmaking, videography, editing, visual effects, motion graphics, photography and 3D.";
 
 
 export const INQUIRY_STATUS_LABELS: Record<string, string> = {
@@ -32,8 +33,8 @@ export function pageMetadata(path: string, title: string, description: string): 
 
 export const OWNER = {
   name: "LONG SENGCHHUN",
-  title: "Visual Creative & Media",
-  roles: "VFX · Film · Photography · Video · Motion · 3D",
+  title: "Filmmaker & Visual Creative",
+  roles: "Film · Video · VFX · Motion · Photography · 3D",
   location: "Phnom Penh, Cambodia",
   phone: "016 590 899",
   email: "longsengchhun@gmail.com",
