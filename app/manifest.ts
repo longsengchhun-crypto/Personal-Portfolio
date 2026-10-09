@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: `${OWNER.name} | ${OWNER.title}`,
     short_name: "Sengchhun",
-    description: "Portfolio of Long Sengchhun: VFX, filmmaking, photography, motion and 3D.",
+    description: "Portfolio of Long Sengchhun: VFX, videography, photography, motion and 3D.",
     start_url: "/",
     display: "standalone",
     background_color: "#07080a",

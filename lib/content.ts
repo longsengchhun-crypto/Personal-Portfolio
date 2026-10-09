@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 export const SITE_URL = "https://sengchhun.site";
 export const DEFAULT_OG_IMAGE = "/opengraph-image";
-export const SITE_TITLE = "LONG SENGCHHUN — Filmmaker & Visual Creative";
-export const DEFAULT_DESCRIPTION = "Filmmaker and visual creative in Phnom Penh, Cambodia, working across filmmaking, videography, editing, visual effects, motion graphics, photography and 3D.";
+export const SITE_TITLE = "LONG SENGCHHUN — Visual Creative";
+export const DEFAULT_DESCRIPTION = "Visual creative in Phnom Penh, Cambodia, working across videography, editing, visual effects, motion graphics, photography and 3D.";
 
 
 export const INQUIRY_STATUS_LABELS: Record<string, string> = {
@@ -33,7 +33,7 @@ export function pageMetadata(path: string, title: string, description: string): 
 
 export const OWNER = {
   name: "LONG SENGCHHUN",
-  title: "Filmmaker & Visual Creative",
+  title: "Visual Creative",
   roles: "Film · Video · VFX · Motion · Photography · 3D",
   location: "Phnom Penh, Cambodia",
   phone: "016 590 899",
@@ -42,6 +42,6 @@ export const OWNER = {
   telegramUrl: "https://t.me/SENGCHHUN11",
 };
 
-export const SERVICE_CHOICES = ["Graphic Design", "Poster Design", "Video Editing", "Photo / Video Production", "Photography", "Videography", "Filmmaking", "3D Design and Modeling", "3D Modeling", "3D Animation", "Product Visualization", "Motion Graphics", "Social Media Content", "Other"] as const;
+export const SERVICE_CHOICES = ["Graphic Design", "Poster Design", "Video Editing", "Photo / Video Production", "Photography", "Videography", "3D Design and Modeling", "3D Modeling", "3D Animation", "Product Visualization", "Motion Graphics", "Social Media Content", "Other"] as const;
 export const BUDGET_CHOICES = ["Not decided yet", "Under $100", "$100-$300", "$300-$700", "$700-$1,500", "Above $1,500", "Prefer to discuss privately"] as const;
 export const INQUIRY_STATUSES = ["new", "reviewing", "replied", "accepted", "declined", "archived"] as const;

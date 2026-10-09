@@ -4,7 +4,7 @@ import { pageMetadata, SERVICE_CHOICES, SITE_URL } from "@/lib/content";
 import { toJsonLd } from "@/lib/jsonLd";
 import { CORE_SERVICES, SUPPORTING_SERVICES } from "@/lib/profile";
 
-export const metadata = pageMetadata("/services/", "Services", "Filmmaking, videography, video editing, post-production, visual effects, motion graphics, photography and 3D by Long Sengchhun in Phnom Penh, Cambodia.");
+export const metadata = pageMetadata("/services/", "Services", "Videography, video editing, post-production, visual effects, motion graphics, photography and 3D by Long Sengchhun in Phnom Penh, Cambodia.");
 
 const enquiryHref = (title: string) => (SERVICE_CHOICES.includes(title as never) ? `/contact/?service=${encodeURIComponent(title)}` : "/contact/");
 

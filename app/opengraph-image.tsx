@@ -9,7 +9,7 @@ export const contentType = "image/png";
 export default function OpengraphImage() {
   return new ImageResponse(
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 80, background: "#f4f1ea", color: "#16140f" }}>
-      <div style={{ display: "flex", fontSize: 22, letterSpacing: 6, textTransform: "uppercase", color: "#8f3a1d" }}>Filmmaker · Visual creative</div>
+      <div style={{ display: "flex", fontSize: 22, letterSpacing: 6, textTransform: "uppercase", color: "#8f3a1d" }}>Visual creative</div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", fontSize: 104, fontWeight: 600, letterSpacing: -4, lineHeight: 1 }}>Long Sengchhun</div>
         <div style={{ display: "flex", fontSize: 30, color: "#5c5850", marginTop: 24 }}>Visual storytelling, from production through post.</div>

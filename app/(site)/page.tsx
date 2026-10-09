@@ -26,13 +26,13 @@ export default async function HomePage() {
     "@type": "Person",
     "@id": `${SITE_URL}/#person`,
     name: OWNER.name,
-    jobTitle: "Filmmaker & Visual Creative",
+    jobTitle: "Visual Creative",
     description: DEFAULT_DESCRIPTION,
     url: SITE_URL,
     image: `${SITE_URL}/opengraph-image`,
     email,
     address: { "@type": "PostalAddress", addressLocality: "Phnom Penh", addressCountry: "KH" },
-    knowsAbout: ["Filmmaking", "Videography", "Video editing", "Visual effects", "Motion graphics", "Photography", "3D modeling"],
+    knowsAbout: ["Videography", "Video editing", "Visual effects", "Motion graphics", "Photography", "3D modeling"],
     ...(social.length ? { sameAs: social.map((link) => link.url) } : {}),
   };
 
@@ -40,10 +40,10 @@ export default async function HomePage() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }} />
 
     <section className="intro wrap" aria-labelledby="intro-title">
-      <p className="meta intro__label">Filmmaker · Visual creative · Phnom Penh, Cambodia</p>
+      <p className="meta intro__label">Visual creative · Phnom Penh, Cambodia</p>
       <h1 id="intro-title" className="intro__title">Visual storytelling, from production through post.</h1>
       <div className="intro__body">
-        <p className="lede">I am Long Sengchhun. I work across filmmaking and videography, post-production, visual effects, motion graphics and 3D, taking a project from the first idea to the final delivery.</p>
+        <p className="lede">I am Long Sengchhun. I work across videography, post-production, visual effects, motion graphics and 3D, taking a project from the first idea to the final delivery.</p>
         <div className="intro__actions">
           <Link href="/about/" className="btn btn--primary">Explore my profile <ArrowRight className="btn__arrow" /></Link>
           <Link href="/contact/" className="btn btn--outline">Discuss a project</Link>

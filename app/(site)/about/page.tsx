@@ -7,7 +7,7 @@ import { BIO, LASTFX, PRACTICE, PROFILE_SUMMARY, TOOLS } from "@/lib/profile";
 import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
 export const revalidate = 60;
-export const metadata = pageMetadata("/about/", "About & Profile", "Long Sengchhun is a filmmaker and visual creative in Phnom Penh, Cambodia, working across filmmaking, editing, visual effects, motion graphics, photography and 3D.");
+export const metadata = pageMetadata("/about/", "About & Profile", "Long Sengchhun is a visual creative in Phnom Penh, Cambodia, working across videography, editing, visual effects, motion graphics, photography and 3D.");
 
 export default async function AboutPage() {
   const [{ site }, flags] = await Promise.all([getSiteContext().catch(() => ({ site: null })), getSiteFlags()]);
@@ -17,7 +17,7 @@ export default async function AboutPage() {
   return <>
     <header className="page-head wrap">
       <p className="meta">About</p>
-      <h1 className="page-head__title">Filmmaker and visual creative, working from capture to finish.</h1>
+      <h1 className="page-head__title">Visual creative, working from capture to finish.</h1>
     </header>
 
     <section className="wrap bio" aria-label="Biography">
@@ -32,7 +32,7 @@ export default async function AboutPage() {
         <div className="split__head"><p className="meta">Profile</p><h2 id="profile-title" className="heading">At a glance</h2></div>
         <dl className="facts split__main">
           <div><dt>Name</dt><dd>{OWNER.name}</dd></div>
-          <div><dt>Titles</dt><dd>Filmmaker · Visual creative</dd></div>
+          <div><dt>Titles</dt><dd>Visual creative</dd></div>
           <div><dt>Location</dt><dd>{site?.location || OWNER.location}</dd></div>
           <div><dt>Practice</dt><dd>{PRACTICE}</dd></div>
           {TOOLS.map(([group, list]) => <div key={group}><dt>{group}</dt><dd>{list}</dd></div>)}

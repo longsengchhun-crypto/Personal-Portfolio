@@ -10,7 +10,7 @@ export default async function Footer() {
     <div className="wrap footer__inner">
       <div className="footer__id">
         <p className="footer__name">Long Sengchhun</p>
-        <p className="footer__line">Filmmaker &amp; visual creative<br />{site?.location || OWNER.location}</p>
+        <p className="footer__line">Visual creative<br />{site?.location || OWNER.location}</p>
       </div>
       <nav aria-label="Footer" className="footer__col">
         <h2 className="meta">Pages</h2>

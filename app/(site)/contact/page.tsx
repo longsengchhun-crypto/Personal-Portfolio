@@ -4,7 +4,7 @@ import { OWNER, pageMetadata, SERVICE_CHOICES } from "@/lib/content";
 import { getCustomer } from "@/lib/customerAuth";
 import { availabilityLabel, getSiteFlags } from "@/lib/siteFlags";
 
-export const metadata = pageMetadata("/contact/", "Contact", "Start a filmmaking, video, VFX, motion or photography project with LONG SENGCHHUN in Phnom Penh, Cambodia.");
+export const metadata = pageMetadata("/contact/", "Contact", "Start a video, VFX, motion or photography project with LONG SENGCHHUN in Phnom Penh, Cambodia.");
 
 const NEXT_STEPS = [
   ["You send the brief", "A few lines are enough. Add budget, timeline and references if you have them."],
