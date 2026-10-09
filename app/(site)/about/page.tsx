@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ToolMarquee from "@/components/site/ToolMarquee";
 import { ArrowUpRight } from "@/components/ui/Icon";
 import Picture from "@/components/ui/Picture";
 import { OWNER, pageMetadata } from "@/lib/content";
@@ -27,8 +28,10 @@ export default async function AboutPage() {
       <div className="bio__portrait"><Picture src="/static/site-assets/profile/profile-cutout.webp" alt="Portrait of Long Sengchhun" fill priority sizes="(min-width: 900px) 30vw, 70vw" /></div>
     </section>
 
+    <ToolMarquee />
+
     <section className="block wrap" aria-labelledby="profile-title">
-      <div className="split">
+      <div className="split" data-r>
         <div className="split__head"><p className="meta">Profile</p><h2 id="profile-title" className="heading">At a glance</h2></div>
         <dl className="facts split__main">
           <div><dt>Name</dt><dd>{OWNER.name}</dd></div>
@@ -44,13 +47,13 @@ export default async function AboutPage() {
     </section>
 
     <section className="block wrap" aria-labelledby="summary-title">
-      <div className="split">
+      <div className="split" data-r>
         <div className="split__head"><p className="meta">Summary</p><h2 id="summary-title" className="heading">Short version</h2></div>
         <div className="split__main prose-flow"><p>{PROFILE_SUMMARY}</p></div>
       </div>
     </section>
 
-    <section className="closing wrap" aria-labelledby="about-cta">
+    <section className="closing wrap" aria-labelledby="about-cta" data-r>
       <h2 id="about-cta" className="closing__title">Let&apos;s talk about your project.</h2>
       <div className="closing__actions"><Link href="/contact/" className="btn btn--primary">Get in touch <ArrowUpRight className="btn__arrow" /></Link></div>
     </section>

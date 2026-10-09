@@ -189,3 +189,65 @@ html[data-theme="dark"] .site {
 /* Rules inside padded .wrap blocks should span the content width, not the padding. */
 .closing { border-top: 0; background: linear-gradient(var(--line-strong), var(--line-strong)) top / calc(100% - 2 * var(--gutter)) 1px no-repeat; }
 .footer__bottom { border-top: 0; background: linear-gradient(var(--line), var(--line)) top / calc(100% - 2 * var(--gutter)) 1px no-repeat; }
+
+/* ---------- Layout refinements ---------- */
+.bio { align-items: center; }
+.bio__portrait { aspect-ratio: 4 / 5; max-width: 380px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; clip-path: inset(0 0 0 0); animation: portrait-in 1100ms var(--ease) 120ms both; }
+.bio__portrait img { object-fit: cover; object-position: 50% 0; animation: portrait-zoom 1600ms var(--ease) 120ms both; }
+@keyframes portrait-in { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes portrait-zoom { from { transform: scale(1.12); } to { transform: scale(1); } }
+@media (max-width: 760px) { .bio__portrait { max-width: 260px; } }
+
+/* Entrance: the opening lines rise in one after another; nothing waits on scroll above the fold. */
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+.intro > *, .page-head > * { animation: rise 1000ms var(--ease) both; }
+.intro > :nth-child(1), .page-head > :nth-child(1) { animation-delay: 80ms; }
+.intro > :nth-child(2), .page-head > :nth-child(2) { animation-delay: 200ms; }
+.intro > :nth-child(3) { animation-delay: 380ms; }
+.bio__text > * { animation: rise 900ms var(--ease) both; }
+.bio__text > :nth-child(1) { animation-delay: 160ms; } .bio__text > :nth-child(2) { animation-delay: 260ms; } .bio__text > :nth-child(3) { animation-delay: 340ms; } .bio__text > :nth-child(4) { animation-delay: 420ms; }
+
+/* The copper underline draws itself beneath the closing words of the headline. */
+.intro__mark { background: linear-gradient(var(--accent), var(--accent)) 0 92% / 0% 0.06em no-repeat; animation: draw 1200ms var(--ease) 900ms forwards; }
+@keyframes draw { to { background-size: 100% 0.06em; } }
+
+/* Rules draw across as each section arrives. */
+.split, .closing { position: relative; }
+.split[data-reveal="pending"] { transform: none; }
+.split::before { content: ""; position: absolute; top: -1px; left: 0; height: 1px; width: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: transform 1400ms var(--ease) 200ms; opacity: 0.9; }
+.split[data-reveal="in"]::before { transform: scaleX(1); opacity: 0; transition: transform 1400ms var(--ease) 200ms, opacity 900ms ease 1300ms; }
+.split { border-top: 0; background: linear-gradient(var(--line-strong), var(--line-strong)) top / 100% 1px no-repeat; }
+
+/* Row hover: the title slides, the number turns copper. */
+.index li, .services > li { transition: padding-left var(--dur-3) var(--ease), background-color var(--dur-2) var(--ease); }
+.index__title, .services__title { transition: transform var(--dur-3) var(--ease), color var(--dur-2) var(--ease); }
+@media (hover: hover) {
+  .index li:hover .index__title, .services > li:hover .services__title { transform: translateX(8px); color: var(--accent); }
+  .index li:hover .index__num, .services > li:hover .index__num { color: var(--accent); }
+}
+.btn--primary .btn__arrow { transition: transform var(--dur-2) var(--ease); }
+.site .btn--primary { background-image: linear-gradient(var(--accent), var(--accent)); background-repeat: no-repeat; background-size: 0% 100%; transition: background-size var(--dur-3) var(--ease), color var(--dur-2) var(--ease); }
+.site .btn--primary:hover:not(:disabled) { background-size: 100% 100%; background-color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro > *, .page-head > *, .bio__text > *, .bio__portrait, .bio__portrait img, .intro__mark { animation: none !important; }
+  .intro__mark { background-size: 100% 0.06em; }
+  .split::before { display: none; }
+}
+
+/* ---------- Tool marquee (signature) ---------- */
+.marquee { padding-block: clamp(28px, 4vw, 48px); border-bottom: 1px solid var(--line); background: var(--bg-raised); }
+.marquee__label { text-align: center; margin-bottom: 20px; }
+.marquee__viewport { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+.marquee__track { display: flex; width: max-content; gap: clamp(36px, 5vw, 72px); padding-right: clamp(36px, 5vw, 72px); animation: marquee 48s linear infinite; }
+.marquee__viewport:hover .marquee__track, .marquee__viewport:focus-within .marquee__track { animation-play-state: paused; }
+.marquee__item { display: grid; justify-items: center; gap: 10px; flex: none; }
+.marquee__item img { width: 56px; height: 56px; border-radius: 14px; filter: saturate(0.9); transition: transform var(--dur-3) var(--ease), filter var(--dur-3) var(--ease); }
+.marquee__item span { font-size: var(--t-caption); color: var(--muted); white-space: nowrap; transition: color var(--dur-2) var(--ease); }
+@media (hover: hover) { .marquee__item:hover img { transform: translateY(-4px) scale(1.08); filter: none; } .marquee__item:hover span { color: var(--text); } }
+@keyframes marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee__track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } .marquee__item[aria-hidden] { display: none; } }
+@media (max-width: 560px) { .marquee__item img { width: 44px; height: 44px; border-radius: 11px; } }
+
+.facts.split__main { justify-items: stretch; }
+.facts > div { width: 100%; }

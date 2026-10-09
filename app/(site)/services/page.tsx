@@ -28,7 +28,7 @@ export default function ServicesPage() {
 
     <section className="wrap block" aria-labelledby="core-title">
       <h2 id="core-title" className="meta rule">Primary</h2>
-      <ol className="services">{CORE_SERVICES.map((service, i) => <li key={service.title}>
+      <ol className="services">{CORE_SERVICES.map((service, i) => <li key={service.title} data-r={i}>
         <span className="index__num tabular" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
         <div><h3 className="services__title">{service.title}</h3><p className="services__text">{service.text}</p></div>
         <ul className="services__points">{service.points.map((point) => <li key={point}>{point}</li>)}</ul>
@@ -38,13 +38,13 @@ export default function ServicesPage() {
 
     <section className="wrap block" aria-labelledby="support-title">
       <h2 id="support-title" className="meta rule">Complementary</h2>
-      <ul className="supporting">{SUPPORTING_SERVICES.map((service) => <li key={service.title}>
+      <ul className="supporting">{SUPPORTING_SERVICES.map((service, i) => <li key={service.title} data-r={i}>
         <h3 className="services__title services__title--sm">{service.title}</h3>
         <p className="services__text">{service.text}</p>
       </li>)}</ul>
     </section>
 
-    <section className="closing wrap" aria-labelledby="services-cta">
+    <section className="closing wrap" aria-labelledby="services-cta" data-r>
       <h2 id="services-cta" className="closing__title">Need a custom combination?</h2>
       <div className="closing__actions"><Link href="/contact/" className="btn btn--primary">Tell me about it <ArrowUpRight className="btn__arrow" /></Link></div>
     </section>

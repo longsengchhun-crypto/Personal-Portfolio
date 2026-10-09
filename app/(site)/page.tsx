@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ToolMarquee from "@/components/site/ToolMarquee";
 import { ArrowRight, ArrowUpRight } from "@/components/ui/Icon";
 import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, OWNER, SITE_TITLE, SITE_URL } from "@/lib/content";
 import { getSiteContext } from "@/lib/data";
@@ -41,7 +42,7 @@ export default async function HomePage() {
 
     <section className="intro wrap" aria-labelledby="intro-title">
       <p className="meta intro__label">Visual creative · Phnom Penh, Cambodia</p>
-      <h1 id="intro-title" className="intro__title">Visual storytelling, from production through post.</h1>
+      <h1 id="intro-title" className="intro__title">Visual storytelling, from production <span className="intro__mark">through post.</span></h1>
       <div className="intro__body">
         <p className="lede">I am Long Sengchhun. I work across videography, post-production, visual effects, motion graphics and 3D, taking a project from the first idea to the final delivery.</p>
         <div className="intro__actions">
@@ -51,11 +52,13 @@ export default async function HomePage() {
       </div>
     </section>
 
+    <ToolMarquee />
+
     <section className="block wrap" aria-labelledby="work-title">
-      <div className="split">
+      <div className="split" data-r>
         <div className="split__head"><p className="meta">Services</p><h2 id="work-title" className="heading">What I can help with</h2></div>
         <div className="split__main">
-          <ol className="index">{[...CORE_SERVICES, ...SUPPORTING_SERVICES].map((service, i) => <li key={service.title}>
+          <ol className="index">{[...CORE_SERVICES, ...SUPPORTING_SERVICES].map((service, i) => <li key={service.title} data-r={i}>
             <span className="index__num tabular" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
             <span className="index__title">{service.title}</span>
             <span className="index__text">{service.text}</span>
@@ -66,7 +69,7 @@ export default async function HomePage() {
     </section>
 
     <section className="block wrap" aria-labelledby="about-title">
-      <div className="split">
+      <div className="split" data-r>
         <div className="split__head"><p className="meta">About</p><h2 id="about-title" className="heading">A connected approach</h2></div>
         <div className="split__main prose-flow">
           <p>{BIO[1]}</p>
@@ -77,7 +80,7 @@ export default async function HomePage() {
     </section>
 
     <section className="block wrap" aria-labelledby="lastfx-title">
-      <div className="split">
+      <div className="split" data-r>
         <div className="split__head"><p className="meta">Software</p><h2 id="lastfx-title" className="heading">Also: {LASTFX.name}</h2></div>
         <div className="split__main prose-flow">
           <p>{LASTFX.summary} Current tools: {LASTFX.products.map(([name]) => name).join(", ")}.</p>
@@ -86,7 +89,7 @@ export default async function HomePage() {
       </div>
     </section>
 
-    <section className="closing wrap" aria-labelledby="closing-title">
+    <section className="closing wrap" aria-labelledby="closing-title" data-r>
       <p className="meta closing__status"><i className={flags.available ? "is-open" : ""} aria-hidden="true" />{flags.available ? "Open to selected collaborations" : "Currently booked, enquiries welcome"}</p>
       <h2 id="closing-title" className="closing__title">Have a project in mind?</h2>
       <div className="closing__actions">
